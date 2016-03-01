@@ -1,0 +1,56 @@
+body{
+	margin: 0;
+}
+
+.banner{
+	background-color: #DE5164;
+	height: 200px;
+}
+
+.banner-container{
+	height: 200px;
+	width: 1150px;
+	background-color: #DE5164;
+	margin: auto;
+}
+
+#logo-img{
+	height: 160px;
+}
+.logo{
+	height: 200px;
+	width: 400px;
+	display: inline;
+	float: left;
+	padding-top: 20px;
+}
+
+.signin{
+	height: 200px;
+	width: 500px;
+	display: inline;
+	float: left;
+}
+
+.signin-input{
+	padding-top:50px;
+	float: right;
+}
+.signin input{
+	height: 35px;
+	width: 300px;
+	margin-bottom: 20px;
+	border-radius: 5px;
+}
+
+.signin-button{
+	width: 200px;
+	height: 200px;
+	display: inline;
+	float: left;
+	padding-top: 40px;
+}
+
+#button-img{
+	width: 150px;
+}
