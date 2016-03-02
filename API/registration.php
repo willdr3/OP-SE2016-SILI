@@ -1,5 +1,11 @@
 <?php 
-//include("dbconnect.inc.php");
+include("dbconnect.inc.php");
+
+$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
+if ($mysqli->connect_errno) 
+{
+    echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+}
 
 $result = array();
 $errors = array();
@@ -53,7 +59,7 @@ else
 			else
 			{
 				//Check that email doesnt already exist in the DB	
-				if ($stmt = $mysqli->prepare("SELECT * FROM UserLogin WHERE userEmail = ?")) 
+				if ($stmt = $mysqli->prepare("SELECT * FROM userlogin WHERE userEmail = ?")) 
 				{
 					/* bind parameters for markers */
 					$stmt->bind_param("s", $emailAddress);
@@ -97,7 +103,7 @@ if(!isset($_POST['lastName']) || strlen($_POST['lastName']) == 0) //Check if the
 	$tempError = [
 	"code" => "R007",
 	"field" => "lastName",
-	"message" => "Lasy Name is Empty", 
+	"message" => "Last Name is Empty", 
 	];
 	array_push($errors, $tempError);
 }
@@ -158,7 +164,6 @@ else
 	
 if(count($errors) == 0) //If no errors add the user to the system
 {
-	http_response_code(200);
 	$firstName = filter_var($_POST['firstName'], FILTER_SANITIZE_STRING);
 	$lastName = filter_var($_POST['lastName'], FILTER_SANITIZE_STRING);
 	
@@ -170,22 +175,36 @@ if(count($errors) == 0) //If no errors add the user to the system
 	//hash password
 	$hashedPassword = crypt($password, '$5$rounds=5000$'. $salt .'$');
 	
+	//Add user to the Database
 	
+	/* prepare statement */
+	if ($stmt = $mysqli->prepare("INSERT INTO userlogin (userEmail, userPassword) VALUES (?,?)")) 
+	{
+		
+		$stmt->bind_param("ss", $emailAddress, $hashedPassword);
+		$stmt->execute();
+		$userID = $stmt->insert_id;
+		$stmt->close();
+	}
 	
+	//add user to profile table
+	if ($stmt = $mysqli->prepare("INSERT INTO profile (userID, firstName, lastName) VALUES (?,?,?)")) 
+	{
+		
+		$stmt->bind_param("iss", $userID, $firstName, $lastName);
+		$stmt->execute();
+		$stmt->close();
+	}
+	$result["status"] = 200;
+	$result["message"] = "User Registration successful";	
 }
 else //return the json of errors 
 {
-	http_response_code(400);
+	$result["status"] = 400;	
+	$result["message"] = "User Registration failed";	
 	$result["errors"] = $errors;
-	echo json_encode($result);
 }
-
-
-
-
-
-
-
-	
+echo json_encode($result);
+$mysqli->close();
 
 ?>
