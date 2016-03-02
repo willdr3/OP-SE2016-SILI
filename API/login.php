@@ -1,54 +1,128 @@
 <?php
 session_start();
-include "connect.inc.php";
+include "dbconnect.inc.php";
 
-if(isset($_SESSION['userID']))
-	$userID = $_SESSION['userID'];
-if(isset($_POST['userName']))
-	$userName = strip_tags($_POST['userName']);
-else if(isset($_SESSION['userName']))
-	$userName = $_SESSION['userName'];
-
-if(isset($_POST['password']))
-	$userPassword = strip_tags($_POST['password']);
-
-if(!isset($userName))
+// Connect to mysqli
+$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
+if ($mysqli->connect_errno) 
 {
-	// Reload this page
-	
-	exit;
+    echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+}
+
+// Arrays for jsons
+$result = array();
+$errors = array();
+
+// email validation
+if((!isset($_POST['email'])) || (strlen($_POST['email']) == 0)) // Check if the email has been submitted and is longer than 0 chars
+{
+	$tempError = [
+    "code" => "L001",
+    "field" => "email",
+	"message" => "Email is empty", 
+	];
+	array_push($errors, $tempError);
 }
 else
 {
-	if(!isset($_SESSION['userName']))
+	$emailAddress = filter_var($_POST['email'],FILTER_SANITIZE_EMAIL);
+	if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) // Check if its a vaild email format 
 	{
-		//Prepared statement to prevent (mostly) sql injection
-		$stmt = $dbh->prepare("SELECT * FROM userLogin where name = :name");
-		$stmt->bindParam(':name', $userName);
-		$stmt->execute();
-		
-		$result = mysqli_query($connection, $select);
-		
-		if(mysqli_num_rows($result) > 0)
+		$tempError = [
+		"code" => "L002",
+		"field" => "email",
+		"message" => "Not a Valid Email",
+		];
+		array_push($errors, $tempError);
+	}
+	else
+	{
+		if(!isset($_POST['password']) || (strlen($_POST['password']) == 0)) // Check if the password has been submitted and is longer than 0 chars
 		{
-			$row = mysqli_fetch_assoc($result);
-			// Assuming that usernames are unique
-			
-			if(crypt($userPassword, $row['password']) == $row['password'])
-			{
-				$_SESSION['userName'] = $userName;
-				$_SESSION['userID'] = $row['userID'];
-				// Return a json, not sure how to do yet
-				die();
-			}
-			// Return a json, not sure how to do yet
-			die();
+			$tempError = [
+			"code" => "L003",
+			"field" => "password",
+			"message" => "Password is empty",
+			];
+			array_push($errors, $tempError);
 		}
 		else
 		{
-				// Return json about error message
-				exit;
+			
+			$userPassword = $_POST['password'];
+			
+			//Prepared statement to prevent (mostly) sql injection
+			if($stmt = $mysqli->prepare("SELECT userID, userPassword FROM userlogin WHERE userEmail = ?"))
+			{
+				// Bind parameters
+				$stmt->bind_param("s", $emailAddress);
+				
+				// Execute Query
+				$stmt->execute();
+				
+				// Store result
+				$stmt->store_result();
+				
+				if($stmt->num_rows > 0)
+				{
+					// Bind parameters
+					$stmt->bind_result($userID, $hashPass);
+					
+					// Fill with values
+					$stmt->fetch();
+					
+					// Close stmt
+					$stmt->close();
+					
+					if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
+					{
+						$_SESSION['userID'] = $userID;
+					}
+					else
+					{
+						$tempError = [
+						"code" => "L004",
+						"field" => "password",
+						"message" => "Password incorrect",
+						];
+						array_push($errors, $tempError);
+					}
+				}
+				else
+				{
+					$tempError = [
+					"code" => "L005",
+					"field" => "user",
+					"message" => "User email not found",
+					];
+					array_push($errors, $tempError);
+				}
+			}
+			else
+			{
+				$tempError = [
+				"code" => "L006",
+				"field" => "mysqli",
+				"message" => "Error with mysqli prepare",
+				];
+				array_push($errors, $tempError);
+			}
 		}
 	}
 }
+
+if(count($errors) == 0) //If no errors user logged in
+{
+	$result["status"] = 200;
+	$result["message"] = "User Login Successful";
+}
+else
+{
+	$result["status"] =400;
+	$result["message"] = "User Login Failed";
+	$result["errors"] = $errors;
+
+}
+
+echo json_encode($result);
 ?>
