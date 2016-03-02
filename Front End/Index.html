@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link type="text/css" rel="stylesheet" href="css/stylesheet.css">
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link type="text/css" rel="stylesheet" href="css/stylesheet.css">
+	<title>SILI - Say it! Like it!</title>
+	<link rel="icon" href="images/creep.png">
 </head>
 <body>
 	<div class="banner">
@@ -16,21 +22,36 @@
 				</div>	
 			</div>
 			<div class="signin-button">
-				<img id="button-img" src="images/button.png" />
+				<input type="image" id="button-img" name="signin" src="images/button.png" alt="SUBMIT" >
 			</div>
 		</div>
 	</div>
 	<div class="content-area">
 		<div class="subtitle">
+			<h1 id="sub-left">New to <span id="title-span">SILI</span>?</h1>
+			<h1 id="sub-right">Join up here!</h1>
 		</div>
 		<div class="welcome-content">
 			<div class="intro-img">
+				<img id="creep-img" src="images/creep.png" alt="Creepy icon face" height="450px"/>
 			</div>
 			<div class="signup-container">
+				<form id="join-form">
+					<input type="text" name="join-email" placeholder="Email address"></br>
+					<input type="text" name="join-re-email" placeholder="Re-enter email address"></br>
+					<input class="sml" type="text" name="join-fname" placeholder="First name">
+					<input class="sml" type="text" name="join-lname" placeholder="Last name"></br>
+					<input type="text" name="join-pswd" placeholder="Password"></br>
+					<input type="text" name="join-re-pswd" placeholder="Re-enter password"></br>
+					<input class="join-button" type="submit" name="join" value="JOIN"></br>
+				</form>
 			</div>
 		</div>
 	</div>
 	<div class="footer">
 	</div>
+	<script src="js/jquery-1.12.1.js"></script>
+    <!--<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>-->
+    <script src="js/bootstrap.min.js"></script>
 </body>
 </html>

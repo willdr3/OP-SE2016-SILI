@@ -2,6 +2,11 @@ body{
 	margin: 0;
 }
 
+h1{
+	margin: 0;
+	padding: 0;
+}
+
 .banner{
 	background-color: #DE5164;
 	height: 200px;
@@ -53,4 +58,80 @@ body{
 
 #button-img{
 	width: 150px;
+}
+
+.content-area{
+	background-color: #FFE9EC;
+}
+
+.subtitle{
+	width: 1150px;
+	margin: auto;
+	height: 135px;
+}
+
+#sub-left,#sub-right{
+	font-family: Hobo Std;
+	font-size: 60px;
+	display: inline;
+	float: left;
+	padding-top: 50px;
+}
+
+#sub-left{
+	padding-left: 20px;
+}
+
+#sub-right{
+	padding-left: 270px;
+}
+
+#title-span{
+	color: #DE5164;
+}
+
+.welcome-content{
+	background-color: #FFE9EC;
+	width: 1300px;
+	margin: auto;
+	height: 480px;
+}
+
+.intro-img{
+	display: inline;
+	float: left;
+}
+
+.signup-container{
+	display: inline;
+	float: left;
+}
+
+.signup-container form{
+	padding-left: 120px;
+	padding-top: 10px;
+}
+
+.signup-container input{
+	width: 450px;
+	height: 40px;
+	margin-bottom: 6px;
+	border-radius: 5px;
+}
+
+.signup-container .sml{
+	width: 220px;
+	margin-right: 6px;
+}
+
+.signup-container .join-button{
+	width: 180px;
+	float: right;
+	margin-right: 6px;
+	background-color: #DE5164;
+	color: white;
+	font-family: Hobo Std;
+	font-size: 25px;
+	border-color: white;
+	border-width: 3px;
 }
