@@ -40,6 +40,11 @@ if(isset($_SESSION['userID']))
 			// Close stmt
 			$stmt->close();
 			
+			if($profileImage == "")
+			{
+				$profileImage = "images/blankprofilepic.png";
+			}
+			
 			$userData = [
 			"firstName" => $firstName,
 			"lastName" => $lastName,

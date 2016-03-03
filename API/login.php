@@ -113,12 +113,12 @@ else
 
 if(count($errors) == 0) //If no errors user logged in
 {
-	$result["status"] = 200;
+	http_response_code(200);
 	$result["message"] = "User Login Successful";
 }
 else
 {
-	$result["status"] =400;
+	http_response_code(400);
 	$result["message"] = "User Login Failed";
 	$result["errors"] = $errors;
 
