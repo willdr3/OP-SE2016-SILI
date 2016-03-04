@@ -52,7 +52,7 @@ else
 			$userPassword = $_POST['password'];
 			
 			//Prepared statement to prevent (mostly) sql injection
-			if($stmt = $mysqli->prepare("SELECT userID, userPassword FROM userlogin WHERE userEmail = ?"))
+			if($stmt = $mysqli->prepare("SELECT userID, userPassword FROM UserLogin WHERE userEmail = ?"))
 			{
 				// Bind parameters
 				$stmt->bind_param("s", $emailAddress);

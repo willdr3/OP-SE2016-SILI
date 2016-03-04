@@ -1,6 +1,10 @@
 <?php
 session_start();
+
 include "dbconnect.inc.php";
+
+//Path for profile Images
+$profileImagePath = "contents/profilePics/";
 
 // Connect to mysqli
 $mysqli = new mysqli($host, $userMS, $passwordMS, $database);
@@ -18,7 +22,7 @@ if(isset($_SESSION['userID']))
 	$userID = $_SESSION['userID'];
 	
 	//Pull user details from the db
-	if($stmt = $mysqli->prepare("SELECT userName, firstName, lastName, profileImage FROM profile WHERE userID = ?"))
+	if($stmt = $mysqli->prepare("SELECT userName, firstName, lastName, profileImage FROM Profile WHERE userID = ?"))
 	{
 		// Bind parameters
 		$stmt->bind_param("i", $userID);
@@ -42,14 +46,14 @@ if(isset($_SESSION['userID']))
 			
 			if($profileImage == "")
 			{
-				$profileImage = "images/blankprofilepic.png";
+				$profileImage = "blankprofilepic.png";
 			}
 			
 			$userData = [
 			"firstName" => $firstName,
 			"lastName" => $lastName,
 			"userName" => $userName, 
-			"profileImage" => $profileImage,
+			"profileImage" => $profileImagePath . $profileImage,
 			];
 
 		}
@@ -76,13 +80,13 @@ else
 
 if(count($errors) == 0) //If no errors user is logged in
 {	
-	$result["status"] = 200;
+	http_response_code(200);
 	$result["message"] = "User Logged In";
 	$result["userData"] = $userData;
 }
 else
 {
-	$result["status"] = 400;
+	http_response_code(400);
 	$result["message"] = "User not Logged in";
 	$result["errors"] = $errors;
 }

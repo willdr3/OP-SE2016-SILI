@@ -59,7 +59,7 @@ else
 			else
 			{
 				//Check that email doesnt already exist in the DB	
-				if ($stmt = $mysqli->prepare("SELECT * FROM userlogin WHERE userEmail = ?")) 
+				if ($stmt = $mysqli->prepare("SELECT * FROM UserLogin WHERE userEmail = ?")) 
 				{
 					/* bind parameters for markers */
 					$stmt->bind_param("s", $emailAddress);
@@ -178,7 +178,7 @@ if(count($errors) == 0) //If no errors add the user to the system
 	//Add user to the Database
 	
 	/* prepare statement */
-	if ($stmt = $mysqli->prepare("INSERT INTO userlogin (userEmail, userPassword) VALUES (?,?)")) 
+	if ($stmt = $mysqli->prepare("INSERT INTO UserLogin (userEmail, userPassword) VALUES (?,?)")) 
 	{
 		
 		$stmt->bind_param("ss", $emailAddress, $hashedPassword);
@@ -188,19 +188,19 @@ if(count($errors) == 0) //If no errors add the user to the system
 	}
 	
 	//add user to profile table
-	if ($stmt = $mysqli->prepare("INSERT INTO profile (userID, firstName, lastName) VALUES (?,?,?)")) 
+	if ($stmt = $mysqli->prepare("INSERT INTO Profile (userID, firstName, lastName) VALUES (?,?,?)")) 
 	{
 		
 		$stmt->bind_param("iss", $userID, $firstName, $lastName);
 		$stmt->execute();
 		$stmt->close();
 	}
-	$result["status"] = 200;
+	http_response_code(200);
 	$result["message"] = "User Registration successful";	
 }
 else //return the json of errors 
 {
-	$result["status"] = 400;	
+	http_response_code(400);	
 	$result["message"] = "User Registration failed";	
 	$result["errors"] = $errors;
 }
