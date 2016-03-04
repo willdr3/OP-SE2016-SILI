@@ -6,7 +6,11 @@ include "dbconnect.inc.php";
 $mysqli = new mysqli($host, $userMS, $passwordMS, $database);
 if ($mysqli->connect_errno) 
 {
-    echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	$tempError = [
+	"code" => "L001",
+    "field" => "email",
+	"message" => "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error,
+	]
 }
 
 // Arrays for jsons
@@ -17,7 +21,7 @@ $errors = array();
 if((!isset($_POST['email'])) || (strlen($_POST['email']) == 0)) // Check if the email has been submitted and is longer than 0 chars
 {
 	$tempError = [
-    "code" => "L001",
+    "code" => "L002",
     "field" => "email",
 	"message" => "Email is empty", 
 	];
@@ -29,7 +33,7 @@ else
 	if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) // Check if its a vaild email format 
 	{
 		$tempError = [
-		"code" => "L002",
+		"code" => "L003",
 		"field" => "email",
 		"message" => "Not a Valid Email",
 		];
@@ -40,7 +44,7 @@ else
 		if(!isset($_POST['password']) || (strlen($_POST['password']) == 0)) // Check if the password has been submitted and is longer than 0 chars
 		{
 			$tempError = [
-			"code" => "L003",
+			"code" => "L004",
 			"field" => "password",
 			"message" => "Password is empty",
 			];
@@ -71,6 +75,9 @@ else
 					// Fill with values
 					$stmt->fetch();
 					
+					// Free result
+					$stmt->free_result();
+					
 					// Close stmt
 					$stmt->close();
 					
@@ -81,7 +88,7 @@ else
 					else
 					{
 						$tempError = [
-						"code" => "L004",
+						"code" => "L005",
 						"field" => "password",
 						"message" => "Password incorrect",
 						];
@@ -91,7 +98,7 @@ else
 				else
 				{
 					$tempError = [
-					"code" => "L005",
+					"code" => "L006",
 					"field" => "user",
 					"message" => "User email not found",
 					];
@@ -101,7 +108,7 @@ else
 			else
 			{
 				$tempError = [
-				"code" => "L006",
+				"code" => "L007",
 				"field" => "mysqli",
 				"message" => "Error with mysqli prepare",
 				];
