@@ -13,7 +13,7 @@ if (is_ajax())
 		"code" => "L001",
 		"field" => "email",
 		"message" => "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error,
-		]
+		];
 	}
 
 	// Arrays for jsons
@@ -140,7 +140,7 @@ if (is_ajax())
 // Function to check if the request is an ajax request
 function is_ajax()
 {
-	return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower('$_SERVER[''HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+	return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
 
 ?>
