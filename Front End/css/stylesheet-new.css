@@ -1,18 +1,25 @@
+body
+{
+    height:100%;
+	background-color: #E8E8E8;
+}
 .banner{
 	background-color: #373F51;
 	height: 200px;
 	color: #E8E8E8;
 }
-
+h1{
+padding-top:50px;
+}
 .signin-input{
-	padding-top:50px;
+	padding-top:80px;
 }
 
 .signin-button{
-  width: 65px;
-  height: 65px;
+  width: 450px;
+  height: 40px;
   text-align: center;
-  border-radius: 35px;
+  
 }
 .signin-bottom{
 	background-color: #E8E8E8;

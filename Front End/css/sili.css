@@ -1,0 +1,112 @@
+@import url("fonts.css");
+body
+{
+    height:100%;
+	background-color: #E8E8E8;
+}
+
+h1
+{
+	font-family: 'komika_title_-_axisregular';
+}
+
+h2, h3, h4, h5
+{
+	font-family: 'komika_titleregular';
+}
+
+p, *
+{
+	font-family: 'komika_textregular';
+}
+
+.login-banner
+{
+	background-color: #373F51;
+	height: 200px;
+}
+
+.login-banner h1
+{
+	padding-top: 20px;
+	color: #91aec1;
+	font-size: 70px;
+}
+
+.login-banner img {
+	max-height: 200px;
+}
+
+.login-content h2
+{
+	font-size: 50px;
+	font-family: 'komika_titleregular';
+	text-align: center;
+	color: #373F51;
+}
+
+.login-forms
+{
+	padding-top:50px;
+}
+
+.registerButton, .loginButton 
+{
+	background-color:#79B791;
+	color: #FFFFFF;
+}
+
+.form-control, .registerButton, .loginButton 
+{
+	margin-bottom: 6px;
+}
+
+.banner
+{
+	background-color: #373F51;
+	height: 100px;
+}
+
+.banner img {
+	max-height: 100px;
+}
+
+.banner .user
+{
+	height: 100px;
+	padding-left: 0;
+	padding-right: 5;
+}
+
+.banner .user p 
+{
+	padding-top: 35px;
+	color: #E8E8E8;
+	font-size: 20px;
+}
+
+.banner .user img
+{
+	margin-top: 20px;
+	max-height: 50px;
+}
+
+.dropdown-menu
+{
+	background-color: #E8E8E8;
+}
+
+.content
+{
+	padding-top: 20px;
+}
+.sidebarLeft{
+background-color: #79B791;
+margin-bottom: -999px;
+	padding-bottom: 999px;
+}.sidebarRight{
+color:#E8E8E8;
+background-color: #373F51;
+margin-bottom: -999px;
+padding-bottom: 999px;
+	}
