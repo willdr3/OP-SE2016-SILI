@@ -128,7 +128,7 @@ p, *
 	padding-left: 5px;
 }
 
-.sayFormBox
+.sayFormBox, .sayButton
 {
 	margin-bottom: 5px;
 }
