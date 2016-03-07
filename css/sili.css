@@ -1,0 +1,186 @@
+@import url("fonts.css");
+body
+{
+    height:100%;
+	background-color: #E8E8E8;
+}
+
+h1
+{
+	font-family: 'komika_title_-_axisregular';
+}
+
+h2, h3, h4, h5, h6
+{
+	font-family: 'komika_titleregular';
+}
+
+p, *
+{
+	font-family: 'komika_textregular';
+}
+
+.login-banner
+{
+	background-color: #373F51;
+	height: 150px;
+}
+
+.login-banner h1
+{
+	padding-top: 7.5px;
+	color: #91aec1;
+	font-size: 70px;
+}
+
+.login-banner img {
+	max-height: 150px;
+}
+
+.login-content h2
+{
+	font-size: 50px;
+	font-family: 'komika_titleregular';
+	text-align: center;
+	color: #373F51;
+}
+
+.login-forms
+{
+	margin-top:50px;
+	background-color: #E8E8E8;
+	border-radius: 30px;
+	padding-bottom: 20px;
+
+}
+
+.form-horizontal .form-group
+{
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.registerButton, .loginButton, .sayButton
+{
+	background-color:#79B791;
+	color: #FFFFFF;
+}
+
+.form-control, .registerButton, .loginButton 
+{
+	margin-bottom: 6px;
+}
+
+.banner
+{
+	background-color: #373F51;
+	height: 100px;
+}
+
+.banner img {
+	max-height: 100px;
+}
+
+.banner .user
+{
+	height: 100px;
+	padding-left: 0;
+	padding-right: 5;
+}
+
+.banner .user p 
+{
+	padding-top: 35px;
+	color: #E8E8E8;
+	font-size: 20px;
+}
+
+.banner .user img
+{
+	margin-top: 20px;
+	max-height: 50px;
+}
+
+.dropdown-menu
+{
+	background-color: #E8E8E8;
+}
+
+.content
+{
+	padding-top: 20px;
+}
+
+.sayForm
+{
+	background-color: #DCE0D9;
+	border: 1px solid #91AEC1;
+	border-radius: 10px;
+	padding-top: 10px;
+	margin-bottom: 5px;
+}
+
+.sayBox
+{
+	resize: none;
+	width: 100%;
+	border-radius: 10px;
+	padding-left: 5px;
+}
+
+.sayFormBox
+{
+	margin-bottom: 5px;
+}
+
+.say
+{
+	padding-top: 10px;
+	background-color: #DCE0D9;
+	border: 1px solid #91AEC1;
+	border-radius: 10px;
+	margin-bottom: 5px;
+}
+
+.sayProfilePic
+{
+	padding-right: 2.5px;
+}
+
+.sayProfileImg
+{
+	max-height: 50px;
+}
+	
+.sayMessageDetails
+{
+	padding-left: 0px;
+}
+
+.sayMessage
+{
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+	-ms-hyphens: auto;
+	-moz-hyphens: auto;
+	-webkit-hyphens: auto;
+	hyphens: auto;
+}
+
+.profile
+{
+	background-color: #DCE0D9;
+	border-radius: 10px;
+}
+
+.profile h3, h4
+{
+	margin-top: 0;
+	
+}
+.profile hr
+{
+	margin: 0;
+}
+
+
