@@ -141,6 +141,33 @@ function userRegister(){
 	return false;
 }
 
+function addSay(){
+	var data = $(this).serialize();
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: "API-addsay",
+		data: data,
+		success: function(data) {	
+			$(".sayFeed").prepend("<div class=\"row say\"> <div class=\"col-md-1 sayProfilePic\"> <img class=\"sayProfileImg img-circle pull-right\" src=\"" + data.say["profileImage"] + "\" /> </div> <div class=\"col-md-11 sayMessageDetails\"> <div class=\"row\"> <div class=\"col-md-12\">" + data.say["firstName"] + " " + data.say["lastName"] + " - (" + data.say["userName"] +")</div> </div> <div class=\"row\"> <div class=\"col-md-12 sayMessage\">" + data.say["message"] + " </div> </div> <div class=\"row\"> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-4 text-right\">" + data.say["timePosted"] + "</div> </div> </div> </div>");
+		}
+	});
+	return false;
+}
+
+function fetchSays(){
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: "API-fetchsays",
+		success: function(data) {
+			$.each(data.says, function(index, element) {	
+				$(".sayFeed").prepend("<div class=\"row say\"> <div class=\"col-md-1 sayProfilePic\"> <img class=\"sayProfileImg img-circle pull-right\" src=\"" + element["profileImage"] + "\" /> </div> <div class=\"col-md-11 sayMessageDetails\"> <div class=\"row\"> <div class=\"col-md-12\">" + element["firstName"] + " " + element["lastName"] + " - (" + element["userName"] +")</div> </div> <div class=\"row\"> <div class=\"col-md-12 sayMessage\">" + element["message"] + " </div> </div> <div class=\"row\"> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-4 text-right\">" + element["timePosted"] + "</div> </div> </div> </div>");
+			});
+		}
+	});
+}
+
 function getUserDetials() {
 	return $.ajax({
 		type: "POST",
@@ -158,9 +185,11 @@ function getUserDetials() {
 	});
 }
 
+
 getUserDetials().done(function() {
 if(loggedIn) {
 $("#profileImage").attr("src", profileImage);
 $("#userName").text(firstName);
+fetchSays();
 }
 });
