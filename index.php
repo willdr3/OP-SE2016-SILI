@@ -29,6 +29,13 @@ if($loginDetails["message"] == "User Logged In") //If the message returns that t
 			header("Location: http://kate.ict.op.ac.nz/~gearl1/SILI/TESTING/");
 			exit;
 		}
+		elseif($request[0] == "profile")
+		{
+			include("content/views/profile.html");
+
+			exit;
+		}
+
 	}
 	//If the request wasnt found
 	http_response_code(404);
