@@ -141,7 +141,7 @@ function userRegister(){
 	return false;
 }
 
-function checkLogin() {
+function getUserDetials() {
 	return $.ajax({
 		type: "POST",
 		dataType: "json",
@@ -158,7 +158,7 @@ function checkLogin() {
 	});
 }
 
-checkLogin().done(function() {
+getUserDetials().done(function() {
 if(loggedIn) {
 $("#profileImage").attr("src", profileImage);
 $("#userName").text(firstName);
