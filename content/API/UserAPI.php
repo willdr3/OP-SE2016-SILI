@@ -175,7 +175,7 @@ function CheckLogin($host, $userMS, $passwordMS, $database)
 			// Store result
 			$stmt->store_result();
 			
-			if($stmt->num_rows > 0)
+			if($stmt->num_rows == 1)
 			{
 				// Bind parameters
 				$stmt->bind_result($userName, $firstName, $lastName, $profileImage);

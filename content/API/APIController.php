@@ -9,10 +9,16 @@ $controller = true;
 
 //Include all the API file
 include("UserAPI.php");
+include("SayAPI.php");
 
 //Check if the request is coming from one of the scripts
 if (is_ajax())
 {
+	$userID = 0;
+	if(isset($_SESSION['userID']))
+	{
+		$userID = $_SESSION['userID'];
+	}
 	include("../config/dbconnect.inc.php");
 	if(isset($_GET['request']))
 	{	
@@ -29,6 +35,16 @@ if (is_ajax())
 		elseif ($request == "checklogin")
 		{
 			$result = CheckLogin($host, $userMS, $passwordMS, $database);	
+		}
+		elseif ($request == "addsay")
+		{
+			$result = SayIt($host, $userMS, $passwordMS, $database, $userID);	
+
+		}
+		elseif ($request == "fetchsays")
+		{
+			$result = GetSays($host, $userMS, $passwordMS, $database, $userID);	
+
 		}
 		else 
 		{
