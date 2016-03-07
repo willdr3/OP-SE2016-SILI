@@ -128,7 +128,7 @@ p, *
 	padding-left: 5px;
 }
 
-.sayFormBox, .sayButton
+.sayFormBox
 {
 	margin-bottom: 5px;
 }
@@ -165,6 +165,22 @@ p, *
 	-moz-hyphens: auto;
 	-webkit-hyphens: auto;
 	hyphens: auto;
+}
+
+.profile
+{
+	background-color: #DCE0D9;
+	border-radius: 10px;
+}
+
+.profile h3, h4
+{
+	margin-top: 0;
+	
+}
+.profile hr
+{
+	margin: 0;
 }
 
 
