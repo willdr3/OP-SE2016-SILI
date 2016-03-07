@@ -13,7 +13,7 @@
 	
 	<script type="text/javascript">
 		$("document").ready(function(){
-			$(".say-form").submit(addSay);
+			getUserProfile()
 		});
 	</script>
 	
@@ -32,7 +32,7 @@
 					<p class="dropdown-toggle" id="userDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span id="userName"></span><span class="caret"></span></p>
 					
 					 <ul class="dropdown-menu" aria-labelledby="userDropDown">
-						<li><a href="#">Profile</a></li>
+						<li><a href="profile">Profile</a></li>
 						<li role="separator" class="divider"></li>
 						<li><a href="logout">Logout</a></li>
 					</ul>
@@ -47,18 +47,18 @@
 				<h2 class="text-center">Account Settings</h2>
 				<div class="row">
 					<div class="col-md-5">
-						<img src=""  class="img-circle center-block"/>
+						<img src="" class="img-circle center-block acc-profileImage" alt="" />
 					</div>
 					<div class="col-md-1">
 						<h4>Edit</h4>
 					</div>
 					<div class="col-md-5">
 						<h3>Personal Info</h3>
-						<p>Aidan Smith</p>
+						<p class="acc-name"></p>
 						<br>
-						<p>MonsterDick</p>
+						<p class"acc-username"></p>
 						<hr>
-						<p>smithae4@student.op.ac.nz</p>
+						<p class="acc-email"></p>
 						
 					</div>
 					<div class="col-md-1">
@@ -72,8 +72,8 @@
 				</div>
 				<div class="row">
 					<div class="col-md-5">
-						<h3>Info About MonsterDick</h3>
-						<p>Interesting stuff that I cant think of right now</p>
+						<h3>Info About<span class="acc-username"></span></h3>
+						<p class="acc-userbio"></p>
 					</div>
 					<div class="col-md-1">
 						<h4>Edit</h4>
@@ -87,6 +87,24 @@
 			<div class="col-md-2"></div>
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 		</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 	</div>	
 </body>
 </html>

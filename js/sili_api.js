@@ -185,6 +185,21 @@ function getUserDetials() {
 }
 
 
+function getUserProfile() {
+	return $.ajax({
+		dataType: "json",
+		url: "API-getProfile",
+		success: function(data) {
+			$(".acc-name").text(data.userProfile["firstName"] + " " + data.userProfile["lastName"]);
+			$(".acc-username").text(data.userProfile["userName"]);
+			$(".acc-email").text(data.userProfile["email"]);
+			$(".acc-profileImage").attr("src", data.userProfile["profileImage"]);
+			$(".acc-userbio").text(data.userProfile["userBio"]);
+		}
+	});
+}
+
+
 getUserDetials().done(function() {
 if(loggedIn) {
 $("#profileImage").attr("src", profileImage);

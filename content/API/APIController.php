@@ -10,6 +10,7 @@ $controller = true;
 //Include all the API file
 include("UserAPI.php");
 include("SayAPI.php");
+include("ProfileAPI.php");
 
 //Check if the request is coming from one of the scripts
 if (is_ajax())
@@ -44,6 +45,11 @@ if (is_ajax())
 		elseif ($request == "fetchsays")
 		{
 			$result = GetSays($host, $userMS, $passwordMS, $database, $userID);	
+
+		}
+		elseif ($request == "getProfile")
+		{
+			$result = getUserProfile($host, $userMS, $passwordMS, $database, $userID);
 
 		}
 		else 
