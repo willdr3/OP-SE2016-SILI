@@ -26,28 +26,10 @@ function userLogin(){
 					$('#myModal').modal('show');
 					return false;
 				}
-				if(element.code == "L002")
+				else 
 				{
-					$(".loginEmail").addClass("has-error");
-					$(".loginEmail .help-block").text("Please enter your email address");				
-				}
-				
-				if(element.code == "L003" || element.code == "L006")
-				{
-					$(".loginEmail").addClass("has-error");
-					$(".loginEmail .help-block").text("Please enter a vaid email address");				
-				}
-				
-				if(element.code == "L004")
-				{
-					$(".loginPassword").addClass("has-error");
-					$(".loginPassword .help-block").text("Please enter your password");				
-				}
-				
-				if(element.code == "L005")
-				{
-					$(".loginPassword").addClass("has-error");
-					$(".loginPassword .help-block").text("Password is incorrect");				
+					$("." + errors[element.code].field).addClass("has-error");
+					$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
 				}
 			});
 		},				
