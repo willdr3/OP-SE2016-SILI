@@ -87,50 +87,10 @@ function userRegister(){
 					$('#myModal').modal('show');
 					return false;
 				}
-				if(element.code == "R002") {
-					$(".registerEmail").addClass("has-error");
-					$(".registerEmail .help-block").text("Please enter your email address");	
-				}
-				if(element.code == "R003") {
-					$(".registerEmail").addClass("has-error");
-					$(".registerEmail .help-block").text("Please enter a valid email address");	
-				}
-				if(element.code == "R004") {
-					$(".registerConfirmEmail").addClass("has-error");
-					$(".registerConfirmEmail .help-block").text("Please enter confirm email address");	
-				}
-				if(element.code == "R005") {
-					$(".registerEmail").addClass("has-error");
-					$(".registerConfirmEmail").addClass("has-error");
-					$(".registerConfirmEmail .help-block").text("Confirm email doesnt match Email Address");	
-				}
-				if(element.code == "R006") {
-					$(".registerEmail").addClass("has-error");
-					$(".registerEmail .help-block").text("This email has already been used to register");	
-				}
-				if(element.code == "R008") {
-					$(".registerFirstName").addClass("has-error");
-					$(".registerFirstName .help-block").text("Please enter your First Name");	
-				}
-				if(element.code == "R009") {
-					$(".registerLastName").addClass("has-error");
-					$(".registerLastName .help-block").text("Please Enter your Last Name");	
-				}
-				if(element.code == "R010") {
-					$(".registerPassword").addClass("has-error");
-					$(".registerPassword .help-block").text("Your password does not meet the complexity requirements");	
-				}
-				if(element.code == "R011") {
-					$(".registerConfirmPassword").addClass("has-error");
-					$(".registerConfirmPassword .help-block").text("Confirm password does not match password");	
-				}
-				if(element.code == "R012") {
-					$(".registerConfirmPassword").addClass("has-error");
-					$(".registerConfirmPassword .help-block").text("Please confirm your password");	
-				}
-				if(element.code == "R013") {
-					$(".registerPassword").addClass("has-error");
-					$(".registerPassword .help-block").text("Please enter your password");	
+				else 
+				{
+					$("." + errors[element.code].field).addClass("has-error");
+					$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
 				}
 			});
 		},
@@ -150,7 +110,16 @@ function addSay(){
 		data: data,
 		success: function(data) {	
 			$(".sayBox").val("");
-			$(".sayFeed").prepend($("<div class=\"row say\"> <div class=\"col-md-1 sayProfilePic\"> <img class=\"sayProfileImg img-circle pull-right\" src=\"" + data.say["profileImage"] + "\" /> </div> <div class=\"col-md-11 sayMessageDetails\"> <div class=\"row\"> <div class=\"col-md-12\">" + data.say["firstName"] + " " + data.say["lastName"] + " - (" + data.say["userName"] +")</div> </div> <div class=\"row\"> <div class=\"col-md-12 sayMessage\">" + data.say["message"] + " </div> </div> <div class=\"row\"> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-4 text-right\">" + data.say["timePosted"] + "</div> </div> </div> </div>").fadeIn(3000));
+			$(".sayFeed").loadTemplate("content/templates/say.html",
+				{
+				        firstName: data.say["firstName"],
+				        lastName: data.say["lastName"],
+				        userName: data.say["userName"],
+					message: data.say["message"],
+					profilePicture: data.say["profileImage"],
+					timePosted: data.say["timePosted"]
+				}, { prepend: true });
+;
 		}
 	});
 	return false;
@@ -162,7 +131,15 @@ function fetchSays(){
 		url: "API-fetchsays",
 		success: function(data) {
 			$.each(data.says, function(index, element) {	
-				$(".sayFeed").prepend("<div class=\"row say\"> <div class=\"col-md-1 sayProfilePic\"> <img class=\"sayProfileImg img-circle pull-right\" src=\"" + element["profileImage"] + "\" /> </div> <div class=\"col-md-11 sayMessageDetails\"> <div class=\"row\"> <div class=\"col-md-12\">" + element["firstName"] + " " + element["lastName"] + " - (" + element["userName"] +")</div> </div> <div class=\"row\"> <div class=\"col-md-12 sayMessage\">" + element["message"] + " </div> </div> <div class=\"row\"> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-2\"></div> <div class=\"col-md-4 text-right\">" + element["timePosted"] + "</div> </div> </div> </div>");
+				$(".sayFeed").loadTemplate("content/templates/say.html",
+				{
+				        firstName: element["firstName"],
+				        lastName: element["lastName"],
+				        userName: element["userName"],
+					message: element["message"],
+					profilePicture: element["profileImage"],
+					timePosted: element["timePosted"]
+				}, { prepend: true });
 			});
 		}
 	});

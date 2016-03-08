@@ -10,7 +10,7 @@ if(isset($_GET['request']))
 //Check if the user is actually logged in	
 $internal = true; //Used to tell the API that is being used internally
 include("content/config/dbconnect.inc.php");
-include("content/API/UserAPI.php");
+include("content/api/UserAPI.php");
 $loginDetails = CheckLogin($host, $userMS, $passwordMS, $database); //Check if the use is logged in
 
 if($loginDetails["message"] == "User Logged In") //If the message returns that the user is logged in 
@@ -26,7 +26,7 @@ if($loginDetails["message"] == "User Logged In") //If the message returns that t
 		{
 		    session_unset();     // unset $_SESSION variable for the run-time 
 		    session_destroy();   // destroy session data in storage
-			header("Location: http://kate.ict.op.ac.nz/~gearl1/SILI/TESTING/");
+			header("Location: http://kate.ict.op.ac.nz/~gearl1/SILI/");
 			exit;
 		}
 		elseif($request[0] == "profile")
