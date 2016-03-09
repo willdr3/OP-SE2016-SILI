@@ -27,35 +27,21 @@ function UserLogin($host, $userMS, $passwordMS, $database)
 	// email validation
 	if((!isset($_POST['email'])) || (strlen($_POST['email']) == 0)) // Check if the email has been submitted and is longer than 0 chars
 	{
-		$tempError = [
-		"code" => "L002",
-		"field" => "email",
-		"message" => "Email is empty", 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["L002"]);
 	}
 	else
 	{
 		$emailAddress = filter_var($_POST['email'],FILTER_SANITIZE_EMAIL);
 		if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) // Check if its a vaild email format 
 		{
-			$tempError = [
-			"code" => "L003",
-			"field" => "email",
-			"message" => "Not a Valid Email",
-			];
-			array_push($errors, $tempError);
+			array_push($errors, $errorCodes["L003"]);
 		}
 		else
 		{
 			if(!isset($_POST['password']) || (strlen($_POST['password']) == 0)) // Check if the password has been submitted and is longer than 0 chars
 			{
-				$tempError = [
-				"code" => "L004",
-				"field" => "password",
-				"message" => "Password is empty",
-				];
-				array_push($errors, $tempError);
+
+				array_push($errors, $errorCodes["L004"]);
 			}
 			else
 			{
@@ -93,32 +79,17 @@ function UserLogin($host, $userMS, $passwordMS, $database)
 						}
 						else
 						{
-							$tempError = [
-							"code" => "L005",
-							"field" => "password",
-							"message" => "Password incorrect",
-							];
-							array_push($errors, $tempError);
+							array_push($errors, $errorCodes["L005"]);
 						}
 					}
 					else
 					{
-						$tempError = [
-						"code" => "L006",
-						"field" => "user",
-						"message" => "User email not found",
-						];
-						array_push($errors, $tempError);
+						array_push($errors, $errorCodes["L006"]);
 					}
 				}
 				else
 				{
-					$tempError = [
-					"code" => "L007",
-					"field" => "mysqli",
-					"message" => "Error with mysqli prepare",
-					];
-					array_push($errors, $tempError);
+					array_push($errors, $errorCodes["L007"]);
 				}
 			}
 			
@@ -198,12 +169,7 @@ function CheckLogin($host, $userMS, $passwordMS, $database)
 			}
 			else
 			{
-				$tempError = [
-				"code" => "C001",
-				"field" => "userID",
-				"message" => "User Profile not found",
-				];
-				array_push($errors, $tempError);
+				array_push($errors, $errorCodes["C001"]);
 			}
 			
 			/* free result */
@@ -224,12 +190,7 @@ function CheckLogin($host, $userMS, $passwordMS, $database)
 	}
 	else
 	{
-		$tempError = [
-		"code" => "C002",
-		"field" => "userID",
-		"message" => "No User Logged in",
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["C002"]);
 	}
 
 	if(count($errors) == 0) //If no errors user is logged in
@@ -264,47 +225,27 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 	//Email Validation
 	if((!isset($_POST['email'])) || (strlen($_POST['email']) == 0)) //Check if the email has been submitted 
 	{
-		$tempError = [
-		"code" => "R002",
-		"field" => "email",
-		"message" => "Email is empty", 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["R002"]);
 	}
 	else
 	{
 		$emailAddress = filter_var($_POST['email'],FILTER_SANITIZE_EMAIL);
 		if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) //Check if its a vaild email format 
 		{
-			$tempError = [
-			"code" => "R003",
-			"field" => "email",
-			"message" => "Not a valid email", 
-			];
-			array_push($errors, $tempError);
+			array_push($errors, $errorCodes["R003"]);
 		}
 		else
 		{
 			if((!isset($_POST['emailConfirm'])) || (strlen($_POST['emailConfirm']) == 0)) //Check if the confirmation email has been submitted 
 			{
-				$tempError = [
-				"code" => "R004",
-				"field" => "emailConfirm",
-				"message" => "Confirmation email is empty", 
-				];
-				array_push($errors, $tempError);
+				array_push($errors, $errorCodes["R004"]);
 			}
 			else
 			{
 				$confirmEmailAddress = filter_var($_POST['emailConfirm'],FILTER_SANITIZE_EMAIL);
 				if($emailAddress != $confirmEmailAddress) //Check if both email addresses match
 				{
-					$tempError = [
-					"code" => "R005",
-					"field" => "email & emailConfirm",
-					"message" => "Emails dont match", 
-					];
-					array_push($errors, $tempError);
+					array_push($errors, $errorCodes["R005"]);
 				}
 				else
 				{
@@ -321,12 +262,7 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 											
 						if($stmt->num_rows > 0)
 						{
-							$tempError = [
-							"code" => "R006",
-							"field" => "email",
-							"message" => "Email already exists in the database", 
-							];
-							array_push($errors, $tempError);
+							array_push($errors, $errorCodes["R006"]);
 						}
 						/* free result */
 						$stmt->free_result();
@@ -349,21 +285,11 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 	}
 	if(!isset($_POST['firstName']) || strlen($_POST['firstName']) == 0) //Check if the first name has been submitted
 	{
-		$tempError = [
-		"code" => "R008",
-		"field" => "firstName",
-		"message" => "First name is empty", 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["R008"]);
 	}
 	if(!isset($_POST['lastName']) || strlen($_POST['lastName']) == 0) //Check if the last name has been submitted
 	{
-		$tempError = [
-		"code" => "R009",
-		"field" => "lastName",
-		"message" => "Last name is empty", 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["R009"]);
 	}
 		
 	if(isset($_POST['password']) && strlen($_POST['password']) > 0) //check if the password has been submitted
@@ -373,12 +299,7 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 		$passwordCheck = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
 		if(!preg_match("/$passwordCheck/", $password )) //check it meets the complexity requirements set above
 		{
-			$tempError = [
-			"code" => "R010",
-			"field" => "password",
-			"message" => "Password does not meet the complexity requirements", 
-			];
-			array_push($errors, $tempError);
+			array_push($errors, $errorCodes["R010"]);
 		}
 		else 
 		{
@@ -387,33 +308,18 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 				$confirmPassword = $_POST['confirmPassword'];
 				if($confirmPassword != $password) //check the both passwords match
 				{
-					$tempError = [
-					"code" => "R011",
-					"field" => "password & confirmPassword",
-					"message" => "Password does not match Confirm password", 
-					];
-					array_push($errors, $tempError);
+					array_push($errors, $errorCodes["R011"]);
 				}
 			}
 			else 
 			{
-				$tempError = [
-				"code" => "R012",
-				"field" => "confirmPassword",
-				"message" => "Password Confirmation is empty", 
-				];
-				array_push($errors, $tempError);
+				array_push($errors, $errorCodes["R012"]);
 			}
 		}
 	}
 	else 
 	{
-		$tempError = [
-		"code" => "R013",
-		"field" => "password",
-		"message" => "Password is empty", 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["R013"]);
 	}
 	
 	if(count($errors) == 0) //If no errors add the user to the system

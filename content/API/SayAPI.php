@@ -24,23 +24,13 @@ function SayIt($host, $userMS, $passwordMS, $database, $userID)
 	$errors = array();
 	if($userID == 0)
 	{
-		$tempError = [
-			"code" => "S002",
-			"field" => "userID",
-			"message" => "UserID is not set", 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["S002"]);
 	}
 	else {
 		// Check if the Say has been submitted and is longer than 0 chars
 		if((!isset($_POST['sayBox'])) || (strlen($_POST['sayBox']) == 0))
 		{
-			$tempError = [
-				"code" => "S003",
-				"field" => "sayBox",
-				"message" => "Say is empty", 
-			];
-			array_push($errors, $tempError);
+			array_push($errors, $errorCodes["S003"]);
 		}
 		else
 		{

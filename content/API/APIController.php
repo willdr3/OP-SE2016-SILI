@@ -11,6 +11,8 @@ $controller = true;
 include("UserAPI.php");
 include("SayAPI.php");
 include("ProfileAPI.php");
+include("../config/APIrequests.php");
+include("../config/errorhandling.php");
 
 //Check if the request is coming from one of the scripts
 if (is_ajax())
@@ -25,32 +27,9 @@ if (is_ajax())
 	{	
 		$request = $_GET['request'];
 		//Based on the request return the correct json_decode
-		if($request == "login")
-		{
-			$result = UserLogin($host, $userMS, $passwordMS, $database);	
-		}
-		elseif ($request == "register")
-		{
-			$result = UserRegister($host, $userMS, $passwordMS, $database);	
-		}
-		elseif ($request == "checklogin")
-		{
-			$result = CheckLogin($host, $userMS, $passwordMS, $database);	
-		}
-		elseif ($request == "addsay")
-		{
-			$result = SayIt($host, $userMS, $passwordMS, $database, $userID);	
-
-		}
-		elseif ($request == "fetchsays")
-		{
-			$result = GetSays($host, $userMS, $passwordMS, $database, $userID);	
-
-		}
-		elseif ($request == "getProfile")
-		{
-			$result = getUserProfile($host, $userMS, $passwordMS, $database, $userID);
-
+		
+		if (in_array($request, $reqArray)) {
+			$result = $reqArray[$request]["func"];
 		}
 		else 
 		{
@@ -80,7 +59,6 @@ else
 	http_response_code(403);
 	exit;
 }
-
 
 // Function to check if the request is an ajax request
 function is_ajax()

@@ -6,7 +6,7 @@ if (!isset($internal) && !isset($controller)) //check if its an internal request
 	exit;
 }
 
-function getUserProfile($host, $userMS, $passwordMS, $database,$userID)
+function GetUserProfile($host, $userMS, $passwordMS, $database,$userID)
 {
 	//Path for profile Images
 	$profileImagePath = "content/profilePics/";
@@ -26,12 +26,7 @@ function getUserProfile($host, $userMS, $passwordMS, $database,$userID)
 	
 	if($userID == 0)
 	{
-		$tempError = [
-			"code" => "P002",
-			"field" => "userID",
-			"message" => "UserID is not set", 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["P002"]);
 	}
 	else {
 		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userEmail, userName, userBio, dob, gender, location, joinDate, profileImage FROM Profile INNER JOIN UserLogin ON UserLogin.userID=Profile.userID WHERE Profile.userID = ?"))
