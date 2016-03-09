@@ -88,7 +88,7 @@ function addSay(){
 	$.ajax({
 		type: "POST",
 		dataType: "json",
-		url: "API-addsay",
+		url: "API-addSay",
 		data: data,
 		success: function(data) {	
 			$(".sayBox").val("");
@@ -110,7 +110,7 @@ function addSay(){
 function fetchSays(){
 	$.ajax({
 		dataType: "json",
-		url: "API-fetchsays",
+		url: "API-fetchSays",
 		success: function(data) {
 			$.each(data.says, function(index, element) {	
 				$(".sayFeed").loadTemplate("content/templates/say.html",
@@ -130,7 +130,7 @@ function fetchSays(){
 function getUserDetials() {
 	return $.ajax({
 		dataType: "json",
-		url: "API-checklogin",
+		url: "API-checkLogin",
 		success: function(data) {
 			userName = data.userData["userName"];
 			firstName = data.userData["firstName"];
