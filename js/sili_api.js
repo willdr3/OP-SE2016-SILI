@@ -166,3 +166,5 @@ $("#userName").text(firstName);
 fetchSays();
 }
 });
+
+var myAppModule = angular.module('MyApp', ['ngImgCrop']);
