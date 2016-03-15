@@ -1,27 +1,23 @@
 <?php
 
-if (!isset($internal) && !isset($controller)) //check if its an internal request
+if (!isset($internal) && !isset($controller)) //check if its not an internal or controller request
 {
+	//Trying to direct access
 	http_response_code(403);
 	exit;
 }
 
-function SayIt($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
+function SayIt($mysqli, $errorCodes, $userID)
 {
-	// Connect to mysqli
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
-	if ($mysqli->connect_errno) 
-	{
-		$tempError = [
-			"code" => "S001",
-			"field" => "mysqli",
-			"message" => "Failed to connect to MySQLi: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error,
-		];
-	}
-	
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
 	if($userID == 0)
 	{
 		array_push($errors, $errorCodes["S002"]);
@@ -49,12 +45,7 @@ function SayIt($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
 			}
 			else
 			{
-				$tempError = [
-					"code" => "S004",
-					"field" => "MySQLi",
-					"message" => "MySQLi failed to prepare statement", 
-				];
-				array_push($errors, $tempError);
+				array_push($errors, $errorCodes["M002"]);
 			}
 		}
 	}
@@ -71,27 +62,21 @@ function SayIt($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
 		$result["message"] = "Say failed";	
 		$result["errors"] = $errors;
 	}
-
-	$mysqli->close();
 	
 	return $result;
 }
 
-function GetSays($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
+function GetSays($mysqli, $errorCodes, $userID)
 {	
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
-	if ($mysqli->connect_errno) 
-	{
-		$tempError = [
-			"code" => "S001",
-			"field" => "mysqli",
-			"message" => "Failed to connect to MySQLi: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error,
-		];
-	}
-	
 	// Arrays for jsons
 	$result = array();
 	$says = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
 	if ($userID != 0) 
 	{
 		if($stmt = $mysqli->prepare("SELECT sayID FROM Says WHERE userID IN (SELECT followingUserID FROM Following WHERE userID = ?) OR userID = ? ORDER BY timePosted LIMIT 10"))
