@@ -11,7 +11,8 @@ if(isset($_GET['request']))
 $internal = true; //Used to tell the API that is being used internally
 include("content/config/dbconnect.inc.php");
 include("content/api/UserAPI.php");
-$loginDetails = CheckLogin($host, $userMS, $passwordMS, $database); //Check if the use is logged in
+include("content/config/errorhandling.php");
+$loginDetails = CheckLogin($host, $userMS, $passwordMS, $database, $errorCodes); //Check if the use is logged in
 include("content/views/header.inc.html");
 if($loginDetails["message"] == "User Logged In") //If the message returns that the user is logged in 
 {
