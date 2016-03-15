@@ -119,4 +119,16 @@ $errorCodes ["P002"] = [
 		"field" => "userID",
 		"message" => "UserID is not set", 
 		];
+		
+// Comment error codes/messages
+$errorCodes ["Co02"] = [
+		"code" => "Co02",
+		"field" => "userID",
+		"message" => "UserID is not set",
+		];
+$errorCodes ["Co03"] = [
+		"code" => "Co03",
+		"field" => "MySQLi",
+		"message" => "MySQLi failed to prepare statement", 
+		];
 ?>
