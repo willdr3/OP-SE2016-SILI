@@ -1,5 +1,17 @@
 <?php
 $errorCodes = array();
+//Generic MySQL codes/Messages
+$errorCodes["M002"] = [
+		"code" => "M001",
+		"field" => "mysqli",
+		"message" => "Failed to connect to MySQLi",
+		];
+$errorCodes["M002"] = [
+		"code" => "M002",
+		"field" => "mysqli",
+		"message" => "MySQLi failed to prepare statement",
+		];
+
 // Login error codes/messages
 $errorCodes["L002"] = [
 		"code" => "L002",

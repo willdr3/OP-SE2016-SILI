@@ -1,29 +1,25 @@
 <?php
 
-if (!isset($internal) && !isset($controller)) //check if its an internal request
+if (!isset($internal) && !isset($controller)) //check if its not an internal or controller request
 {
+	//Trying to direct access
 	http_response_code(403);
 	exit;
 }
 
 
-function UserLogin($host, $userMS, $passwordMS, $database, $errorCodes)
+function UserLogin($mysqli, $errorCodes)
 {
-	// Connect to mysqli
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
-	if ($mysqli->connect_errno) 
-	{
-		$tempError = [
-		"code" => "L001",
-		"field" => "email",
-		"message" => "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error,
-		];
-	}
-
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
 
+	//Pre Requirments
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
 	// email validation
 	if((!isset($_POST['email'])) || (strlen($_POST['email']) == 0)) // Check if the email has been submitted and is longer than 0 chars
 	{
@@ -36,66 +32,68 @@ function UserLogin($host, $userMS, $passwordMS, $database, $errorCodes)
 		{
 			array_push($errors, $errorCodes["L003"]);
 		}
-		else
-		{
-			if(!isset($_POST['password']) || (strlen($_POST['password']) == 0)) // Check if the password has been submitted and is longer than 0 chars
-			{
+	}
+	
+	//Password validation
+	if(!isset($_POST['password']) || (strlen($_POST['password']) == 0)) // Check if the password has been submitted and is longer than 0 chars
+	{
 
-				array_push($errors, $errorCodes["L004"]);
-			}
-			else
-			{
-				$userPassword = $_POST['password'];
+		array_push($errors, $errorCodes["L004"]);
+	}
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{
+		$userPassword = $_POST['password'];
 				
-				//Prepared statement to prevent (mostly) sql injection
-				if($stmt = $mysqli->prepare("SELECT userID, userPassword FROM UserLogin WHERE userEmail = ?"))
+		//Prepared statement to prevent (mostly) sql injection
+		if($stmt = $mysqli->prepare("SELECT userID, userPassword FROM UserLogin WHERE userEmail = ?"))
+		{
+			// Bind parameters
+			$stmt->bind_param("s", $emailAddress);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows > 0)
+			{
+				// Bind parameters
+				$stmt->bind_result($userID, $hashPass);
+				
+				// Fill with values
+				$stmt->fetch();
+						
+				// Free result
+				$stmt->free_result();
+						
+				// Close stmt
+				$stmt->close();
+						
+				if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
 				{
-					// Bind parameters
-					$stmt->bind_param("s", $emailAddress);
-					
-					// Execute Query
-					$stmt->execute();
-					
-					// Store result
-					$stmt->store_result();
-					
-					if($stmt->num_rows > 0)
-					{
-						// Bind parameters
-						$stmt->bind_result($userID, $hashPass);
-						
-						// Fill with values
-						$stmt->fetch();
-						
-						// Free result
-						$stmt->free_result();
-						
-						// Close stmt
-						$stmt->close();
-						
-						if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
-						{
-							$_SESSION['userID'] = $userID;
-						}
-						else
-						{
-							array_push($errors, $errorCodes["L005"]);
-						}
-					}
-					else
-					{
-						array_push($errors, $errorCodes["L006"]);
-					}
+					$_SESSION['userID'] = $userID;
 				}
 				else
 				{
-					array_push($errors, $errorCodes["L007"]);
+					array_push($errors, $errorCodes["L005"]);
 				}
 			}
-			
+			else
+			{
+				array_push($errors, $errorCodes["L006"]);
+			}
+		}
+		else
+		{
+			array_push($errors, $errorCodes["L007"]);
 		}
 	}
-	if(count($errors) == 0) //If no errors user logged in
+	
+	//Post Processing
+	if(count($errors) == 0) //If no errors user is logged in
 	{
 		$result["message"] = "User Login Successful";
 	}
@@ -109,7 +107,7 @@ function UserLogin($host, $userMS, $passwordMS, $database, $errorCodes)
 	return $result;
 }
 
-function CheckLogin($host, $userMS, $passwordMS, $database, $errorCodes)
+function CheckLogin($mysqli, $errorCodes)
 {
 	$result = array();
 	$errors = array();
@@ -117,20 +115,14 @@ function CheckLogin($host, $userMS, $passwordMS, $database, $errorCodes)
 	//Path for profile Images
 	$profileImagePath = "content/profilePics/";
 
-	// Connect to mysqli
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
-		$tempError = [
-		"code" => "C003",
-		"field" => "MySQL",
-		"message" => "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error, 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["M001"]);
 	}
 
-
-	if(isset($_SESSION['userID']))
+	//Process
+	if ((count($errors) == 0) && (isset($_SESSION['userID'])))
 	{
 		$userID = $_SESSION['userID'];
 		
@@ -180,12 +172,7 @@ function CheckLogin($host, $userMS, $passwordMS, $database, $errorCodes)
 		}
 		else
 		{
-			$tempError = [
-				"code" => "C004",
-				"field" => "MySQL",
-				"message" => "MySQL failed to prepare statement", 
-				];
-				array_push($errors, $tempError);
+			array_push($errors, $errorCodes["M002"]);
 		}
 	}
 	else
@@ -207,19 +194,15 @@ function CheckLogin($host, $userMS, $passwordMS, $database, $errorCodes)
 	return $result;
 }
 
-function UserRegister($host, $userMS, $passwordMS, $database, $errorCodes)
+function UserRegister($mysqli, $errorCodes)
 {
 	$result = array();
 	$errors = array();
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
+	
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
-		$tempError = [
-		"code" => "R001",
-		"field" => "MySQL",
-		"message" => "Failed to connect to MySQLi: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error, 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["M001"]);
 	}
 	
 	//Email Validation
@@ -272,12 +255,7 @@ function UserRegister($host, $userMS, $passwordMS, $database, $errorCodes)
 					}
 					else
 					{
-						$tempError = [
-							"code" => "R007",
-							"field" => "MySQLi",
-							"message" => "MySQLi failed to prepare statement", 
-							];
-							array_push($errors, $tempError);
+						array_push($errors, $errorCodes["M002"]);
 					}
 				}
 			}
@@ -322,6 +300,7 @@ function UserRegister($host, $userMS, $passwordMS, $database, $errorCodes)
 		array_push($errors, $errorCodes["R013"]);
 	}
 	
+	//Process
 	if(count($errors) == 0) //If no errors add the user to the system
 	{
 		$firstName = filter_var($_POST['firstName'], FILTER_SANITIZE_STRING);
@@ -352,16 +331,14 @@ function UserRegister($host, $userMS, $passwordMS, $database, $errorCodes)
 			$stmt->execute();
 			$stmt->close();
 		}
-
-		$result["message"] = "User Registration successful";	
+		
+		$result["message"] = "User Registration successful";
 	}
 	else //return the json of errors 
 	{	
 		$result["message"] = "User Registration failed";	
 		$result["errors"] = $errors;
 	}
-
-	$mysqli->close();
 	
 	return $result;
 }
