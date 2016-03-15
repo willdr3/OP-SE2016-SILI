@@ -332,6 +332,9 @@ function UserRegister($mysqli, $errorCodes)
 			$stmt->close();
 		}
 		
+		//Log the user in 
+		$_SESSION['userID'] = $userID;
+		
 		$result["message"] = "User Registration successful";
 	}
 	else //return the json of errors 
