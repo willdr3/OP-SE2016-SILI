@@ -76,7 +76,7 @@ function userRegister(){
 			});
 		},
 		success: function(data) {	
-			
+			location.reload();
 			}
 		});
 	return false;
