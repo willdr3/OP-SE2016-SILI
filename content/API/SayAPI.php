@@ -6,7 +6,7 @@ if (!isset($internal) && !isset($controller)) //check if its an internal request
 	exit;
 }
 
-function SayIt($host, $userMS, $passwordMS, $database, $userID)
+function SayIt($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
 {
 	// Connect to mysqli
 	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
@@ -77,7 +77,7 @@ function SayIt($host, $userMS, $passwordMS, $database, $userID)
 	return $result;
 }
 
-function GetSays($host, $userMS, $passwordMS, $database, $userID)
+function GetSays($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
 {	
 	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
 	if ($mysqli->connect_errno) 

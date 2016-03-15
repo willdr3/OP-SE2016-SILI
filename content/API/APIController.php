@@ -8,11 +8,13 @@ if($status == PHP_SESSION_NONE){
 $controller = true;
 
 //Include all the API file
+include("../config/dbconnect.inc.php");
+include("../config/errorhandling.php");
+include("../config/APIrequests.php");
 include("UserAPI.php");
 include("SayAPI.php");
 include("ProfileAPI.php");
-include("../config/APIrequests.php");
-include("../config/errorhandling.php");
+
 
 //Check if the request is coming from one of the scripts
 if (is_ajax())
@@ -22,14 +24,14 @@ if (is_ajax())
 	{
 		$userID = $_SESSION['userID'];
 	}
-	include("../config/dbconnect.inc.php");
+
 	if(isset($_GET['request']))
 	{	
 		$request = $_GET['request'];
 		//Based on the request return the correct json_decode
 		
-		if (in_array($request, $reqArray)) {
-			$result = $reqArray[$request]["func"];
+		if (array_key_exists($request, $reqArray)) {
+			$result = $reqArray[$request]($host, $userMS, $passwordMS, $database, $errorCodes, $userID);
 		}
 		else 
 		{
