@@ -6,8 +6,9 @@ if (!isset($internal) && !isset($controller)) //check if its an internal request
 	exit;
 }
 
-function GetUserProfile($host, $userMS, $passwordMS, $database,$userID)
+function GetUserProfile($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
 {
+	
 	//Path for profile Images
 	$profileImagePath = "content/profilePics/";
 	

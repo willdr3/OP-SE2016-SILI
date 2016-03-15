@@ -7,7 +7,7 @@ if (!isset($internal) && !isset($controller)) //check if its an internal request
 }
 
 
-function UserLogin($host, $userMS, $passwordMS, $database)
+function UserLogin($host, $userMS, $passwordMS, $database, $errorCodes)
 {
 	// Connect to mysqli
 	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
@@ -109,7 +109,7 @@ function UserLogin($host, $userMS, $passwordMS, $database)
 	return $result;
 }
 
-function CheckLogin($host, $userMS, $passwordMS, $database)
+function CheckLogin($host, $userMS, $passwordMS, $database, $errorCodes)
 {
 	$result = array();
 	$errors = array();
@@ -207,7 +207,7 @@ function CheckLogin($host, $userMS, $passwordMS, $database)
 	return $result;
 }
 
-function UserRegister($host, $userMS, $passwordMS, $database)
+function UserRegister($host, $userMS, $passwordMS, $database, $errorCodes)
 {
 	$result = array();
 	$errors = array();
