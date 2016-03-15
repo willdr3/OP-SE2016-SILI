@@ -18,7 +18,6 @@ function userLogin(){
 			$(".loginEmail .help-block").text("");
 			$(".loginPassword .help-block").text("");
 			data = $.parseJSON(jqXHR.responseText);
-			var errors = '';
 			$.each(data.errors, function(index, element) {
 				if(element.code == "L001" || element.code == "L007")
 				{
@@ -178,6 +177,25 @@ function getUserProfile() {
 			$(".acc-email").text(data.userProfile["email"]);
 			$(".acc-profileImage").attr("src", data.userProfile["profileImage"]);
 			$(".acc-userbio").text(data.userProfile["userBio"]);
+			
+			$("body").loadTemplate("content/templates/changeEmail.html", "", { append: true });
+				
+			$("body").loadTemplate("content/templates/changePassword.html", "", { append: true });
+				
+			$("body").loadTemplate("content/templates/personalForm.html",
+				{
+				    firstName: data.userProfile["firstName"],
+				    lastName: data.userProfile["lastName"],
+				    userName: data.userProfile["userName"],
+					dob: data.userProfile["dob"],
+					gender: data.userProfile["gender"]
+				}, { append: true });
+				
+			$("body").loadTemplate("content/templates/userBio.html",
+				{
+				        bio: data.userProfile["userBio"]
+				}, { append: true });
+			
 		}
 	});
 }

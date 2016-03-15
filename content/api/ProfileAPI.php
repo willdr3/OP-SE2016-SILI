@@ -1,12 +1,13 @@
 <?php
 
-if (!isset($internal) && !isset($controller)) //check if its an internal request
+if (!isset($internal) && !isset($controller)) //check if its not an internal or controller request
 {
+	//Trying to direct access
 	http_response_code(403);
 	exit;
 }
 
-function GetUserProfile($host, $userMS, $passwordMS, $database, $errorCodes, $userID)
+function GetUserProfile($mysqli, $errorCodes, $userID)
 {
 	
 	//Path for profile Images
@@ -14,15 +15,10 @@ function GetUserProfile($host, $userMS, $passwordMS, $database, $errorCodes, $us
 	
 	$result = array();
 	$errors = array();
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
+	
 	if ($mysqli->connect_errno) 
 	{
-		$tempError = [
-		"code" => "P001",
-		"field" => "MySQL",
-		"message" => "Failed to connect to MySQLi: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error, 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["M001"]);
 	}
 	
 	if($userID == 0)
@@ -86,11 +82,6 @@ function GetUserProfile($host, $userMS, $passwordMS, $database, $errorCodes, $us
 	{
 		$result["errors"] = $errors;
 	}
-
-	$mysqli->close();	
 		
 	return $result;
-	
-
-
 }
