@@ -80,6 +80,11 @@ function UserLogin($mysqli, $errorCodes)
 				{
 					array_push($errors, $errorCodes["L005"]);
 				}
+				
+				if(isset($_POST['rememberMe']))
+				{
+					newUserRememberMeCookie($mysqli, $userID);
+				}
 			}
 			else
 			{
@@ -107,6 +112,98 @@ function UserLogin($mysqli, $errorCodes)
 	return $result;
 }
 
+function CookieLogin($mysqli)
+{
+	if (isset($_COOKIE['rememberMe'])) {
+		list ($userID, $token, $hash) = explode(':', $_COOKIE['rememberMe']);
+
+		if ($hash == hash('sha256', $userID . ':' . $token . '6f$g@0rq0&17m5op6ke%@#d$ygv=*8xu_c=7%+*0fg+1p5_knv') && !empty($token)) 
+		{
+			$stmt = $mysqli->prepare("SELECT userID FROM UserSessions WHERE rememberMeToken = ?");
+		
+			// Bind parameters
+			$stmt->bind_param("s", $token);
+		
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows > 0)
+			{
+				// Bind parameters
+				$stmt->bind_result($userID);
+				
+				// Fill with values
+				$stmt->fetch();
+						
+				// Free result
+				$stmt->free_result();
+						
+				// Close stmt
+				$stmt->close();
+				
+				$_SESSION['userID'] = $userID;
+				// Cookie token usable only once
+				newUserRememberMeCookie($mysqli, $userID, $token);
+				return $userID;
+			}
+		}
+		deleteRememberMeCookie($mysqli, $userID);
+	}
+	return false;
+}
+
+function newUserRememberMeCookie($mysqli, $userID, $currentToken = '')
+{
+	$randomToken = hash('sha256', mt_rand());
+	
+	if ($currentToken== '') {
+		$stmt = $mysqli->prepare("INSERT INTO UserSessions (userID, rememberMeToken, loginAgent, loginIP, loginDatetime, lastVisit) VALUES (?, ?, ?, ?, now(), now())");
+		
+		// Bind parameters
+		$stmt->bind_param("isss", $userID, $randomToken, $_SERVER['HTTP_USER_AGENT'], $_SERVER['REMOTE_ADDR']);
+		
+		// Execute Query
+		$stmt->execute();
+	}
+	else {
+		$stmt = $mysqli->prepare("UPDATE UserSessions SET rememberMeToken = ?, lastVisit = now(), lastVisitAgent = ? WHERE userID = ? AND rememberMeToken = ?");
+
+		// Bind parameters
+		$stmt->bind_param("ssis", $randomToken, $_SERVER['HTTP_USER_AGENT'], $userID, $currentToken);
+		
+		// Execute Query
+		$stmt->execute();
+	}
+	
+	// generate cookie string that consists of userid, randomstring and combined hash of both
+	$cookieFirstPart = $userID . ':' . $randomToken;
+	$cookieHash = hash('sha256', $cookieFirstPart . '6f$g@0rq0&17m5op6ke%@#d$ygv=*8xu_c=7%+*0fg+1p5_knv');
+	$cookie = $cookieFirstPart . ':' . $cookieHash;
+	// set cookie
+	setcookie('rememberMe', $cookie, time() + 1209600, "/", "kate.ict.op.ac.nz");
+}
+
+function deleteRememberMeCookie($mysqli, $userID)
+{
+	if (isset($_COOKIE['rememberMe'])) {
+            list ($user_id, $token, $hash) = explode(':', $_COOKIE['rememberMe']);
+            
+            if ($hash == hash('sha256', $user_id . ':' . $token . '6f$g@0rq0&17m5op6ke%@#d$ygv=*8xu_c=7%+*0fg+1p5_knv') && !empty($token)) {
+                $stmt = $mysqli->prepare("DELETE FROM UserSessions WHERE rememberMeToken = ? AND userID = ?");
+		
+				// Bind parameters
+				$stmt->bind_param("si", $token, $userID);
+		
+				// Execute Query
+				$stmt->execute();
+			}
+        setcookie('rememberMe', false, time() - (3600 * 3650), '/', "kate.ict.op.ac.nz");
+    }
+}
+
 function CheckLogin($mysqli, $errorCodes)
 {
 	$result = array();
@@ -121,11 +218,18 @@ function CheckLogin($mysqli, $errorCodes)
 		array_push($errors, $errorCodes["M001"]);
 	}
 
-	//Process
 	if ((count($errors) == 0) && (isset($_SESSION['userID'])))
 	{
 		$userID = $_SESSION['userID'];
-		
+	}
+	elseif((count($errors) == 0) && isset($_COOKIE['rememberMe']))
+	{
+		$userID = CookieLogin($mysqli);
+	}
+	
+	//Process
+	if ((count($errors) == 0) && (isset($userID)) && ($userID != false))
+	{
 		//Pull user details from the db
 		if($stmt = $mysqli->prepare("SELECT userName, firstName, lastName, profileImage FROM Profile WHERE userID = ?"))
 		{
