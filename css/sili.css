@@ -188,3 +188,40 @@ p, *
 	max-height: 200px;
 }
 
+.userSearch
+{
+	padding-top: 25px;
+	margin-bottom: 0;
+}
+
+.easy-autocomplete.userSearch input:focus 
+{
+	border-color: #ccc;
+	box-shadow: none; 
+}
+
+.easy-autocomplete.userSearch ul
+{
+	border-top: 3px solid #E8E8E8;
+}
+	
+		
+.easy-autocomplete.userSearch .eac-item 
+{
+	font-size: 14px;
+	margin-top: 0;
+	min-height: 0;
+	padding: 10px 8px;
+	position: relative; 
+}
+	
+.easy-autocomplete.userSearch .eac-item .eac-icon 
+{
+	color: #555;
+	max-height: none;
+	position: absolute;
+	right: -4px;
+	width: 42px;
+	top: -2px; 
+	border-radius: 50%;
+}

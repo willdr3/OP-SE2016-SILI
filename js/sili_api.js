@@ -186,3 +186,42 @@ fetchSays();
 });
 
 var myAppModule = angular.module('MyApp', ['ngImgCrop']);
+
+var options = {
+  url: "users.json",
+  
+  placeholder: "Search SILI for friends!",
+  
+  getValue: "name",
+  
+  cssClasses: "userSearch",
+  
+  adjustWidth: false,
+  
+  requestDelay: 500,
+
+  template: {
+    type: "iconRight",
+    fields: {
+      iconSrc: "icon"
+    }
+  },
+
+  list: {
+		maxNumberOfElements: 10,
+		match: {
+				enabled: true
+		},
+		showAnimation: {
+		  type: "slide"
+		},
+		hideAnimation: {
+		  type: "slide"
+		}
+  }
+
+};
+
+$("document").ready(function() {
+	$("#userSearch").easyAutocomplete(options);
+});

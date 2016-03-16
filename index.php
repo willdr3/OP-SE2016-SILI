@@ -18,6 +18,8 @@ include("content/views/header.inc.html");
 
 if(array_key_exists("userData", $loginDetails)) //If the userData is returned then the user is logged in
 {
+	include("content/views/banner.inc.html");
+	$userID = $_SESSION['userID'];
 	if (empty($request)) 
 	{
 		include($pageRequests["home"]["file"]);
