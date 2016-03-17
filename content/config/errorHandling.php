@@ -1,5 +1,11 @@
 <?php
 $errorCodes = array();
+//Generic Errors
+$errorCodes["G000"] = [
+	"code" => "G000",
+	"field" => "",
+	"message" => "Error",
+	];
 //Generic MySQL codes/Messages
 $errorCodes["M002"] = [
 		"code" => "M001",
@@ -11,6 +17,8 @@ $errorCodes["M002"] = [
 		"field" => "mysqli",
 		"message" => "MySQLi failed to prepare statement",
 		];
+		
+
 
 // Login error codes/messages
 $errorCodes["L002"] = [
@@ -133,14 +141,9 @@ $errorCodes ["P002"] = [
 		];
 		
 // Comment error codes/messages
-$errorCodes ["Co02"] = [
-		"code" => "Co02",
+$errorCodes ["C002"] = [
+		"code" => "C002",
 		"field" => "userID",
 		"message" => "UserID is not set",
-		];
-$errorCodes ["Co03"] = [
-		"code" => "Co03",
-		"field" => "MySQLi",
-		"message" => "MySQLi failed to prepare statement", 
 		];
 ?>
