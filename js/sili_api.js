@@ -188,7 +188,9 @@ fetchSays();
 var myAppModule = angular.module('MyApp', ['ngImgCrop']);
 
 var options = {
-  url: "users.json",
+  url: function(phrase) {
+		return "API-search/" + phrase;
+	},
   
   placeholder: "Search SILI for friends!",
   
@@ -203,7 +205,7 @@ var options = {
   template: {
     type: "iconRight",
     fields: {
-      iconSrc: "icon"
+      iconSrc: "profileImage"
     }
   },
 
