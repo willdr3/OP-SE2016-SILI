@@ -100,7 +100,7 @@ As above, this function may need modified if a new DB table is to be created
 					
 			if($profileImage == "")
 			{
-				$profileImage = "blankprofilepic.png";
+				$profileImage = $defaultProfileImg;
 			}
 			
 			$say = [
