@@ -66,7 +66,7 @@ function SayIt($mysqli, $errorCodes, $userID)
 	return $result;
 }
 
-function GetSays($mysqli, $errorCodes, $userID)
+function GetSays($mysqli, $errorCodes, $userID, $userOnly = false)
 {	
 	// Arrays for jsons
 	$result = array();
@@ -79,7 +79,18 @@ function GetSays($mysqli, $errorCodes, $userID)
 	
 	if ($userID != 0) 
 	{
-		if($stmt = $mysqli->prepare("SELECT sayID FROM Says WHERE userID IN (SELECT followingUserID FROM Following WHERE userID = ?) OR userID = ? ORDER BY timePosted LIMIT 10"))
+		if($userOnly) 
+		{
+			$saysQuery = "SELECT sayID FROM Says WHERE userID = ? ORDER BY timePosted LIMIT 10";
+		}
+		else
+		{
+			$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT followingUserID FROM Following WHERE userID = ?) OR userID = ? ORDER BY timePosted LIMIT 10";	
+		}
+		
+		
+		
+		if($stmt = $mysqli->prepare($saysQuery))
 		{
 			// Bind parameters
 			$stmt->bind_param("ii", $userID, $userID);

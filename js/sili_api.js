@@ -126,6 +126,30 @@ function fetchSays(){
 	});
 }
 
+function addComment(){
+	var data = $(this).serialize();
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: "API-addComment",
+		data: data,
+		success: function(data) {	
+			$(".commentBox").val("");
+			$(".commentFeed").loadTemplate("content/templates/comment.html", //<-- front end page yet to be made <--<-- commentFeed????? ask Lewey
+				{
+				        firstName: data.say["firstName"],
+				        lastName: data.say["lastName"],
+				        userName: data.say["userName"],
+					message: data.say["message"],
+					profilePicture: data.say["profileImage"],
+					timePosted: data.say["timePosted"]
+				}, { prepend: true }); // <--- Maybe change this
+;
+		}
+	});
+	return false;
+}
+
 function getUserDetials() {
 	return $.ajax({
 		dataType: "json",

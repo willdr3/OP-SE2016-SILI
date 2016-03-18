@@ -29,11 +29,11 @@ if (is_ajax())
 	//Check if a request for an API was actually made
 	if(isset($_GET['request']))
 	{	
-		$request = $_GET['request'];
+		$request = explode("/", $_GET['request']);
 		
 		//Check if the request is a vaild request
-		if (array_key_exists($request, $reqArray)) {
-			$result = $reqArray[$request]($mysqli, $errorCodes, $userID);
+		if (array_key_exists($request[0], $reqArray)) {
+			$result = $reqArray[$request[0]]($mysqli, $errorCodes, $userID);
 		}
 		else //Request not found
 		{
