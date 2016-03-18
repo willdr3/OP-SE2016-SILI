@@ -169,6 +169,15 @@ function CommentSayIt($userID)
 		array_push($errors, $errorCodes["M001"]);
 	}
 	
+	if(count($request) >= 3)
+	{
+		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING) . "%";
+	}
+	else
+	{
+		array_push($errors, $errorCodes["Co04"])
+	}
+	
 	if($userID == 0)
 	{
 		array_push($errors, $errorCodes["Co02"]);
@@ -236,13 +245,13 @@ function GetComments($userID)
 		array_push($errors, $errorCodes["M001"]);
 	}
 	
-	if(count($request) > 3)
+	if(count($request) >= 3)
 	{
-		$sayID = $request[2];
+		filter_var($request[2], FILTER_SANITIZE_STRING) . "%";
 	}
 	else
 	{
-		array_push($errors, $errorCodes["Co04"])
+		array_push($errors, $errorCodes["Co04"]);
 	}
 
 	if ($userID != 0)
