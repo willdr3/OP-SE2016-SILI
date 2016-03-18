@@ -7,10 +7,10 @@ $errorCodes["G000"] = [
 	"message" => "Error",
 	];
 	
-$errorCodes["G000"] = [
+$errorCodes["G001"] = [
 	"code" => "G000",
-	"field" => "",
-	"message" => "Error",
+	"field" => "userID",
+	"message" => "No UserID provided",
 	];
 	
 //Generic MySQL codes/Messages
@@ -146,9 +146,19 @@ $errorCodes ["P002"] = [
 		];
 		
 // Comment error codes/messages
-$errorCodes ["C002"] = [
+$errorCodes ["Co02"] = [
 		"code" => "C002",
 		"field" => "userID",
 		"message" => "UserID is not set",
-		]; 
+		];
+$errorCodes ["Co03"] = [
+		"code" => "C003",
+		"field" => "commentBox",
+		"message" => "Comment is empty",
+		];
+$errorCodes ["Co04"] = [
+		"code" => "C004",
+		"field" => "sayID",
+		"message" => "SayID is not set",
+		];
 ?>
