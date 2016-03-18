@@ -120,7 +120,7 @@ function fetchSays(){
 					message: element["message"],
 					profilePicture: element["profileImage"],
 					timePosted: element["timePosted"]
-				}, { prepend: true });
+				}, { append: true });
 			});
 		}
 	});

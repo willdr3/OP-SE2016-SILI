@@ -81,7 +81,7 @@ function GetSays($userID)
 	
 	if ($userID != 0) 
 	{
-		$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT followingUserID FROM Following WHERE userID = ?) OR userID = ? ORDER BY timePosted LIMIT 10";	
+		$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) OR userID = ? ORDER BY timePosted DESC LIMIT 10";	
 		
 		if($stmt = $mysqli->prepare($saysQuery))
 		{
@@ -116,7 +116,7 @@ function FetchSay($sayID)
 {
 	global $mysqli, $profileImagePath, $defaultProfileImg;
 	$say = array();
-	if($stmt = $mysqli->prepare("SELECT timePosted, message, profileImage, firstName, lastName, userName FROM Says INNER JOIN Profile ON Says.userID=Profile.userID WHERE sayID = ?"))
+	if($stmt = $mysqli->prepare("SELECT LPAD(sayID, 10, '0') as sayIDFill, timePosted, message, profileImage, firstName, lastName, userName FROM Says INNER JOIN Profile ON Says.userID=Profile.userID WHERE sayID = ?"))
 	{
 		// Bind parameters
 		$stmt->bind_param("i", $sayID);
@@ -130,7 +130,7 @@ function FetchSay($sayID)
 		if($stmt->num_rows == 1)
 		{
 			// Bind parameters
-			$stmt->bind_result($timePosted, $message, $profileImage, $firstName, $lastName, $userName);
+			$stmt->bind_result($sayIDFill, $timePosted, $message, $profileImage, $firstName, $lastName, $userName);
 			
 			// Fill with values
 			$stmt->fetch();
@@ -141,6 +141,7 @@ function FetchSay($sayID)
 			}
 			
 			$say = [
+			"saydID" => str_replace("=", "", base64_encode($sayIDFill)),
 			"timePosted" => date('g:i:sa j M Y',strtotime($timePosted)),
 			"message" => $message,
 			"profileImage" => $profileImagePath . $profileImage,
@@ -149,8 +150,11 @@ function FetchSay($sayID)
 			"userName" => $userName,
 			];
 		}	
+		
+		$stmt->close();
 	}
 	
 	return $say;
 }
+
 ?>
