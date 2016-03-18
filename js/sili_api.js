@@ -76,7 +76,7 @@ function userRegister(){
 			});
 		},
 		success: function(data) {	
-			
+			location.reload();
 			}
 		});
 	return false;
@@ -186,3 +186,44 @@ fetchSays();
 });
 
 var myAppModule = angular.module('MyApp', ['ngImgCrop']);
+
+var options = {
+  url: function(phrase) {
+		return "API-search/" + phrase;
+	},
+  
+  placeholder: "Search SILI for friends!",
+  
+  getValue: "name",
+  
+  cssClasses: "userSearch",
+  
+  adjustWidth: false,
+  
+  requestDelay: 500,
+
+  template: {
+    type: "iconRight",
+    fields: {
+      iconSrc: "profileImage"
+    }
+  },
+
+  list: {
+		maxNumberOfElements: 10,
+		match: {
+				enabled: true
+		},
+		showAnimation: {
+		  type: "slide"
+		},
+		hideAnimation: {
+		  type: "slide"
+		}
+  }
+
+};
+
+$("document").ready(function() {
+	$("#userSearch").easyAutocomplete(options);
+});

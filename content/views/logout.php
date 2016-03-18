@@ -1,5 +1,7 @@
 <?php
-session_unset();     // unset $_SESSION variable for the run-time 
-session_destroy();   // destroy session data in storage
+deleteRememberMeCookie($mysqli, $userID);
+$_SESSION = array();
+session_destroy();
+
 header("Location: http://kate.ict.op.ac.nz/~gearl1/SILI/");
 ?>
