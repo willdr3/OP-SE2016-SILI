@@ -162,10 +162,10 @@ function UserSearch()
 	
 	$result = array();
 	$errors = array();
-	if(count($request) >= 2)
+	if(count($request) >= 3)
 	{
 		$searchResults = array();
-		$searchParam = filter_var($request[1], FILTER_SANITIZE_STRING) . "%";
+		$searchParam = filter_var($request[2], FILTER_SANITIZE_STRING) . "%";
 		
 		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE userName LIKE ? OR firstName LIKE ? OR lastName  LIKE ?"))
 		{

@@ -9,7 +9,7 @@ function userLogin(){
 	$.ajax({
 	  type: "POST",
 	  dataType: "json",
-	  url: "API-login",
+	  url: "API/user/login",
 	  data: data,
 	  error: function(jqXHR, textStatus, errorThrown) {
 			//reset all the form fields
@@ -44,7 +44,7 @@ function userRegister(){
 	$.ajax({
 	  type: "POST",
 	  dataType: "json",
-	  url: "API-register",
+	  url: "API/user/register",
 	  data: data,
 	  error: function(jqXHR, textStatus, errorThrown) {
 			//reset all the form fields
@@ -87,7 +87,7 @@ function addSay(){
 	$.ajax({
 		type: "POST",
 		dataType: "json",
-		url: "API-addSay",
+		url: "API/say/",
 		data: data,
 		success: function(data) {	
 			$(".sayBox").val("");
@@ -109,7 +109,7 @@ function addSay(){
 function fetchSays(){
 	$.ajax({
 		dataType: "json",
-		url: "API-fetchSays",
+		url: "API/say/",
 		success: function(data) {
 			$.each(data.says, function(index, element) {	
 				$(".sayFeed").loadTemplate("content/templates/say.html",
@@ -153,7 +153,7 @@ function addComment(){
 function getUserDetials() {
 	return $.ajax({
 		dataType: "json",
-		url: "API-checkLogin",
+		url: "API/user/",
 		success: function(data) {
 			userName = data.userData["userName"];
 			firstName = data.userData["firstName"];
@@ -170,7 +170,7 @@ function getUserDetials() {
 function getUserProfile() {
 	return $.ajax({
 		dataType: "json",
-		url: "API-getAccount",
+		url: "API/profile/settings",
 		success: function(data) {
 			$(".acc-name").text(data.userProfile["firstName"] + " " + data.userProfile["lastName"]);
 			$(".acc-username").text(data.userProfile["userName"]);
@@ -213,7 +213,7 @@ var myAppModule = angular.module('MyApp', ['ngImgCrop']);
 
 var options = {
   url: function(phrase) {
-		return "API-search/" + phrase;
+		return "API/profile/search/" + phrase;
 	},
   
   placeholder: "Search SILI for friends!",
