@@ -7,7 +7,7 @@ if (!isset($internal) && !isset($controller)) //check if its not an internal or 
 	exit;
 }
 
-function GetFullUserProfile($userID)
+function GetUserAccountSettings($userID)
 {
 	global $mysqli, $errorCodes, $profileImagePath, $defaultProfileImg;
 	

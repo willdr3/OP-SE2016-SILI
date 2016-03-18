@@ -6,6 +6,9 @@ $pageRequests["home"] = [
 $pageRequests["profile"] = [
 		"file" => "content/views/profile.html",
 		];	
+$pageRequests["accountSettings"] = [
+		"file" => "content/views/accountSettings.html",
+		];	
 $pageRequests["logout"] = [
 		"file" => "content/views/logout.php",
 		];

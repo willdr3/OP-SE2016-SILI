@@ -6,5 +6,6 @@
 	$reqArray["addSay"] = "SayIt";
 	$reqArray["fetchSays"] = "GetSays";
 	$reqArray["getProfile"] = "GetUserProfile";
+	$reqArray["getAccount"] = "GetUserAccountSettings";
 	$reqArray["search"] = "UserSearch";
 ?>

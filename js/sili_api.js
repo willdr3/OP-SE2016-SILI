@@ -170,7 +170,7 @@ function getUserDetials() {
 function getUserProfile() {
 	return $.ajax({
 		dataType: "json",
-		url: "API-getProfile",
+		url: "API-getAccount",
 		success: function(data) {
 			$(".acc-name").text(data.userProfile["firstName"] + " " + data.userProfile["lastName"]);
 			$(".acc-username").text(data.userProfile["userName"]);
