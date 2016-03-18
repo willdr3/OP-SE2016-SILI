@@ -10,7 +10,8 @@ if(isset($_GET['request']))
 //Check if the user is actually logged in	
 $internal = true; //Used to tell the API that is being used internally
 include("content/config/dbconnect.inc.php");
-include("content/config/errorhandling.php");
+include("content/config/errorHandling.php");
+include("content/config/config.inc.php");
 include("content/api/UserAPI.php");
 include("content/config/errorHandling.php");
 include("content/config/pageRequests.php");

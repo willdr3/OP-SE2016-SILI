@@ -11,6 +11,7 @@ $controller = true;
 include("../config/dbconnect.inc.php");
 include("../config/errorHandling.php");
 include("../config/APIrequests.php");
+include("../config/config.inc.php");
 include("UserAPI.php");
 include("SayAPI.php");
 include("ProfileAPI.php");
@@ -33,7 +34,7 @@ if (is_ajax())
 		
 		//Check if the request is a vaild request
 		if (array_key_exists($request[0], $reqArray)) {
-			$result = $reqArray[$request[0]]($mysqli, $errorCodes, $userID);
+			$result = $reqArray[$request[0]]($userID);
 		}
 		else //Request not found
 		{

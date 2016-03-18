@@ -8,8 +8,9 @@ if (!isset($internal) && !isset($controller)) //check if its not an internal or 
 }
 
 
-function UserLogin($mysqli, $errorCodes)
+function UserLogin()
 {
+	global $mysqli, $errorCodes;
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
@@ -83,7 +84,7 @@ function UserLogin($mysqli, $errorCodes)
 				
 				if(isset($_POST['rememberMe']))
 				{
-					newUserRememberMeCookie($mysqli, $userID);
+					newUserRememberMeCookie($userID);
 				}
 			}
 			else
@@ -112,12 +113,13 @@ function UserLogin($mysqli, $errorCodes)
 	return $result;
 }
 
-function CookieLogin($mysqli)
+function CookieLogin()
 {
+	global $mysqli, $errorCodes, $cookieSecret;
 	if (isset($_COOKIE['rememberMe'])) {
 		list ($userID, $token, $hash) = explode(':', $_COOKIE['rememberMe']);
 
-		if ($hash == hash('sha256', $userID . ':' . $token . '6f$g@0rq0&17m5op6ke%@#d$ygv=*8xu_c=7%+*0fg+1p5_knv') && !empty($token)) 
+		if ($hash == hash('sha256', $userID . ':' . $token . $cookieSecret) && !empty($token)) 
 		{
 			$stmt = $mysqli->prepare("SELECT userID FROM UserSessions WHERE rememberMeToken = ?");
 		
@@ -146,17 +148,18 @@ function CookieLogin($mysqli)
 				
 				$_SESSION['userID'] = $userID;
 				// Cookie token usable only once
-				newUserRememberMeCookie($mysqli, $userID, $token);
+				newUserRememberMeCookie($userID, $token);
 				return $userID;
 			}
 		}
-		deleteRememberMeCookie($mysqli, $userID);
+		deleteRememberMeCookie($userID);
 	}
 	return false;
 }
 
-function newUserRememberMeCookie($mysqli, $userID, $currentToken = '')
+function newUserRememberMeCookie($userID, $currentToken = '')
 {
+	global $mysqli, $errorCodes, $cookieSecret;
 	$randomToken = hash('sha256', mt_rand());
 	
 	if ($currentToken== '') {
@@ -180,18 +183,19 @@ function newUserRememberMeCookie($mysqli, $userID, $currentToken = '')
 	
 	// generate cookie string that consists of userid, randomstring and combined hash of both
 	$cookieFirstPart = $userID . ':' . $randomToken;
-	$cookieHash = hash('sha256', $cookieFirstPart . '6f$g@0rq0&17m5op6ke%@#d$ygv=*8xu_c=7%+*0fg+1p5_knv');
+	$cookieHash = hash('sha256', $cookieFirstPart . $cookieSecret);
 	$cookie = $cookieFirstPart . ':' . $cookieHash;
 	// set cookie
 	setcookie('rememberMe', $cookie, time() + 1209600, "/", "kate.ict.op.ac.nz");
 }
 
-function deleteRememberMeCookie($mysqli, $userID)
+function deleteRememberMeCookie($userID)
 {
+	global $mysqli, $errorCodes;
 	if (isset($_COOKIE['rememberMe'])) {
             list ($user_id, $token, $hash) = explode(':', $_COOKIE['rememberMe']);
             
-            if ($hash == hash('sha256', $user_id . ':' . $token . '6f$g@0rq0&17m5op6ke%@#d$ygv=*8xu_c=7%+*0fg+1p5_knv') && !empty($token)) {
+            if ($hash == hash('sha256', $user_id . ':' . $token . $cookieSecret) && !empty($token)) {
                 $stmt = $mysqli->prepare("DELETE FROM UserSessions WHERE rememberMeToken = ? AND userID = ?");
 		
 				// Bind parameters
@@ -204,8 +208,9 @@ function deleteRememberMeCookie($mysqli, $userID)
     }
 }
 
-function CheckLogin($mysqli, $errorCodes)
+function CheckLogin()
 {
+	global $mysqli, $errorCodes, $profileImagePath, $defaultProfileImg;
 	$result = array();
 	$errors = array();
 
@@ -224,7 +229,7 @@ function CheckLogin($mysqli, $errorCodes)
 	}
 	elseif((count($errors) == 0) && isset($_COOKIE['rememberMe']))
 	{
-		$userID = CookieLogin($mysqli);
+		$userID = CookieLogin();
 	}
 	
 	//Process
@@ -252,7 +257,7 @@ function CheckLogin($mysqli, $errorCodes)
 						
 				if($profileImage == "")
 				{
-					$profileImage = "blankprofilepic.png";
+					$profileImage = $defaultProfileImg;
 				}
 				
 				$userData = [
@@ -298,8 +303,9 @@ function CheckLogin($mysqli, $errorCodes)
 	return $result;
 }
 
-function UserRegister($mysqli, $errorCodes)
+function UserRegister()
 {
+	global $mysqli, $errorCodes;
 	$result = array();
 	$errors = array();
 	
@@ -437,8 +443,7 @@ function UserRegister($mysqli, $errorCodes)
 		}
 		
 		//Log the user in 
-		$_SESSION['userID'] = $userID;
-		
+		$_SESSION['userID'] = $userID;	
 		$result["message"] = "User Registration successful";
 	}
 	else //return the json of errors 

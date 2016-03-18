@@ -7,8 +7,9 @@ if (!isset($internal) && !isset($controller)) //check if its not an internal or 
 	exit;
 }
 
-function SayIt($mysqli, $errorCodes, $userID)
+function SayIt($userID)
 {
+	global $mysqli, $errorCodes;
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
@@ -40,7 +41,7 @@ function SayIt($mysqli, $errorCodes, $userID)
 				$sayID = $stmt->insert_id;
 				$stmt->close();
 				
-				$say = fetchSay($mysqli, $sayID);
+				$say = fetchSay($sayID);
 				
 			}
 			else
@@ -66,8 +67,9 @@ function SayIt($mysqli, $errorCodes, $userID)
 	return $result;
 }
 
-function GetSays($mysqli, $errorCodes, $userID, $userOnly = false)
+function GetSays($userID)
 {	
+	global $mysqli, $errorCodes;
 	// Arrays for jsons
 	$result = array();
 	$says = array();
@@ -79,16 +81,7 @@ function GetSays($mysqli, $errorCodes, $userID, $userOnly = false)
 	
 	if ($userID != 0) 
 	{
-		if($userOnly) 
-		{
-			$saysQuery = "SELECT sayID FROM Says WHERE userID = ? ORDER BY timePosted LIMIT 10";
-		}
-		else
-		{
-			$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT followingUserID FROM Following WHERE userID = ?) OR userID = ? ORDER BY timePosted LIMIT 10";	
-		}
-		
-		
+		$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT followingUserID FROM Following WHERE userID = ?) OR userID = ? ORDER BY timePosted LIMIT 10";	
 		
 		if($stmt = $mysqli->prepare($saysQuery))
 		{
@@ -107,7 +100,7 @@ function GetSays($mysqli, $errorCodes, $userID, $userOnly = false)
 				$stmt->bind_result($sayID);
 				
 				while ($stmt->fetch()) {
-					array_push($says, FetchSay($mysqli, $sayID));
+					array_push($says, FetchSay($sayID));
 				}
 			}	
 			$stmt->close();
@@ -119,10 +112,9 @@ function GetSays($mysqli, $errorCodes, $userID, $userOnly = false)
 	return $result;
 }
 
-function FetchSay($mysqli, $sayID)
-{	
-	//Path for profile Images
-	$profileImagePath = "content/profilePics/";
+function FetchSay($sayID)
+{
+	global $mysqli, $profileImagePath, $defaultProfileImg;
 	$say = array();
 	if($stmt = $mysqli->prepare("SELECT timePosted, message, profileImage, firstName, lastName, userName FROM Says INNER JOIN Profile ON Says.userID=Profile.userID WHERE sayID = ?"))
 	{
@@ -145,7 +137,7 @@ function FetchSay($mysqli, $sayID)
 					
 			if($profileImage == "")
 			{
-				$profileImage = "blankprofilepic.png";
+				$profileImage = $defaultProfileImg;
 			}
 			
 			$say = [
@@ -161,6 +153,4 @@ function FetchSay($mysqli, $sayID)
 	
 	return $say;
 }
-
-
 ?>
