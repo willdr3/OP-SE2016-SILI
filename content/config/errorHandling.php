@@ -7,8 +7,14 @@ $errorCodes["G000"] = [
 	"message" => "Error",
 	];
 	
+$errorCodes["G000"] = [
+	"code" => "G000",
+	"field" => "",
+	"message" => "Error",
+	];
+	
 //Generic MySQL codes/Messages
-$errorCodes["M002"] = [
+$errorCodes["M001"] = [
 		"code" => "M001",
 		"field" => "mysqli",
 		"message" => "Failed to connect to MySQLi",
