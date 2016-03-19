@@ -93,7 +93,7 @@ function addSay(){
 			$(".sayBox").val("");
 			$(".sayFeed").loadTemplate("content/templates/say.html",
 				{
-					sayID: element["sayID"],
+					sayID: data.say["sayID"],
 					firstName: data.say["firstName"],
 					lastName: data.say["lastName"],
 					userName: data.say["userName"],

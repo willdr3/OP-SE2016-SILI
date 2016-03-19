@@ -171,7 +171,7 @@ function CommentSayIt($userID)
 	
 	if(count($request) >= 3)
 	{
-		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);
+		$sayID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));
 	}
 	else
 	{
@@ -247,7 +247,7 @@ function GetComments($userID)
 	
 	if(count($request) >= 3)
 	{
-		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);
+		$sayID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));
 	}
 	else
 	{
