@@ -216,8 +216,6 @@ getUserDetials().done(function() {
 	}
 });
 
-var myAppModule = angular.module('MyApp', ['ngImgCrop']);
-
 var options = {
   url: function(phrase) {
 		return "API/profile/search/" + phrase;
@@ -254,6 +252,32 @@ var options = {
   }
 
 };
+
+angular.module('app', ['ngImgCrop'])
+  .controller('Ctrl', function($scope) {
+    $scope.myImage='';
+    $scope.myCroppedImage='';
+
+    var handleFileSelect=function(evt) {
+      var file=evt.currentTarget.files[0];
+      var reader = new FileReader();
+      reader.onload = function (evt) {
+        $scope.$apply(function($scope){
+          $scope.myImage=evt.target.result;
+        });
+      };
+
+    $scope.onLoadError=function() {
+      console.log('onLoadError fired');
+    };
+    $scope.onLoadDone=function() {
+      console.log('onLoadDone fired');
+      $('#profileImage-form').modal('show');
+    };
+      reader.readAsDataURL(file);
+    };
+    angular.element(document.querySelector('#profileImageUpload')).on('change',handleFileSelect);
+  });
 
 $("document").ready(function() {
 	$("#userSearch").easyAutocomplete(options);
