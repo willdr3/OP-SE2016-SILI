@@ -213,4 +213,232 @@ function UserSearch()
 	
 	return $result;
 }
+
+function ListenToUser($userID)
+{
+	global $mysqli, $errorCodes, $request;
+	
+	$result = array();
+	$errors = array();
+	
+	//Pre Requirments
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+		
+	
+	
+	if(count($request) >= 3)
+	{
+		$listenerUserID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));
+		if ($userID == $listenerUserID) 
+		{
+			array_push($errors, $errorCodes["G000"]);
+		}
+	}
+	else
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{	
+		//Check not Already Following
+		if($stmt = $mysqli->prepare("SELECT userID, listenerUserID FROM Listeners WHERE userID = ? AND listenerUserID = ?"))
+		{			
+			// Bind parameters
+			$stmt->bind_param("ii", $userID, $listenerUserID);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+
+			if($stmt->num_rows == 0)
+			{
+				//Follow User
+				if($stmt = $mysqli->prepare("INSERT INTO Listeners (userID, listenerUserID) VALUES (?, ?)"))
+				{	
+					// Bind parameters
+					$stmt->bind_param("ii", $userID, $listenerUserID);
+					
+					// Execute Query
+					$stmt->execute();
+				}
+				else
+				{
+					array_push($errors, $errorCodes["M002"]);
+				}
+			}
+			else
+			{
+				array_push($errors, $errorCodes["G000"]);
+			}
+						
+			 $stmt->close();	 
+		}
+		else
+		{
+			array_push($errors, $errorCodes["M002"]);
+		}
+	}
+
+	if(count($errors) == 0)
+	{
+		$result["message"] = "Followed User";
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	
+	return $result;
+}
+
+function GetListeners($userID)
+{
+	global $mysqli, $errorCodes, $request, $profileImagePath, $defaultProfileImg;
+	
+	$result = array();
+	$errors = array();
+	
+	//Pre Requirments
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	$listeners = array();
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{	
+
+		//Check not Already Following
+		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) LIMIT 10"))
+		{			
+			// Bind parameters
+			$stmt->bind_param("i", $userID);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+
+			if($stmt->num_rows > 0)
+			{
+				$stmt->bind_result($firstName, $lastName, $userName, $profileImage);
+				
+				 while ($stmt->fetch()) {
+					 
+					if($profileImage == "")
+					{
+						$profileImage = $defaultProfileImg;
+					}
+					
+					$listener = [
+						"firstName" => $firstName,
+						"lastName" => $lastName,
+						"userName" => $userName,
+						"profileImage" => $profileImagePath . $profileImage,
+					];	
+					array_push($listeners, $listener);
+				 }
+			}						
+			 $stmt->close();	 
+		}
+		else
+		{
+			array_push($errors, $errorCodes["M002"]);
+		}
+	}
+
+	if(count($errors) == 0)
+	{
+		$result["totalListners"] = count($listeners);
+		$result["listeners"] = $listeners;
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	
+	return $result;
+}
+
+function GetAudience($userID)
+{
+	global $mysqli, $errorCodes, $request, $profileImagePath, $defaultProfileImg;
+	
+	$result = array();
+	$errors = array();
+	
+	//Pre Requirments
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	$audienceMembers = array();
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{	
+
+		//Check not Already Following
+		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE userID IN (SELECT userID FROM Listeners WHERE listenerUserID = ?) LIMIT 10"))
+		{			
+			// Bind parameters
+			$stmt->bind_param("i", $userID);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+
+			if($stmt->num_rows > 0)
+			{
+				$stmt->bind_result($firstName, $lastName, $userName, $profileImage);
+				
+				 while ($stmt->fetch()) {
+					 
+					if($profileImage == "")
+					{
+						$profileImage = $defaultProfileImg;
+					}
+					
+					$audienceMember = [
+						"firstName" => $firstName,
+						"lastName" => $lastName,
+						"userName" => $userName,
+						"profileImage" => $profileImagePath . $profileImage,
+					];	
+					array_push($audienceMembers, $audienceMember);
+				 }
+			}						
+			 $stmt->close();	 
+		}
+		else
+		{
+			array_push($errors, $errorCodes["M002"]);
+		}
+	}
+
+	if(count($errors) == 0)
+	{
+		$result["totalAudienceMembers"] = count($audienceMembers);
+		$result["audienceMembers"] = $audienceMembers;
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	
+	return $result;
+}
 ?>
