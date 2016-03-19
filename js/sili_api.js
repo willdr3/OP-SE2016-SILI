@@ -93,9 +93,10 @@ function addSay(){
 			$(".sayBox").val("");
 			$(".sayFeed").loadTemplate("content/templates/say.html",
 				{
-				        firstName: data.say["firstName"],
-				        lastName: data.say["lastName"],
-				        userName: data.say["userName"],
+					sayID: element["sayID"],
+					firstName: data.say["firstName"],
+					lastName: data.say["lastName"],
+					userName: data.say["userName"],
 					message: data.say["message"],
 					profilePicture: data.say["profileImage"],
 					timePosted: data.say["timePosted"]
@@ -114,13 +115,19 @@ function fetchSays(){
 			$.each(data.says, function(index, element) {	
 				$(".sayFeed").loadTemplate("content/templates/say.html",
 				{
-				        firstName: element["firstName"],
-				        lastName: element["lastName"],
-				        userName: element["userName"],
+				    sayID: element["sayID"],
+					firstName: element["firstName"],
+				    lastName: element["lastName"],
+				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
 					timePosted: element["timePosted"]
-				}, { append: true });
+				}, { append: true });	
+			});
+			$('.say').on('click', function () {
+				var $el = $(this);
+				
+				console.log($el.attr('id'));
 			});
 		}
 	});
@@ -202,11 +209,11 @@ function getUserProfile() {
 
 
 getUserDetials().done(function() {
-if(loggedIn) {
-$("#profileImage").attr("src", profileImage);
-$("#userName").text(firstName);
-fetchSays();
-}
+	if(loggedIn) {
+		$("#profileImage").attr("src", profileImage);
+		$("#userName").text(firstName);
+		fetchSays();
+	}
 });
 
 var myAppModule = angular.module('MyApp', ['ngImgCrop']);
@@ -250,4 +257,13 @@ var options = {
 
 $("document").ready(function() {
 	$("#userSearch").easyAutocomplete(options);
+	$(document).on('click', '.say', function(){
+			var $el = $(this);
+			
+			console.log($el.attr('id'));
+	});
+	$("body").tooltip({
+		selector: '[data-toggle="tooltip"]'
+	});
 });
+
