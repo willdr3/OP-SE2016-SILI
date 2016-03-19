@@ -159,7 +159,7 @@ function FetchSay($sayID)
 
 function CommentSayIt($userID)
 {
-	global $mysqli, $errorCodes;
+	global $mysqli, $errorCodes, $request;
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
@@ -171,11 +171,11 @@ function CommentSayIt($userID)
 	
 	if(count($request) >= 3)
 	{
-		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING) . "%";
+		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);
 	}
 	else
 	{
-		array_push($errors, $errorCodes["Co04"])
+		array_push($errors, $errorCodes["Co04"]);
 	}
 	
 	if($userID == 0)
@@ -247,16 +247,18 @@ function GetComments($userID)
 	
 	if(count($request) >= 3)
 	{
-		filter_var($request[2], FILTER_SANITIZE_STRING) . "%";
+		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);
 	}
 	else
 	{
 		array_push($errors, $errorCodes["Co04"]);
 	}
 
-	if ($userID != 0)
+	if ($userID != 0 && isset($sayID))
 	{
-		$commentsQuery = "SELECT sayID FROM Say WHERE sayID IN (SELECT commentID FROM Comments WHERE sayID = ?) ORDER BY timePosted DEC LIMIT 10";
+		$commentsQuery = "SELECT sayID FROM Says WHERE sayID IN (SELECT commentID FROM Comments WHERE sayID = ?) ORDER BY timePosted DESC LIMIT 10";
+		
+		$comments = array();
 		
 		if($stmt = $mysqli->prepare($commentsQuery))
 		{
@@ -283,6 +285,7 @@ function GetComments($userID)
 		}
 		$result["comments"] = $comments;
 	}
+	
 	return $result;
 }
 
