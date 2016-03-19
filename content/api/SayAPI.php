@@ -9,45 +9,48 @@ if (!isset($internal) && !isset($controller)) //check if its not an internal or 
 
 function SayIt($userID)
 {
+	
 	global $mysqli, $errorCodes;
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
 	
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
 		array_push($errors, $errorCodes["M001"]);
 	}
-	
+		
 	if($userID == 0)
 	{
 		array_push($errors, $errorCodes["S002"]);
 	}
-	else {
-		// Check if the Say has been submitted and is longer than 0 chars
-		if((!isset($_POST['sayBox'])) || (strlen($_POST['sayBox']) == 0))
+
+	// Check if the Say has been submitted and is longer than 0 chars
+	if((!isset($_POST['sayBox'])) || (strlen($_POST['sayBox']) == 0))
+	{
+		array_push($errors, $errorCodes["S003"]);
+	}
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{
+		$sayContent = htmlspecialchars($_POST['sayBox']);
+		
+		// Insert Say into database
+		if($stmt = $mysqli->prepare("INSERT INTO Says (userID, message) VALUES (?,?)"))
 		{
-			array_push($errors, $errorCodes["S003"]);
+			$stmt->bind_param("is", $userID, $sayContent);
+			$stmt->execute();
+			$sayID = $stmt->insert_id;
+			$stmt->close();
+			
+			$say = fetchSay($sayID);
+			
 		}
 		else
 		{
-			$sayContent = htmlspecialchars($_POST['sayBox']);
-			
-			// Insert Say into database
-			if($stmt = $mysqli->prepare("INSERT INTO Says (userID, message) VALUES (?,?)"))
-			{
-				$stmt->bind_param("is", $userID, $sayContent);
-				$stmt->execute();
-				$sayID = $stmt->insert_id;
-				$stmt->close();
-				
-				$say = fetchSay($sayID);
-				
-			}
-			else
-			{
-				array_push($errors, $errorCodes["M002"]);
-			}
+			array_push($errors, $errorCodes["M002"]);
 		}
 	}
 	
@@ -74,12 +77,14 @@ function GetSays($userID)
 	$result = array();
 	$says = array();
 	
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
 		array_push($errors, $errorCodes["M001"]);
 	}
 	
-	if ($userID != 0) 
+	//Process
+	if(count($errors) == 0 && $userID != 0) 
 	{
 		$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) OR userID = ? ORDER BY timePosted DESC LIMIT 10";	
 		
@@ -103,19 +108,31 @@ function GetSays($userID)
 					array_push($says, FetchSay($sayID));
 				}
 			}	
-			$stmt->close();
 		}
-		
+		$stmt->close();
+	}
+	
+	//Post Processing
+	if(count($errors) == 0)
+	{
 		$result["says"] = $says;
+	}
+	else
+	{
+		$result["errors"] = $errors;
 	}
 	
 	return $result;
+
 }
 
 function FetchSay($sayID)
 {
-	global $mysqli, $profileImagePath, $defaultProfileImg;
+	global  $mysqli, $profileImagePath, $defaultProfileImg;
+	
 	$say = array();
+	
+	//Process
 	if($stmt = $mysqli->prepare("SELECT LPAD(sayID, 10, '0') as sayIDFill, timePosted, message, profileImage, firstName, lastName, userName FROM Says INNER JOIN Profile ON Says.userID=Profile.userID WHERE sayID = ?"))
 	{
 		// Bind parameters
@@ -164,6 +181,7 @@ function CommentSayIt($userID)
 	$result = array();
 	$errors = array();
 	
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
 		array_push($errors, $errorCodes["M001"]);
@@ -182,37 +200,36 @@ function CommentSayIt($userID)
 	{
 		array_push($errors, $errorCodes["Co02"]);
 	}
-	else {
-		// Check if the Say has been submitted and is longer than 0 chars
-		if((!isset($_POST['commentBox'])) || (strlen($_POST['commentBox']) == 0))
+	
+	// Check if the Say has been submitted and is longer than 0 chars
+	if((!isset($_POST['commentBox'])) || (strlen($_POST['commentBox']) == 0))
+	{
+		array_push($errors, $errorCodes["Co03"]);
+	}
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{
+		$sayContent = htmlspecialchars($_POST['commentBox']);
+		if($stmt = $mysqli->prepare("INSERT INTO Says (userID, message) VALUES (?,?)"))
 		{
-			array_push($errors, $errorCodes["Co03"]);
+			$stmt->bind_param("is", $userID, $sayContent);
+			$stmt->execute();
+			$commentID = $stmt->insert_id;
+			$stmt->close();
+			
+			$say = fetchSay($commentID);
+			
+			if($stmt = $mysqli->prepare("INSERT INTO Comments (sayID, commentID) VALUES (?,?)"))
+			{
+				$stmt->bind_param("ii", $sayID, $commentID);
+				$stmt->execute();
+				$stmt->close();
+			}			
 		}
 		else
 		{
-			$sayContent = htmlspecialchars($_POST['commentBox']);
-			
-			// Insert Say into database
-			if($stmt = $mysqli->prepare("INSERT INTO Says (userID, message) VALUES (?,?)"))
-			{
-				$stmt->bind_param("is", $userID, $sayContent);
-				$stmt->execute();
-				$commentID = $stmt->insert_id;
-				$stmt->close();
-				
-				$say = fetchSay($commentID);
-				
-				if($stmt = $mysqli->prepare("INSERT INTO Comments (sayID, commentID) VALUES (?,?)"))
-				{
-					$stmt->bind_param("ii", $sayID, $commentID);
-					$stmt->execute();
-					$stmt->close();
-				}			
-			}
-			else
-			{
-				array_push($errors, $errorCodes["M002"]);
-			}
+			array_push($errors, $errorCodes["M002"]);
 		}
 	}
 	
@@ -229,9 +246,8 @@ function CommentSayIt($userID)
 		$result["errors"] = $errors;
 	}
 	
-	return $result;
+	return $result;	
 }
-
 
 function GetComments($userID)
 {
@@ -240,6 +256,9 @@ function GetComments($userID)
 	$result = array();
 	$errors = array();
 	
+	$comments = array();
+	
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
 		array_push($errors, $errorCodes["M001"]);
@@ -254,12 +273,11 @@ function GetComments($userID)
 		array_push($errors, $errorCodes["Co04"]);
 	}
 
+	//Process
 	if ($userID != 0 && isset($sayID))
 	{
 		$commentsQuery = "SELECT sayID FROM Says WHERE sayID IN (SELECT commentID FROM Comments WHERE sayID = ?) ORDER BY timePosted DESC LIMIT 10";
-		
-		$comments = array();
-		
+			
 		if($stmt = $mysqli->prepare($commentsQuery))
 		{
 			// Bind parameters
@@ -281,12 +299,21 @@ function GetComments($userID)
 					array_push($comments, FetchSay($commentID));
 				}	
 			}	
-			$stmt->close();
 		}
+		$stmt->close();
+	}
+	
+	
+	//Post Processing
+	if(count($errors) == 0)
+	{
 		$result["comments"] = $comments;
+	}
+	else
+	{
+		$result["errors"] = $errors;
 	}
 	
 	return $result;
 }
-
 ?>
