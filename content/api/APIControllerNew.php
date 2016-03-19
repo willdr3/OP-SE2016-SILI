@@ -64,11 +64,13 @@ if (is_ajax())
 	
 	//No Request provided or Not Found
 	http_response_code(404);
+	include("../../404.html");
 	exit;
 } 
 else //Not json Forbiden
 {
 	http_response_code(403);
+	include("../../403.html");
 	exit;
 }
 

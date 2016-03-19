@@ -16,34 +16,47 @@ include("content/api/UserAPI.php");
 include("content/config/errorHandling.php");
 include("content/config/pageRequests.php");
 $loginDetails = CheckLogin($mysqli, $errorCodes); //Check if the use is logged in
-include("content/views/header.inc.html");
+
+$page = "";
+$login = false;
+$error = false;
 
 if(array_key_exists("userData", $loginDetails)) //If the userData is returned then the user is logged in
 {
-	include("content/views/banner.inc.html");
+	
 	$userID = $_SESSION['userID'];
 	if (empty($request)) 
 	{
-		include($pageRequests["home"]["file"]);
-		exit;
+		$page = $viewsLocation . $pageRequests["home"]["file"];
 	} 
 	elseif(array_key_exists($request[0], $pageRequests))
 	{
-		include($pageRequests[$request[0]]["file"]);
-		exit;
+		$page = $viewsLocation . $pageRequests[$request[0]]["file"];
 	}
 	else 
 	{
 		//If the request wasnt found
 		http_response_code(404);
-		exit;		
+		$error = true;
+		$page = "404.html";
 	}
 }
 else //Not logged in show login page
 {
-	include("content/views/login.html");
-	exit;
+	$login = true;
+	$page = "content/views/login.html";
 }
+
+if(!$error)
+{
+	include("content/views/header.inc.html");
+}
+if(!$login && !$error)
+{
+	include("content/views/banner.inc.html");
+}
+
+include($page);
 
 $mysqli->close();	
 ?>

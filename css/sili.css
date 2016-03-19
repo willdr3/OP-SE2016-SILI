@@ -258,3 +258,9 @@ input[type=file].profileImageUpload
   width:500px;
   height:350px;
 }
+
+.http-error-title
+{
+	font-size: 700%;
+	font-family: 'komika_title_-_axisregular';
+}
