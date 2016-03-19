@@ -20,6 +20,7 @@ include("ProfileAPI.php");
 //Check if the request is coming from one of the scripts
 if (is_ajax())
 {
+
 	//Get UserID from session
 	$userID = 0;
 	if(isset($_SESSION['userID']))

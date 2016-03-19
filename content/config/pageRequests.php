@@ -1,16 +1,16 @@
 <?php
 $pageRequests = array();
 $pageRequests["home"] = [
-		"file" => "content/views/home.html",
+		"file" => "home.html",
 		];	
 $pageRequests["profile"] = [
-		"file" => "content/views/profile.html",
+		"file" => "profile.html",
 		];	
 $pageRequests["accountSettings"] = [
-		"file" => "content/views/accountSettings.html",
+		"file" => "accountSettings.html",
 		];	
 $pageRequests["logout"] = [
-		"file" => "content/views/logout.php",
+		"file" => "logout.php",
 		];
 		
 ?>

@@ -8,7 +8,7 @@
 	
 	$reqArray["say"] = [
 		0 => ["GET" => "GetSays", "POST" => "SayIt"],
-		"comment" => ["POST" => ""],
+		"comment" => ["POST" => "CommentSayIt", "GET" => "GetComments"],
 		"like" => ["POST" => ""],
 		"share" => ["POST" => ""],
 		"user" => ["POST" => ""],
@@ -20,8 +20,9 @@
 		"bio" => ["GET" => "", "POST" => ""],
 		"password" => ["POST" => ""],
 		"email" => ["POST" => ""],
-		"follow" => ["GET" => "", "POST" => ""],
-		"followers" => ["GET" => ""],
+		"listen" => ["GET" => "ListenToUser"],
+		"listeners" => ["GET" => "GetListeners"],
+		"audience" => ["GET" => "GetAudience"],
 		"unfollow" => ["POST" => ""],
 		"search" => ["GET" => "UserSearch"],
 		"settings" => ["GET" => "GetUserAccountSettings"],
