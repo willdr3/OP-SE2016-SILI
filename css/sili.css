@@ -67,7 +67,7 @@ hr
 	margin-right: 0;
 }
 
-.registerButton, .loginButton, .sayButton
+.registerButton, .loginButton, .sayButton, .comButton
 {
 	background-color:#79B791;
 	color: #FFFFFF;
@@ -135,7 +135,7 @@ hr
 	padding-left: 5px;
 }
 
-.sayFormBox, .sayButton
+.sayFormBox, .sayButton, .comButton
 {
 	margin-bottom: 5px;
 }

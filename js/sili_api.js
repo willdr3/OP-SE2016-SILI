@@ -133,7 +133,7 @@ function fetchSays(){
 	});
 }
 
-function addComment(){
+function addComment(){ //Sure we need to have 1 function for fetching comments, and another for new comment. Ask Lewis monday.
 	var data = $(this).serialize();
 	$.ajax({
 		type: "POST",
@@ -142,7 +142,7 @@ function addComment(){
 		data: data,
 		success: function(data) {	
 			$(".commentBox").val("");
-			$(".commentFeed").loadTemplate("content/templates/comment.html",
+			$(".say").loadTemplate("content/templates/comment.html",
 				{
 					firstName: data.say["firstName"],
 				    lastName: data.say["lastName"],
