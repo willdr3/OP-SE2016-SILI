@@ -386,4 +386,21 @@ function SayActivity ($userID, $action)
 	
 }
 
+function Boo ($userID)
+{
+	SayActivity($userID, "BOO");
+	
+}
+
+function Applaud ($userID)
+{
+	SayActivity($userID, "Applaud");
+	
+}
+
+function Re-Say ($userID)
+{
+	SayActivity($userID, "Re-Say");
+	
+}
 ?>
