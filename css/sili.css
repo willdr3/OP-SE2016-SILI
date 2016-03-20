@@ -20,13 +20,6 @@ p, *
 	font-family: 'komika_textregular';
 }
 
-hr
-{
-	padding: 0px;
-	margin: 5px;
-	border-top:1px solid #91AEC1;	
-}
-
 .login-banner
 {
 	background-color: #373F51;

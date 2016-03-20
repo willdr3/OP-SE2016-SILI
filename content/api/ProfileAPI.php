@@ -242,6 +242,11 @@ function ListenToUser($userID)
 		array_push($errors, $errorCodes["G000"]);
 	}
 	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	
 	//Process
 	if(count($errors) == 0) //If theres no errors so far
 	{	
@@ -312,6 +317,11 @@ function GetListeners($userID)
 	}
 	
 	$listeners = array();
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
 	
 	//Process
 	if(count($errors) == 0) //If theres no errors so far
@@ -384,6 +394,11 @@ function GetAudience($userID)
 	}
 	
 	$audienceMembers = array();
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
 	
 	//Process
 	if(count($errors) == 0) //If theres no errors so far
