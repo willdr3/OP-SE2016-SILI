@@ -9,9 +9,9 @@
 	$reqArray["say"] = [
 		0 => ["GET" => "GetSays", "POST" => "SayIt"],
 		"comment" => ["POST" => "CommentSayIt", "GET" => "GetComments"],
-		"like" => ["POST" => ""],
-		"share" => ["POST" => ""],
-		"user" => ["POST" => ""],
+		"boo" => ["GET" => "Boo"],
+		"applaud" => ["GET" => "Applaud"],
+		"resay" => ["GET" => "Resay"],
 	];
 		
 	$reqArray["profile"] = [
