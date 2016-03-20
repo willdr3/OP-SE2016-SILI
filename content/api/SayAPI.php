@@ -398,7 +398,7 @@ function Applaud ($userID)
 	
 }
 
-function Re-Say ($userID)
+function ReSay ($userID)
 {
 	SayActivity($userID, "Re-Say");
 	
