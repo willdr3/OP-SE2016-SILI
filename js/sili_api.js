@@ -138,19 +138,19 @@ function addComment(){
 	$.ajax({
 		type: "POST",
 		dataType: "json",
-		url: "API-addComment",
+		url: "API/say/",
 		data: data,
 		success: function(data) {	
 			$(".commentBox").val("");
-			$(".commentFeed").loadTemplate("content/templates/comment.html", //<-- front end page yet to be made <--<-- commentFeed????? ask Lewey
+			$(".commentFeed").loadTemplate("content/templates/comment.html",
 				{
-				        firstName: data.say["firstName"],
-				        lastName: data.say["lastName"],
-				        userName: data.say["userName"],
+					firstName: data.say["firstName"],
+				    lastName: data.say["lastName"],
+				    userName: data.say["userName"],
 					message: data.say["message"],
 					profilePicture: data.say["profileImage"],
 					timePosted: data.say["timePosted"]
-				}, { prepend: true }); // <--- Maybe change this
+				}, { append: true });
 ;
 		}
 	});
