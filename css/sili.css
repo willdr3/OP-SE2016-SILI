@@ -20,6 +20,13 @@ p, *
 	font-family: 'komika_textregular';
 }
 
+hr
+{
+	padding: 0px;
+	margin: 5px;
+	border-top:1px solid #91AEC1;	
+}
+
 .login-banner
 {
 	background-color: #373F51;
@@ -111,7 +118,7 @@ p, *
 	padding-top: 20px;
 }
 
-.sayForm
+.sayForm, .say
 {
 	background-color: #DCE0D9;
 	border: 1px solid #91AEC1;
@@ -132,24 +139,12 @@ p, *
 {
 	margin-bottom: 5px;
 }
-hr
-{
-	padding: 0px;
-	margin: 5px;
-	border-top:1px solid #91AEC1;	
-}
-.say
-{
-	padding-top: 10px;
-	background-color: #DCE0D9;
-	border: 1px solid #91AEC1;
-	border-radius: 10px;
-	margin-bottom: 5px;
-}
+
 .comment-div
 {
 	border:1px solid #91AEC1;
 }
+
 .sayProfilePic
 {
 	padding-right: 2.5px;
@@ -178,7 +173,6 @@ hr
 .icons
 {
 	max-height:30px;
-	
 }
 
 .profile
@@ -190,8 +184,8 @@ hr
 .profile h3, h4
 {
 	margin-top: 0;
-	
 }
+
 .profile hr
 {
 	margin: 0;
@@ -218,7 +212,6 @@ hr
 {
 	border-top: 3px solid #E8E8E8;
 }
-	
 		
 .easy-autocomplete.userSearch .eac-item 
 {
@@ -251,6 +244,7 @@ input[type=file].profileImageUpload
 	font-size: 18px;
 	font-weight: normal;
 }
+
 .cropArea 
 {
   background: #E4E4E4;
