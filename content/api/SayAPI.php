@@ -287,5 +287,103 @@ function GetComments($userID)
 	}
 	return $result;
 }
+function SayActivity ($userID, $action)
+{
+	global $mysqli, $errorCodes, $request;
+	
+	$result = array();
+	$errors = array();
+	
+	//Pre Requirments
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+		
+	if(count($request) >= 3)
+	{
+		$sayID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));
+	}
+	else
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{	
+		//Check not Already Following
+		if($stmt = $mysqli->prepare("SELECT userID, sayID, activity FROM Activity WHERE userID = ? AND sayID = ? AND activity = ?"))
+		{			
+			// Bind parameters
+			$stmt->bind_param("iis", $userID, $sayID, $action);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+
+			if($stmt->num_rows == 0)
+			{
+				//Follow User
+				if($stmt = $mysqli->prepare("INSERT INTO Activity (userID, sayID, activity) VALUES (?, ?, ?)"))
+				{	
+					// Bind parameters
+					$stmt->bind_param("iis", $userID, $sayID, $action);
+					
+					// Execute Query
+					$stmt->execute();
+				}
+				else
+				{
+					array_push($errors, $errorCodes["M002"]);
+				}
+			}
+			else if ($stmt->num_rows == 1)
+			{
+				if($stmt = $mysqli->prepare("DELETE FROM Activity  WHERE userID = ? AND sayID = ? AND activity = ? "))
+				{	
+					// Bind parameters
+					$stmt->bind_param("iis", $userID, $sayID, $action);
+					
+					// Execute Query
+					$stmt->execute();
+				}
+				else
+				{
+					array_push($errors, $errorCodes["M002"]);
+				}
+			}
+			else
+			{
+				array_push($errors, $errorCodes["G000"]);
+			}
+
+			 $stmt->close();	 
+		}
+		else
+		{
+			array_push($errors, $errorCodes["M002"]);
+		}
+	}
+
+	if(count($errors) == 0)
+	{
+		$result["message"] = "Action Completed";
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	
+	return $result;
+	
+}
 
 ?>
