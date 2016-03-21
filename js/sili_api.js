@@ -159,16 +159,58 @@ function fetchSays(){
 	});
 }
 
-function addComment(){ //Sure we need to have 1 function for fetching comments, and another for new comment. Ask Lewis monday.
+function fetchSayDetails(sayID){
+	$.ajax({
+		dataType: "json",
+		url: "API/say/" + sayID,
+		success: function(data) {
+			$.each(data.says, function(index, element) {
+				$(".sayDetailsModal").loadTemplate("content/templates/sayDetails.html",
+				{
+					sayID: element["sayID"],
+					firstName: element["firstName"],
+				    lastName: element["lastName"],
+				    userName: element["userName"],
+					message: element["message"],
+					profilePicture: element["profileImage"],
+					timePosted: element["timePosted"]
+				}, { append: true});
+			});
+		}
+	});
+}
+
+function fetchComments(sayID){
+	$.ajax({
+		dataType: "json",
+		url: "API/say/comment/" + sayID,
+		success: function(data) {
+			$.each(data.says, function(index, element) {
+				$(".commentFeed").loadTemplate("content/templates/comment.html",
+				{
+					sayID: element["sayID"],
+					firstName: element["firstName"],
+				    lastName: element["lastName"],
+				    userName: element["userName"],
+					message: element["message"],
+					profilePicture: element["profileImage"],
+					timePosted: element["timePosted"]
+				}, { append: true});
+			});
+		}
+	});	
+}
+
+function addComment(){
 	var data = $(this).serialize();
 	$.ajax({
 		type: "POST",
 		dataType: "json",
-		url: "API/say/",
+		url: "API/say/comment/",
 		data: data,
 		success: function(data) {	
 			$(".commentBox").val("");
-			$(".say").loadTemplate("content/templates/comment.html",
+			$(".commentFeed").loadTemplate("content/templates/comment.html",
 				{
 					firstName: data.say["firstName"],
 				    lastName: data.say["lastName"],
@@ -177,7 +219,6 @@ function addComment(){ //Sure we need to have 1 function for fetching comments, 
 					profilePicture: data.say["profileImage"],
 					timePosted: data.say["timePosted"]
 				}, { append: true });
-;
 		}
 	});
 	return false;
@@ -331,6 +372,12 @@ $("document").ready(function() {
 	$("#userSearch").easyAutocomplete(options);
 	$(document).on('click', '.sayMessage', function(){
 			var $el = $(this).parent().parent().parent();
+			
+			// var $el = $(this);
+			var sayID = $el.attr('id')
+			fetchSayDetails(sayID);
+			fetchComments(sayID);
+			$('#sayDetailsModal').modal('show');
 			
 			console.log($el.attr('id'));
 	});

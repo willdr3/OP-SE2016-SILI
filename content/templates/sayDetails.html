@@ -1,0 +1,55 @@
+<div class="modal fade" id="sayDetailsModal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				<div class="row sayDetails"> 
+					<div class="col-md-2"></div>
+					<div class="col-md-1 sayProfilePic"> 
+						<img class="sayProfileImg img-circle pull-right" data-src="profilePicture" /> 
+					</div> 
+					<div class="col-md-9 sayMessageDetails"> 
+						<div class="row"> 
+							<div class="col-md-8">
+								<span data-content="firstName"></span> <span data-content="lastName"></span> (<span data-content="userName"></span> )
+							</div>
+							<div class="col-md-4 text-right">
+								<span data-content="timePosted"></span> 
+							</div>
+						</div>
+						<div class="row"> 
+							<div class="col-md-12 sayMessage">
+								<span data-content="message"></span>
+							</div>
+						</div>
+						<div class="row"> 
+							<div class="col-md-2">
+							   <img class="icons" src="images/applaud.png" />
+							</div> 
+							<div class="col-md-2">
+								<img class="icons" src="images/re-say.png" />
+							</div> 
+							<div class="col-md-2">
+								<img class="icons" src="images/boo.png" />
+							</div> 
+							<div class="col-md-6"></div> 
+						</div> 
+					</div>
+				</div>
+				<!-- COMMENTS GO IN HERE -->
+				<div class="commentFeed">
+					
+				</div>				
+				<form class="form-horizontal comment-form" accept-charset="utf-8">
+					<div class="form-group newComment">
+						<label for="newComment" class="sr-only">Enter Your Comment</label>
+						<input type="textarea" id="newComment" name="newCom" rows = "4" class="form-control" placeholder="What have you got to say?" data-value="comment"></textarea>
+					</div>
+					<button class="btn btn-lg btn-block sayButton" type="submit">Say It!</button>
+				</form>
+			</div><!-- /.modal-body -->
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->	  
