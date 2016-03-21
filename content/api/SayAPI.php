@@ -148,6 +148,9 @@ function FetchSay($sayID)
 			"firstName" => $firstName,
 			"lastName" => $lastName,
 			"userName" => $userName,
+			"boos" => GetActivityCount($sayID, "Boo"),
+			"applauds" => GetActivityCount($sayID, "Applaud"),
+			"resays" => GetActivityCount($sayID, "Re-Say"),
 			];
 		}	
 		
@@ -155,6 +158,27 @@ function FetchSay($sayID)
 	}
 	
 	return $say;
+}
+
+function GetActivityCount($sayID, $action)
+{
+	global $mysqli;
+	$count = 0;
+	if($stmt = $mysqli->prepare("SELECT COUNT(*) as count FROM Activity WHERE activity = ? AND sayID = ?"))
+	{
+		// Bind parameters
+		$stmt->bind_param("si", $action, $sayID);
+		
+		// Execute Query
+		$stmt->execute();
+		
+		$stmt->bind_result($count);
+		
+		$stmt->fetch();
+		
+	}
+	
+	return $count;
 }
 
 function CommentSayIt($userID)
@@ -232,6 +256,78 @@ function CommentSayIt($userID)
 	return $result;
 }
 
+function GetSay($userID)
+{
+	global $mysqli, $errorCodes, $request;
+	
+	// Arrays for jsons
+	$result = array();
+	$errors = array();
+	$says = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	if(count($request) >= 3)
+	{
+		$sayID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));
+	}
+	else
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	else 
+	{
+		
+		$saysQuery = "SELECT sayID FROM Says WHERE sayID = ?";	
+		
+		if($stmt = $mysqli->prepare($saysQuery))
+		{
+			// Bind parameters
+			$stmt->bind_param("i", $sayID);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows == 1)
+			{
+				// Bind parameters
+				$stmt->bind_result($sayID);
+				
+				while ($stmt->fetch()) {
+					array_push($says, FetchSay($sayID));
+				}
+			}	
+			$stmt->close();
+		}	
+
+	}
+	
+	// If no errors insert Say message into database
+	if(count($errors) == 0)
+	{
+		$result["say"] = $says;
+		
+	}
+	else //return the json of errors 
+	{	
+		$result["message"] = "Say Fetch failed";	
+		$result["errors"] = $errors;
+	}
+	
+	return $result;
+}
+
 
 function GetComments($userID)
 {
@@ -287,7 +383,7 @@ function GetComments($userID)
 	}
 	return $result;
 }
-function SayActivity ($userID, $action)
+function SayActivity($userID, $action)
 {
 	global $mysqli, $errorCodes, $request;
 	
@@ -376,6 +472,7 @@ function SayActivity ($userID, $action)
 	if(count($errors) == 0)
 	{
 		$result["message"] = "Action Completed";
+		$result["count"] = GetActivityCount($sayID, $action);
 	}
 	else
 	{
@@ -386,21 +483,18 @@ function SayActivity ($userID, $action)
 	
 }
 
-function Boo ($userID)
+function Boo($userID)
 {
-	SayActivity($userID, "BOO");
-	
+	return SayActivity($userID, "Boo");	
 }
 
-function Applaud ($userID)
+function Applaud($userID)
 {
-	SayActivity($userID, "Applaud");
-	
+	return SayActivity($userID, "Applaud");	
 }
 
-function ReSay ($userID)
+function ReSay($userID)
 {
-	SayActivity($userID, "Re-Say");
-	
+	return SayActivity($userID, "Re-Say");	
 }
 ?>
