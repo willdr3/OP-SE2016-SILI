@@ -114,7 +114,7 @@ function GetSays($userID)
 
 function FetchSay($sayID)
 {
-	global $mysqli, $profileImagePath, $defaultProfileImg;
+	global $mysqli, $profileImagePath, $defaultProfileImg, $userID;
 	$say = array();
 	if($stmt = $mysqli->prepare("SELECT LPAD(sayID, 10, '0') as sayIDFill, timePosted, message, profileImage, firstName, lastName, userName FROM Says INNER JOIN Profile ON Says.userID=Profile.userID WHERE sayID = ?"))
 	{
@@ -151,6 +151,9 @@ function FetchSay($sayID)
 			"boos" => GetActivityCount($sayID, "Boo"),
 			"applauds" => GetActivityCount($sayID, "Applaud"),
 			"resays" => GetActivityCount($sayID, "Re-Say"),
+			"booStatus" => GetActivityStatus($userID, $sayID, "Boo"),
+			"applaudStatus" => GetActivityStatus($userID, $sayID, "Applaud"),
+			"resayStatus" =>GetActivityStatus($userID, $sayID, "Re-Say"),
 			];
 		}	
 		
@@ -179,6 +182,32 @@ function GetActivityCount($sayID, $action)
 	}
 	
 	return $count;
+}
+
+function GetActivityStatus($userID, $sayID, $action)
+{
+	global $mysqli;
+	$status = false;
+	if($stmt = $mysqli->prepare("SELECT COUNT(*) as count FROM Activity WHERE activity = ? AND sayID = ? AND userID = ?"))
+	{
+		// Bind parameters
+		$stmt->bind_param("sii", $action, $sayID, $userID);
+		
+		// Execute Query
+		$stmt->execute();
+		
+		$stmt->bind_result($count);
+		
+		$stmt->fetch();
+		
+		if ($count == 1)
+		{
+			$status = true;
+		}
+		
+	}
+	
+	return $status;
 }
 
 function CommentSayIt($userID)

@@ -99,7 +99,10 @@ function addSay(){
 					userName: data.say["userName"],
 					message: data.say["message"],
 					profilePicture: data.say["profileImage"],
-					timePosted: data.say["timePosted"]
+					timePosted: data.say["timePosted"],
+					boos: data.say["boos"],
+					applauds: data.say["applauds"],
+					resays: data.say["resays"]
 				}, { prepend: true });
 ;
 		}
@@ -111,8 +114,25 @@ function fetchSays(){
 	$.ajax({
 		dataType: "json",
 		url: "API/say/",
-		success: function(data) {
+		success: function(data) {			
 			$.each(data.says, function(index, element) {	
+				var boo = "images/boo.png";
+				var applaud = "images/applaud.png";
+				var resay = "images/resay.png";
+			
+				if (element["booStatus"] == true)
+				{
+					boo = "images/booActive.png";
+				}
+				if (element["applaudStatus"] == true)
+				{
+					applaud = "images/applaudActive.png";
+				}				
+				if (element["resayStatus"] == true)
+				{
+					resay = "images/resayActive.png";
+				}
+				
 				$(".sayFeed").loadTemplate("content/templates/say.html",
 				{
 				    sayID: element["sayID"],
@@ -121,7 +141,13 @@ function fetchSays(){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
-					timePosted: element["timePosted"]
+					timePosted: element["timePosted"],
+					boos: element["boos"],
+					applauds: element["applauds"],
+					resays: element["resays"],
+					applaudImg:applaud,
+					resayimg: resay,
+					booImg: boo,
 				}, { append: true });	
 			});
 			$('.say').on('click', function () {
@@ -208,6 +234,20 @@ function getUserProfile() {
 }
 
 
+function SayAction(sayID, action) {
+	var count;
+	$.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/say/" + action + "/" + sayID,
+		success: function(data) {
+			count = data["count"];
+		}
+	});
+	
+	return count;
+}
+
 getUserDetials().done(function() {
 	if(loggedIn) {
 		$("#profileImage").attr("src", profileImage);
@@ -281,13 +321,35 @@ angular.module('app', ['ngImgCrop'])
 
 $("document").ready(function() {
 	$("#userSearch").easyAutocomplete(options);
-	$(document).on('click', '.say', function(){
-			var $el = $(this);
+	$(document).on('click', '.sayMessage', function(){
+			var $el = $(this).parent().parent().parent();
 			
 			console.log($el.attr('id'));
 	});
+	
+	$(document).on('click', '.applaud', function(){
+			var $el = $(this).parent().parent().parent().parent();
+			var sayID = $el.attr('id');
+			var count = SayAction(sayID, "applaud");
+			$(this).parent().find("span").html(count);
+	});
+	
+	$(document).on('click', '.reSay', function(){
+			var $el = $(this).parent().parent().parent().parent();
+			var sayID = $el.attr('id');
+			var count = SayAction(sayID, "resay");
+			$(this).parent().find("span").html(count);
+	});
+	
+	$(document).on('click', '.boo', function(){
+			var $el = $(this).parent().parent().parent().parent();
+			var sayID = $el.attr('id');
+			var count = SayAction(sayID, "boo");
+			$(this).parent().find("span").html(count);
+	});
+	
+	
 	$("body").tooltip({
 		selector: '[data-toggle="tooltip"]'
 	});
 });
-
