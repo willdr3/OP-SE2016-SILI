@@ -7,7 +7,7 @@ if (!isset($internal) && !isset($controller)) //check if its not an internal or 
 	exit;
 }
 
-function SayIt($userID)
+function SayIt($userID) //Adds A Say
 {
 	global $mysqli, $errorCodes;
 	// Arrays for jsons
@@ -67,7 +67,7 @@ function SayIt($userID)
 	return $result;
 }
 
-function GetSays($userID)
+function GetSays($userID) //Returns all the says based of the people listened to by the logged in user
 {	
 	global $mysqli, $errorCodes;
 	// Arrays for jsons
@@ -81,12 +81,12 @@ function GetSays($userID)
 	
 	if ($userID != 0) 
 	{
-		$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) OR userID = ? ORDER BY timePosted DESC LIMIT 10";	
+		$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) OR userID = ? OR sayID IN (SELECT sayID FROM Activity WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) AND activity = \"Re-Say\") ORDER BY timePosted DESC";	
 		
 		if($stmt = $mysqli->prepare($saysQuery))
 		{
 			// Bind parameters
-			$stmt->bind_param("ii", $userID, $userID);
+			$stmt->bind_param("iii", $userID, $userID, $userID);
 			
 			// Execute Query
 			$stmt->execute();
@@ -112,11 +112,11 @@ function GetSays($userID)
 	return $result;
 }
 
-function FetchSay($sayID)
+function FetchSay($sayID) //Fetches the Say
 {
 	global $mysqli, $profileImagePath, $defaultProfileImg, $userID;
 	$say = array();
-	if($stmt = $mysqli->prepare("SELECT LPAD(sayID, 10, '0') as sayIDFill, timePosted, message, profileImage, firstName, lastName, userName FROM Says INNER JOIN Profile ON Says.userID=Profile.userID WHERE sayID = ?"))
+	if($stmt = $mysqli->prepare("SELECT LPAD(sayID, 10, '0') as sayIDFill, timePosted, message, profileImage, firstName, lastName, userName, Says.userID FROM Says INNER JOIN Profile ON Says.userID=Profile.userID WHERE sayID = ?"))
 	{
 		// Bind parameters
 		$stmt->bind_param("i", $sayID);
@@ -130,7 +130,7 @@ function FetchSay($sayID)
 		if($stmt->num_rows == 1)
 		{
 			// Bind parameters
-			$stmt->bind_result($sayIDFill, $timePosted, $message, $profileImage, $firstName, $lastName, $userName);
+			$stmt->bind_result($sayIDFill, $timePosted, $message, $profileImage, $firstName, $lastName, $userName, $postUserID);
 			
 			// Fill with values
 			$stmt->fetch();
@@ -138,6 +138,13 @@ function FetchSay($sayID)
 			if($profileImage == "")
 			{
 				$profileImage = $defaultProfileImg;
+			}
+			
+			$ownSay = false;
+			
+			if($postUserID == $userID)
+			{
+				$ownSay = true;
 			}
 			
 			$say = [
@@ -153,7 +160,9 @@ function FetchSay($sayID)
 			"resays" => GetActivityCount($sayID, "Re-Say"),
 			"booStatus" => GetActivityStatus($userID, $sayID, "Boo"),
 			"applaudStatus" => GetActivityStatus($userID, $sayID, "Applaud"),
-			"resayStatus" =>GetActivityStatus($userID, $sayID, "Re-Say"),
+			"resayStatus" => GetActivityStatus($userID, $sayID, "Re-Say"),
+			"ownSay" => $ownSay,
+			"activityStatus" => GetActivity($userID, $sayID, "Re-Say"),
 			];
 		}	
 		
@@ -161,6 +170,65 @@ function FetchSay($sayID)
 	}
 	
 	return $say;
+}
+
+function GetUserSays($userID) //Get the says of a user
+{
+	global $mysqli, $errorCodes, $request;
+	// Arrays for jsons
+	$result = array();
+	$says = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	$requestedUserID = 0;
+	
+	if(count($request) >= 3)
+	{
+		if(strlen($request[2]) == 0)
+		{
+			$requestedUserID = $userID;
+		}
+		else
+		{
+			$requestedUserID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));	
+		}
+	}
+	
+	if ($requestedUserID != 0) 
+	{
+		$saysQuery = "SELECT sayID FROM Says WHERE userID = ? ORDER BY timePosted DESC LIMIT 10";	
+		
+		if($stmt = $mysqli->prepare($saysQuery))
+		{
+			// Bind parameters
+			$stmt->bind_param("i", $requestedUserID);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows >= 1)
+			{
+				// Bind parameters
+				$stmt->bind_result($sayID);
+				
+				while ($stmt->fetch()) {
+					array_push($says, FetchSay($sayID));
+				}
+			}	
+			$stmt->close();
+		}
+		
+		$result["says"] = $says;
+	}
+	
+	return $result;
 }
 
 function GetActivityCount($sayID, $action)
@@ -180,7 +248,7 @@ function GetActivityCount($sayID, $action)
 		$stmt->fetch();
 		
 	}
-	
+	$stmt->close();
 	return $count;
 }
 
@@ -196,6 +264,9 @@ function GetActivityStatus($userID, $sayID, $action)
 		// Execute Query
 		$stmt->execute();
 		
+		// Store result
+		$stmt->store_result();
+		
 		$stmt->bind_result($count);
 		
 		$stmt->fetch();
@@ -206,8 +277,62 @@ function GetActivityStatus($userID, $sayID, $action)
 		}
 		
 	}
+	$stmt->close();
 	
 	return $status;
+}
+
+function GetActivity($userID, $sayID, $action)
+{
+	global $mysqli, $profileImagePath, $defaultProfileImg;
+	$activity = false;
+	if($stmt = $mysqli->prepare("SELECT userID FROM Activity WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) AND activity = ? AND sayID = ?"))
+	{
+		// Bind parameters
+		$stmt->bind_param("isi",$userID, $action, $sayID);
+		
+		// Execute Query
+		$stmt->execute();
+		
+		// Store result
+		$stmt->store_result();
+			
+		if($stmt->num_rows >= 1)
+		{
+		
+			$stmt->bind_result($activityUserID);
+		
+			$stmt->fetch();
+		
+			if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE userID = ?"))
+			{
+				$stmt->bind_param("i",$activityUserID);
+				
+				// Execute Query
+				$stmt->execute();
+			
+				$stmt->bind_result($firstName, $lastName, $userName, $profileImage);
+			
+				$stmt->fetch();
+				
+				if($profileImage == "")
+				{
+					$profileImage = $defaultProfileImg;
+				}
+				
+				$activity = [
+					"profileImage" => $profileImagePath . $profileImage,
+					"firstName" => $firstName,
+					"lastName" => $lastName,
+					"userName" => $userName,
+				];
+			}
+		}
+	}
+	
+	$stmt->close();
+	
+	return $activity;
 }
 
 function CommentSayIt($userID)
@@ -357,7 +482,6 @@ function GetSay($userID)
 	return $result;
 }
 
-
 function GetComments($userID)
 {
 	global $mysqli, $errorCodes, $request;
@@ -412,6 +536,7 @@ function GetComments($userID)
 	}
 	return $result;
 }
+
 function SayActivity($userID, $action)
 {
 	global $mysqli, $errorCodes, $request;

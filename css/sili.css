@@ -20,6 +20,22 @@ p, *
 	font-family: 'komika_textregular';
 }
 
+*
+{
+	cursor: default;
+}
+
+a, .icons, .banner .user *, .pointer
+{
+    cursor: pointer;
+}
+
+
+input, textarea
+{
+	cursor: text;
+}
+
 .login-banner
 {
 	background-color: #373F51;
@@ -85,7 +101,7 @@ p, *
 {
 	height: 100px;
 	padding-left: 0;
-	padding-right: 5;
+	padding-right: 5px;
 }
 
 .banner .user p 
