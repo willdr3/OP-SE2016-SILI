@@ -263,7 +263,7 @@ function CheckLogin()
 				$userData = [
 				"firstName" => $firstName,
 				"lastName" => $lastName,
-				"userName" => $userName, 
+				"userName" => strtoupper($userName), 
 				"profileImage" => $profileImagePath . $profileImage,
 				];
 

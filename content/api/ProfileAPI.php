@@ -51,7 +51,7 @@ function GetUserAccountSettings($userID)
 				$profile = [
 				"firstName" => $firstName,
 				"lastName" => $lastName,
-				"userName" => $userName,
+				"userName" => strtoupper($userName),
 				"email" => $email,
 				"userBio" =>  $userBio,
 				"dob" =>  $dob,
@@ -127,7 +127,7 @@ function GetUserProfile($userID)
 				$profile = [
 				"firstName" => $firstName,
 				"lastName" => $lastName,
-				"userName" => $userName,
+				"userName" => strtoupper($userName),
 				"userBio" =>  $userBio,
 				"location" =>  $location,
 				"profileImage" => $profileImagePath . $profileImage,
@@ -454,6 +454,213 @@ function GetAudience($userID)
 		$result["errors"] = $errors;
 	}
 	
+	return $result;
+}
+
+function UpdateProfile($userID)
+{
+	global $mysqli, $errorCodes;
+	
+	$result = array();
+	$errors = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	
+	if((!isset($_POST['firstName']) || strlen($_POST['firstName']) == 0))
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if((!isset($_POST['lastName']) || strlen($_POST['lastName']) == 0))
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if((!isset($_POST['userName']) || strlen($_POST['userName']) == 0))
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if((!isset($_POST['dob']) || strlen($_POST['dob']) == 0))
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if((!isset($_POST['gender']) || strlen($_POST['gender']) == 0))
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+		
+	if(count($errors) == 0) 
+	{
+		$firstName =  filter_var($_POST['firstName'], FILTER_SANITIZE_STRING);
+		$lastName = filter_var($_POST['lastName'], FILTER_SANITIZE_STRING);
+		$userName =  filter_var($_POST['userName'], FILTER_SANITIZE_STRING);
+		$dob = filter_var($_POST['dob'], FILTER_SANITIZE_STRING);
+		$gender = substr($_POST['gender'], 1);
+		
+		if($stmt = $mysqli->prepare("UPDATE Profile SET firstName = ?, lastName = ?, userName = ?, dob = ?, gender = ? WHERE userID = ?"))
+		{
+			// Bind parameters
+			$stmt->bind_param("sssssi", $firstName, $lastName, $userName, $dob, $gender, $userID);
+			
+			// Execute Query
+			$stmt->execute();
+		}
+		$stmt->close();	
+	}
+	
+	if(count($errors) == 0) //If no errors user is logged in
+	{
+		$result["message"] = "Profile Updated";
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	return $result;
+}
+
+function UpdatePassword($userID)
+{
+	global $mysqli, $errorCodes;
+	
+	$result = array();
+	$errors = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	
+	
+	if(!isset($_POST['currentPassword']) || strlen($_POST['currentPassword']) == 0)
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if(isset($_POST['newPassword']) && strlen($_POST['newPassword']) > 0)
+	{
+		$newPassword = $_POST['newPassword'];
+		
+		$passwordCheck = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
+		if(!preg_match("/$passwordCheck/", $newPassword )) //check it meets the complexity requirements set above
+		{
+			array_push($errors, $errorCodes["G000"]);
+		}
+		else 
+		{
+			if(isset($_POST['confirmNewPassword']) && strlen($_POST['confirmNewPassword']) > 0) //check if the confirmation password has been submitted
+			{
+				$confirmNewPassword = $_POST['confirmNewPassword'];
+				if($confirmNewPassword != $newPassword) //check the both passwords match
+				{
+					array_push($errors, $errorCodes["G000"]);
+				}
+			}
+			else 
+			{
+				array_push($errors, $errorCodes["G000"]);
+			}
+		}
+	}	
+		
+	if(count($errors) == 0) 
+	{
+		$userPassword = $_POST['currentPassword'];
+		
+		if($stmt = $mysqli->prepare("SELECT userPassword FROM UserLogin WHERE userID = ?"))
+		{
+			// Bind parameters
+			$stmt->bind_param("i", $userID);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows > 0)
+			{
+				// Bind parameters
+				$stmt->bind_result($hashPass);
+				
+				// Fill with values
+				$stmt->fetch();
+						
+				// Free result
+				$stmt->free_result();
+						
+				// Close stmt
+				$stmt->close();
+						
+				if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
+				{					
+					$saltLength = 12;
+					//Generate Salt
+					$bytes = openssl_random_pseudo_bytes($saltLength);
+					$salt   = bin2hex($bytes);
+					
+					//hash password
+					$hashedPassword = crypt($newPassword, '$5$rounds=5000$'. $salt .'$');
+					
+					if($stmt = $mysqli->prepare("UPDATE UserLogin SET userPassword = ? WHERE userID = ?"))
+					{
+						// Bind parameters
+						$stmt->bind_param("si", $hashedPassword, $userID);
+						
+						// Execute Query
+						$stmt->execute();
+						
+						$stmt->close();	
+					}
+					else
+					{
+						array_push($errors, $errorCodes["G000"]);
+					}
+					
+					
+				}
+				else
+				{
+					array_push($errors, $errorCodes["G000"]);
+				}
+			}
+			else
+			{
+				array_push($errors, $errorCodes["G000"]);
+			}
+			
+		}
+		else
+		{
+			array_push($errors, $errorCodes["G000"]);
+		}
+		
+	}
+	
+	if(count($errors) == 0) //If no errors user is logged in
+	{
+		$result["message"] = "Password Updated";
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
 	return $result;
 }
 ?>
