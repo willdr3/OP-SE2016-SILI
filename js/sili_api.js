@@ -146,7 +146,7 @@ function fetchSays(){
 					applauds: element["applauds"],
 					resays: element["resays"],
 					applaudImg:applaud,
-					resayimg: resay,
+					resayImg: resay,
 					booImg: boo,
 				}, { append: true });	
 			});
@@ -235,17 +235,25 @@ function getUserProfile() {
 
 
 function SayAction(sayID, action) {
-	var count;
+	var count, image;
 	$.ajax({
 		dataType: "json",
 		async: false,
 		url: "API/say/" + action + "/" + sayID,
 		success: function(data) {
-			count = data["count"];
+			count = data["count"];			
+			if (action == "applaud")
+			{
+				image = "images/applaud.png";
+				if(data["status"] == true)
+				{
+					image = "images/applaudActive.png";
+				}
+			}				
 		}
 	});
 	
-	return count;
+	return [count, image];
 }
 
 getUserDetials().done(function() {
@@ -328,10 +336,15 @@ $("document").ready(function() {
 	});
 	
 	$(document).on('click', '.applaud', function(){
+			
 			var $el = $(this).parent().parent().parent().parent();
 			var sayID = $el.attr('id');
-			var count = SayAction(sayID, "applaud");
+			var action = SayAction(sayID, "applaud")
+			var count = action[0];
+			var image = action[1];
 			$(this).parent().find("span").html(count);
+			
+			$(this).parent().find("img").attr('src', image);
 	});
 	
 	$(document).on('click', '.reSay', function(){

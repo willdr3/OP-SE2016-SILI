@@ -438,7 +438,7 @@ function SayActivity($userID, $action)
 	{
 		array_push($errors, $errorCodes["G001"]);
 	}
-	
+	$status = "";
 	//Process
 	if(count($errors) == 0) //If theres no errors so far
 	{	
@@ -464,6 +464,8 @@ function SayActivity($userID, $action)
 					
 					// Execute Query
 					$stmt->execute();
+					
+					$status = true;
 				}
 				else
 				{
@@ -479,6 +481,10 @@ function SayActivity($userID, $action)
 					
 					// Execute Query
 					$stmt->execute();
+					
+					$status = false;
+					
+					
 				}
 				else
 				{
@@ -501,6 +507,7 @@ function SayActivity($userID, $action)
 	if(count($errors) == 0)
 	{
 		$result["message"] = "Action Completed";
+		$result["status"] = $status;
 		$result["count"] = GetActivityCount($sayID, $action);
 	}
 	else
