@@ -103,7 +103,7 @@ function addSay(){
 					boos: data.say["boos"],
 					applauds: data.say["applauds"],
 					resays: data.say["resays"]
-				}, { prepend: true });
+				}, { prepend: true, overwriteCache: true });
 ;
 		}
 	});
@@ -145,10 +145,10 @@ function fetchSays(){
 					boos: element["boos"],
 					applauds: element["applauds"],
 					resays: element["resays"],
-					applaudImg:applaud,
-					resayImg: resay,
-					booImg: boo,
-				}, { append: true });	
+					applaudImg: getActionImage("applaud", element["applaudStatus"]),
+					resayImg: getActionImage("resay", element["resayStatus"]),
+					booImg: getActionImage("boo", element["booStatus"]),
+				}, { append: true,  overwriteCache: true});	
 			});
 			$('.say').on('click', function () {
 				var $el = $(this);
@@ -240,8 +240,13 @@ function getUserDetials() {
 	});
 }
 
-
 function getUserProfile() {
+	requestUserProfile().done(function(data) {
+			$('body').find('select[name="gender"]').val(data.userProfile["gender"]);
+	});
+}
+
+function requestUserProfile() {
 	return $.ajax({
 		dataType: "json",
 		url: "API/profile/settings",
@@ -259,20 +264,19 @@ function getUserProfile() {
 			$("#profileModals").loadTemplate("content/templates/changePassword.html", "", { append: true });
 				
 			$("#profileModals").loadTemplate("content/templates/personalForm.html",
-				{
-				    firstName: data.userProfile["firstName"],
-				    lastName: data.userProfile["lastName"],
-				    userName: data.userProfile["userName"],
-					dob: data.userProfile["dob"],
-					gender: data.userProfile["gender"]
-				}, { append: true });
+			{
+			    firstName: data.userProfile["firstName"],
+			    lastName: data.userProfile["lastName"],
+			    userName: data.userProfile["userName"],
+				dob: data.userProfile["dob"],
+				gender: data.userProfile["gender"]
+			}, { append: true, async: false });
 				
 			$("#profileModals").loadTemplate("content/templates/userBio.html",
 				{
 				        bio: data.userProfile["userBio"]
 				}, { append: true });
-
-			$('body').find('select[name="gender"]').val("M");
+			
 			
 		}
 	});
@@ -287,14 +291,7 @@ function SayAction(sayID, action) {
 		url: "API/say/" + action + "/" + sayID,
 		success: function(data) {
 			count = data["count"];			
-			if (action == "applaud")
-			{
-				image = "images/applaud.png";
-				if(data["status"] == true)
-				{
-					image = "images/applaudActive.png";
-				}
-			}				
+			image = getActionImage(action, data["status"]);
 		}
 	});
 	
@@ -339,6 +336,36 @@ function ProfilePasswordChange(data)
 		}
 	});
 	return false;
+}
+
+function getActionImage(action, status)
+{
+	if (action == "applaud")
+	{
+		image = "images/applaud.png";
+		if(status == true)
+		{
+			image = "images/applaudActive.png";
+		}
+	}	
+	else if (action == "resay")
+	{
+		image = "images/resay.png";
+		if(status == true)
+		{
+			image = "images/resayActive.png";
+		}
+	}		
+	else if (action == "boo")
+	{
+		image = "images/boo.png";
+		if(status == true)
+		{
+			image = "images/booActive.png";
+		}
+	}		
+
+	return image;
 }
 
 getUserDetials().done(function() {
@@ -433,24 +460,30 @@ $("document").ready(function() {
 			var action = SayAction(sayID, "applaud")
 			var count = action[0];
 			var image = action[1];
-			$(this).parent().find("span").html(count);
-			
+			$(this).parent().find("span").html(count);			
 			$(this).parent().find("img").attr('src', image);
+			
 	});
 	
 	$(document).on('click', '.reSay', function(){
 			var $el = $(this).parent().parent().parent().parent();
 			var sayID = $el.attr('id');
-			var count = SayAction(sayID, "resay");
-			$(this).parent().find("span").html(count);
+			var action = SayAction(sayID, "resay");
+			var count = action[0];
+			var image = action[1];
+			$(this).parent().find("span").html(count);			
+			$(this).parent().find("img").attr('src', image);
 	});
 	
 	$(document).on('click', '.boo', function(){
 			var $el = $(this).parent().parent().parent().parent();
 			var sayID = $el.attr('id');
-			var count = SayAction(sayID, "boo");
-			$(this).parent().find("span").html(count);
-	});
+			var action = SayAction(sayID, "boo");
+			var count = action[0];
+			var image = action[1];
+			$(this).parent().find("span").html(count);			
+			$(this).parent().find("img").attr('src', image);	
+			});
 	
 	
 	$("body").tooltip({

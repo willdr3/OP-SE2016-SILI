@@ -272,3 +272,9 @@ input[type=file].profileImageUpload
 {
 	text-transform: uppercase;
 }
+
+.username
+{
+	font-family: 'komika_title_-_kapsregular';
+	font-size: 20px;
+}
