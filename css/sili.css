@@ -267,3 +267,8 @@ input[type=file].profileImageUpload
 	font-size: 700%;
 	font-family: 'komika_title_-_axisregular';
 }
+
+.uppercaseText
+{
+	text-transform: uppercase;
+}

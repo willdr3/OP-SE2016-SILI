@@ -51,7 +51,7 @@ function GetUserAccountSettings($userID)
 				$profile = [
 				"firstName" => $firstName,
 				"lastName" => $lastName,
-				"userName" => strtoupper($userName),
+				"userName" => $userName,
 				"email" => $email,
 				"userBio" =>  $userBio,
 				"dob" =>  $dob,
@@ -127,7 +127,7 @@ function GetUserProfile($userID)
 				$profile = [
 				"firstName" => $firstName,
 				"lastName" => $lastName,
-				"userName" => strtoupper($userName),
+				"userName" => $userName,
 				"userBio" =>  $userBio,
 				"location" =>  $location,
 				"profileImage" => $profileImagePath . $profileImage,
@@ -488,6 +488,14 @@ function UpdateProfile($userID)
 	{
 		array_push($errors, $errorCodes["G000"]);
 	}
+	else
+	{
+		$userNameCheck = "^([a-zA-Z])[a-zA-Z_-]*[\w_-]*[\S]$|^([a-zA-Z])[0-9_-]*[\S]$|^[a-zA-Z]*[\S]{5,20}$";
+		if(!preg_match("/$userNameCheck/", $_POST['userName'])) //check it meets the complexity requirements set above
+		{
+			array_push($errors, $errorCodes["G000"]);
+		}
+	}
 	
 	if((!isset($_POST['dob']) || strlen($_POST['dob']) == 0))
 	{
@@ -504,19 +512,37 @@ function UpdateProfile($userID)
 	{
 		$firstName =  filter_var($_POST['firstName'], FILTER_SANITIZE_STRING);
 		$lastName = filter_var($_POST['lastName'], FILTER_SANITIZE_STRING);
-		$userName =  filter_var($_POST['userName'], FILTER_SANITIZE_STRING);
+		$userName =  strtoupper(filter_var($_POST['userName'], FILTER_SANITIZE_STRING));
 		$dob = filter_var($_POST['dob'], FILTER_SANITIZE_STRING);
-		$gender = substr($_POST['gender'], 1);
-		
-		if($stmt = $mysqli->prepare("UPDATE Profile SET firstName = ?, lastName = ?, userName = ?, dob = ?, gender = ? WHERE userID = ?"))
+		$gender = substr($_POST['gender'], 0, 1);
+
+		if($stmt = $mysqli->prepare("SELECT userName FROM Profile WHERE userName = ? AND userID != ?"))
 		{
-			// Bind parameters
-			$stmt->bind_param("sssssi", $firstName, $lastName, $userName, $dob, $gender, $userID);
+			$stmt->bind_param("si",$userName, $userID);
 			
 			// Execute Query
 			$stmt->execute();
+
+			// Store result
+			$stmt->store_result();
+
+			if($stmt->num_rows == 0)
+			{
+				if($stmt = $mysqli->prepare("UPDATE Profile SET firstName = ?, lastName = ?, userName = ?, dob = ?, gender = ? WHERE userID = ?"))
+				{
+					// Bind parameters
+					$stmt->bind_param("sssssi", $firstName, $lastName, $userName, $dob, $gender, $userID);
+					
+					// Execute Query
+					$stmt->execute();
+				}
+				$stmt->close();	
+			} 
+			else
+			{
+				array_push($errors, $errorCodes["G000"]);
+			}
 		}
-		$stmt->close();	
 	}
 	
 	if(count($errors) == 0) //If no errors user is logged in

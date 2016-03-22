@@ -252,11 +252,13 @@ function getUserProfile() {
 			$(".acc-profileImage").attr("src", data.userProfile["profileImage"]);
 			$(".acc-userbio").text(data.userProfile["userBio"]);
 			
-			$("body").loadTemplate("content/templates/changeEmail.html", "", { append: true });
+			$("#profileModals").html("");
+
+			$("#profileModals").loadTemplate("content/templates/changeEmail.html", "", { append: true });
 				
-			$("body").loadTemplate("content/templates/changePassword.html", "", { append: true });
+			$("#profileModals").loadTemplate("content/templates/changePassword.html", "", { append: true });
 				
-			$("body").loadTemplate("content/templates/personalForm.html",
+			$("#profileModals").loadTemplate("content/templates/personalForm.html",
 				{
 				    firstName: data.userProfile["firstName"],
 				    lastName: data.userProfile["lastName"],
@@ -265,10 +267,12 @@ function getUserProfile() {
 					gender: data.userProfile["gender"]
 				}, { append: true });
 				
-			$("body").loadTemplate("content/templates/userBio.html",
+			$("#profileModals").loadTemplate("content/templates/userBio.html",
 				{
 				        bio: data.userProfile["userBio"]
 				}, { append: true });
+
+			$('body').find('select[name="gender"]').val("M");
 			
 		}
 	});
@@ -295,6 +299,46 @@ function SayAction(sayID, action) {
 	});
 	
 	return [count, image];
+}
+
+function ProfileEdit(data)
+{
+	$.ajax({
+	  type: "POST",
+	  dataType: "json",
+	  url: "API/profile/",
+	  data: data,
+	  error: function(jqXHR, textStatus, errorThrown) {
+			
+		},				
+	  success: function(data) {	
+			$('#personal-form').modal('hide');
+			$('body').removeClass('modal-open');
+			$('.modal-backdrop').remove();
+			getUserProfile();
+		}
+	});
+	return false;
+}
+
+function ProfilePasswordChange(data)
+{
+	$.ajax({
+	  type: "POST",
+	  dataType: "json",
+	  url: "API/profile/password",
+	  data: data,
+	  error: function(jqXHR, textStatus, errorThrown) {
+			
+		},				
+	  success: function(data) {	
+			$('#changePassword-form').modal('toggle');
+			$('body').removeClass('modal-open');
+			$('.modal-backdrop').remove();
+			getUserProfile();
+		}
+	});
+	return false;
 }
 
 getUserDetials().done(function() {

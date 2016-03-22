@@ -70,9 +70,22 @@
 		</div>
 	</div>
 
+	<div id="profileModals"></div>
+
 	<script type="text/javascript">
 		$("document").ready(function(){
 			getUserProfile();
+			$(document).on('submit','.changePassword-form', function(e){
+				e.preventDefault();
+				var data = $(this).serialize();
+				ProfilePasswordChange(data);
+			});
+
+			$(document).on('submit','.personal-form', function(e){
+				e.preventDefault();
+				var data = $(this).serialize();
+				ProfileEdit(data);
+			});
 		});
 	</script>
 
