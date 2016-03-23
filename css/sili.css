@@ -76,7 +76,7 @@ input, textarea
 	margin-right: 0;
 }
 
-.registerButton, .loginButton, .sayButton, .comButton
+.registerButton, .loginButton, .sayButton, .comButton, .listenButton
 {
 	background-color:#79B791;
 	color: #FFFFFF;
@@ -200,7 +200,7 @@ input, textarea
 	margin: 0;
 }
 
-.acc-profileImage
+.acc-profileImage, .profile-profileImage
 {
 	max-height: 200px;
 }
