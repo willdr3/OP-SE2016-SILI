@@ -417,7 +417,6 @@ function GetSay($userID)
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
-	$says = array();
 	
 	if ($mysqli->connect_errno) 
 	{
@@ -459,7 +458,7 @@ function GetSay($userID)
 				$stmt->bind_result($sayID);
 				
 				while ($stmt->fetch()) {
-					array_push($says, FetchSay($sayID));
+					$say = FetchSay($sayID);
 				}
 			}	
 			$stmt->close();
@@ -470,7 +469,7 @@ function GetSay($userID)
 	// If no errors insert Say message into database
 	if(count($errors) == 0)
 	{
-		$result["say"] = $says;
+		$result["say"] = $say;
 		
 	}
 	else //return the json of errors 

@@ -146,34 +146,32 @@ function fetchSays(){
 }
 
 function fetchSayDetails(sayID){
-	$.ajax({
+	return $.ajax({
 		dataType: "json",
 		url: "API/say/say/" + sayID,
 		success: function(data) {
-			$.each(data.says, function(index, element) {
-				$(".sayDetailsModal").loadTemplate("content/templates/sayDetails.html",
-				{
-					sayID: element["sayID"],
-					firstName: element["firstName"],
-				    lastName: element["lastName"],
-				    userName: element["userName"],
-					message: element["message"],
-					profilePicture: element["profileImage"],
-					timePosted: moment(element["timePosted"]).fromNow(),
-					boos: element["boos"],
-					applauds: element["applauds"],
-					resays: element["resays"],
-					applaudImg: getActionImage("applaud", element["applaudStatus"]),
-					resayImg: getActionImage("resay", element["resayStatus"]),
-					booImg: getActionImage("boo", element["booStatus"]),
-				});
+			$(".sayDetailsModal").loadTemplate("content/templates/sayDetails.html",
+			{
+				sayID: data.say["sayID"],
+				firstName: data.say["firstName"],
+			    lastName: data.say["lastName"],
+			    userName: data.say["userName"],
+				message: data.say["message"],
+				profilePicture: data.say["profileImage"],
+				timePosted: moment(data.say["timePosted"]).fromNow(),
+				boos: data.say["boos"],
+				applauds: data.say["applauds"],
+				resays: data.say["resays"],
+				applaudImg: getActionImage("applaud", data.say["applaudStatus"]),
+				resayImg: getActionImage("resay", data.say["resayStatus"]),
+				booImg: getActionImage("boo", data.say["booStatus"])
 			});
 		}
 	});
 }
 
 function fetchComments(sayID){
-	$.ajax({
+	return $.ajax({
 		dataType: "json",
 		url: "API/say/comment/" + sayID,
 		success: function(data) {
@@ -232,7 +230,7 @@ function getUserDetials() {
 	});
 }
 
-function getUserProfile(reqUserName = '') {
+function getUserProfile(reqUserName) {
 	reqUserName = window.btoa(reqUserName).replace("=","");
 	requestUserProfile(reqUserName).done(function(data) {
 		//Button Styling
@@ -455,18 +453,6 @@ angular.module('app', ['ngImgCrop'])
 
 $("document").ready(function() {
 	$("#userSearch").easyAutocomplete(options);
-	$(document).on('click', '.sayMessage', function(){
-		var $el = $(this).parent().parent().parent();
-		
-		// var $el = $(this);
-		var sayID = $el.attr('id')
-		fetchSayDetails(sayID);
-		fetchComments(sayID);
-		$('#sayDetailsModal').modal('show');
-		
-		console.log($el.attr('id'));
-	});
-	
 	$(document).on('click', '.applaud', function(){		
 		var $el = $(this).parent().parent().parent().parent();
 		var sayID = $el.attr('id');
@@ -501,11 +487,14 @@ $("document").ready(function() {
 	$(document).on('click', '.commentPen', function(){
 		var $el = $(this).parent().parent().parent().parent();
 		var sayID = $el.attr('id');
-		var sayID = $el.attr('id')
-		fetchSayDetails(sayID);
-		fetchComments(sayID);
-		$('#sayDetailsModal').modal('show');
+		fetchSayDetails(sayID).done(function() {
+			fetchComments(sayID).done(function()
+			{
+				$('#sayDetailsModal').modal('show');
+			});
 
+		});
+		
 		console.log(sayID);
 		});
 	
