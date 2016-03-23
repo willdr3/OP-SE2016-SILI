@@ -149,7 +149,7 @@ function FetchSay($sayID) //Fetches the Say
 			
 			$say = [
 			"sayID" => str_replace("=", "", base64_encode($sayIDFill)),
-			"timePosted" => date('g:i:sa j M Y',strtotime($timePosted)),
+			"timePosted" => strtotime($timePosted) * 1000,
 			"message" => $message,
 			"profileImage" => $profileImagePath . $profileImage,
 			"firstName" => $firstName,

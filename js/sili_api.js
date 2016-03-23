@@ -99,7 +99,7 @@ function addSay(){
 					userName: data.say["userName"],
 					message: data.say["message"],
 					profilePicture: data.say["profileImage"],
-					timePosted: data.say["timePosted"],
+					timePosted: moment(data.say["timePosted"]).fromNow(),
 					boos: data.say["boos"],
 					applauds: data.say["applauds"],
 					resays: data.say["resays"],
@@ -127,7 +127,7 @@ function fetchSays(){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
-					timePosted: element["timePosted"],
+					timePosted: moment(element["timePosted"]).fromNow(),
 					boos: element["boos"],
 					applauds: element["applauds"],
 					resays: element["resays"],
@@ -159,7 +159,7 @@ function fetchSayDetails(sayID){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
-					timePosted: element["timePosted"]
+					timePosted: moment(element["timePosted"]).fromNow()
 				}, { append: true});
 			});
 		}
@@ -180,7 +180,7 @@ function fetchComments(sayID){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
-					timePosted: element["timePosted"]
+					timePosted: moment(element["timePosted"]).fromNow()
 				}, { append: true});
 			});
 		}
@@ -203,7 +203,7 @@ function addComment(){
 				    userName: data.say["userName"],
 					message: data.say["message"],
 					profilePicture: data.say["profileImage"],
-					timePosted: data.say["timePosted"]
+					timePosted: moment(data.say["timePosted"]).fromNow()
 				}, { append: true });
 		}
 	});
@@ -242,8 +242,8 @@ function requestUserProfile(reqUserName) {
 			$(".profile-username").text(data.userProfile["userName"]);
 			$(".profile-profileImage").attr("src", data.userProfile["profileImage"]);
 			$(".profile-userbio").text(data.userProfile["userBio"]);
-			$(".profile-listens").text(data.userProfile["listensTo"]);
-			$(".profile-audience").text(data.userProfile["audience"]);
+			$(".profile-listens").text(numeral(data.userProfile["listensTo"]).format('0 a'));
+			$(".profile-audience").text(numeral(data.userProfile["audience"]).format('0 a')); 
 		}
 	});
 }

@@ -13,6 +13,7 @@
 		"applaud" => ["GET" => "Applaud"],
 		"resay" => ["GET" => "Resay"],
 		"user" => ["GET" => "GetUserSays"],
+		"say" => ["GET" => "GetSay"],
 	];
 		
 	$reqArray["profile"] = [
