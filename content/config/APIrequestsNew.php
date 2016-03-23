@@ -16,7 +16,7 @@
 	];
 		
 	$reqArray["profile"] = [
-		0 => ["GET" => "GetUserProfile", "POST" => "UpdateProfile"],
+		0 => ["GET" => "GetUserAccountSettings", "POST" => "UpdateProfile"],
 		"image" => ["GET"=> "", "POST" => ""],
 		"bio" => ["GET" => "", "POST" => ""],
 		"password" => ["POST" => "UpdatePassword"],
@@ -26,6 +26,6 @@
 		"audience" => ["GET" => "GetAudience"],
 		"unfollow" => ["POST" => ""],
 		"search" => ["GET" => "UserSearch"],
-		"settings" => ["GET" => "GetUserAccountSettings"],
+		"user" => ["GET" => "GetUserProfile"],
 	];
 ?>

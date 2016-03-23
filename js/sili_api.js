@@ -102,7 +102,10 @@ function addSay(){
 					timePosted: data.say["timePosted"],
 					boos: data.say["boos"],
 					applauds: data.say["applauds"],
-					resays: data.say["resays"]
+					resays: data.say["resays"],
+					applaudImg: getActionImage("applaud", data.say["applaudStatus"]),
+					resayImg: getActionImage("resay", data.say["resayStatus"]),
+					booImg: getActionImage("boo", data.say["booStatus"]),
 				}, { prepend: true, overwriteCache: true });
 ;
 		}
@@ -115,24 +118,7 @@ function fetchSays(){
 		dataType: "json",
 		url: "API/say/",
 		success: function(data) {			
-			$.each(data.says, function(index, element) {	
-				var boo = "images/boo.png";
-				var applaud = "images/applaud.png";
-				var resay = "images/resay.png";
-			
-				if (element["booStatus"] == true)
-				{
-					boo = "images/booActive.png";
-				}
-				if (element["applaudStatus"] == true)
-				{
-					applaud = "images/applaudActive.png";
-				}				
-				if (element["resayStatus"] == true)
-				{
-					resay = "images/resayActive.png";
-				}
-				
+			$.each(data.says, function(index, element) {					
 				$(".sayFeed").loadTemplate("content/templates/say.html",
 				{
 				    sayID: element["sayID"],
@@ -240,16 +226,38 @@ function getUserDetials() {
 	});
 }
 
-function getUserProfile() {
-	requestUserProfile().done(function(data) {
+function getUserProfile(reqUserName = '') {
+	reqUserName = window.btoa(reqUserName).replace("=","");
+	requestUserProfile(reqUserName).done(function(data) {
+		//Button Styling
+	});
+}
+
+function requestUserProfile(reqUserName) {
+	return $.ajax({
+		dataType: "json",
+		url: "API/profile/user/" + reqUserName,
+		success: function(data) {
+			$(".profile-name").text(data.userProfile["firstName"] + " " + data.userProfile["lastName"]);
+			$(".profile-username").text(data.userProfile["userName"]);
+			$(".profile-profileImage").attr("src", data.userProfile["profileImage"]);
+			$(".profile-userbio").text(data.userProfile["userBio"]);
+			$(".profile-listens").text(data.userProfile["listensTo"]);
+			$(".profile-audience").text(data.userProfile["audience"]);
+		}
+	});
+}
+
+function getUserSettings() {
+	requestUserSettings().done(function(data) {
 			$('body').find('select[name="gender"]').val(data.userProfile["gender"]);
 	});
 }
 
-function requestUserProfile() {
+function requestUserSettings() {
 	return $.ajax({
 		dataType: "json",
-		url: "API/profile/settings",
+		url: "API/profile/",
 		success: function(data) {
 			$(".acc-name").text(data.userProfile["firstName"] + " " + data.userProfile["lastName"]);
 			$(".acc-username").text(data.userProfile["userName"]);
@@ -312,7 +320,7 @@ function ProfileEdit(data)
 			$('#personal-form').modal('hide');
 			$('body').removeClass('modal-open');
 			$('.modal-backdrop').remove();
-			getUserProfile();
+			getUserSettings();
 		}
 	});
 	return false;
@@ -332,7 +340,7 @@ function ProfilePasswordChange(data)
 			$('#changePassword-form').modal('toggle');
 			$('body').removeClass('modal-open');
 			$('.modal-backdrop').remove();
-			getUserProfile();
+			getUserSettings();
 		}
 	});
 	return false;

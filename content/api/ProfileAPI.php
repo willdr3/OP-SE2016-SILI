@@ -85,7 +85,7 @@ function GetUserAccountSettings($userID)
 
 function GetUserProfile($userID)
 {
-	global $mysqli, $errorCodes, $profileImagePath, $defaultProfileImg;
+	global $mysqli, $errorCodes, $profileImagePath, $defaultProfileImg, $request;
 	
 	$result = array();
 	$errors = array();
@@ -99,50 +99,86 @@ function GetUserProfile($userID)
 	{
 		array_push($errors, $errorCodes["P002"]);
 	}
-	else {
-		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, userBio, location, profileImage FROM Profile INNER JOIN UserLogin ON UserLogin.userID=Profile.userID WHERE Profile.userID = ?"))
+
+	if($stmt = $mysqli->prepare("SELECT userName FROM Profile WHERE userID = ?"))
+	{
+		// Bind parameters
+		$stmt->bind_param("i", $userID);
+		
+		// Execute Query
+		$stmt->execute();
+		
+		// Store result
+		$stmt->store_result();
+		
+		if($stmt->num_rows == 1)
 		{
 			// Bind parameters
-			$stmt->bind_param("i", $userID);
+			$stmt->bind_result($requestedUserName);
 			
-			// Execute Query
-			$stmt->execute();
-			
-			// Store result
-			$stmt->store_result();
-			
-			if($stmt->num_rows == 1)
-			{
-				// Bind parameters
-				$stmt->bind_result($firstName, $lastName, $userName, $userBio, $location, $profileImage);
-				
-				// Fill with values
-				$stmt->fetch();
-						
-				if($profileImage == "")
-				{
-					$profileImage = $defaultProfileImg;
-				}
-				
-				$profile = [
-				"firstName" => $firstName,
-				"lastName" => $lastName,
-				"userName" => $userName,
-				"userBio" =>  $userBio,
-				"location" =>  $location,
-				"profileImage" => $profileImagePath . $profileImage,
-				];
-				
-				
-			}
-			
-			/* free result */
-			$stmt->free_result();
-			
-			// Close stmt
-			$stmt->close();
+			// Fill with values
+			$stmt->fetch();
 		}
 	}
+
+	if(count($request) >= 3)
+	{
+		if(strlen($request[2]) > 0)
+		{
+			$requestedUserName = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));	
+		}
+	}
+
+	if(!isset($requestedUserName))
+	{
+		return null;
+	}
+
+	if($stmt = $mysqli->prepare("SELECT userID, firstName, lastName, userName, userBio, location, profileImage FROM Profile WHERE userName = ?"))
+	{
+		// Bind parameters
+		$stmt->bind_param("s", $requestedUserName);
+		
+		// Execute Query
+		$stmt->execute();
+		
+		// Store result
+		$stmt->store_result();
+		
+		if($stmt->num_rows == 1)
+		{
+			// Bind parameters
+			$stmt->bind_result($requestedUserID, $firstName, $lastName, $userName, $userBio, $location, $profileImage);
+			
+			// Fill with values
+			$stmt->fetch();
+					
+			if($profileImage == "")
+			{
+				$profileImage = $defaultProfileImg;
+			}
+			
+			$profile = [
+			"firstName" => $firstName,
+			"lastName" => $lastName,
+			"userName" => $userName,
+			"userBio" =>  $userBio,
+			"location" =>  $location,
+			"profileImage" => $profileImagePath . $profileImage,
+			"listensTo" => getCount($requestedUserID, "listening"),
+			"audience" => getCount($requestedUserID, "audience"),
+			];
+			
+			
+		}
+		
+		/* free result */
+		$stmt->free_result();
+		
+		// Close stmt
+		$stmt->close();
+	}
+	
 	
 	if(count($errors) == 0) //If no errors user is logged in
 	{
@@ -154,6 +190,44 @@ function GetUserProfile($userID)
 	}
 		
 	return $result;
+}
+
+function getCount($userID, $type)
+{
+	global $mysqli;
+
+	if ($type == "audience")
+	{
+		$countQuery = "SELECT count(*) FROM Listeners WHERE listenerUserID = ?";
+	}
+	elseif ($type == "listening")
+	{
+		$countQuery = "SELECT count(*) FROM Listeners WHERE userID = ?";
+	}
+
+	else
+	{
+		return null;
+	}
+
+	if($stmt = $mysqli->prepare($countQuery))
+	{
+		// Bind parameters
+		$stmt->bind_param("i", $userID);
+		
+		// Execute Query
+		$stmt->execute();
+
+		$stmt->bind_result($count);
+			
+		// Fill with values
+		$stmt->fetch();
+	}
+
+	// Close stmt
+	$stmt->close();
+
+	return $count;
 }
 
 function UserSearch()
