@@ -148,7 +148,7 @@ function fetchSays(){
 function fetchSayDetails(sayID){
 	$.ajax({
 		dataType: "json",
-		url: "API/say/" + sayID,
+		url: "API/say/say/" + sayID,
 		success: function(data) {
 			$.each(data.says, function(index, element) {
 				$(".sayDetailsModal").loadTemplate("content/templates/sayDetails.html",
@@ -159,8 +159,14 @@ function fetchSayDetails(sayID){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
-					timePosted: moment(element["timePosted"]).fromNow()
-				}, { append: true});
+					timePosted: moment(element["timePosted"]).fromNow(),
+					boos: element["boos"],
+					applauds: element["applauds"],
+					resays: element["resays"],
+					applaudImg: getActionImage("applaud", element["applaudStatus"]),
+					resayImg: getActionImage("resay", element["resayStatus"]),
+					booImg: getActionImage("boo", element["booStatus"]),
+				});
 			});
 		}
 	});
@@ -450,48 +456,58 @@ angular.module('app', ['ngImgCrop'])
 $("document").ready(function() {
 	$("#userSearch").easyAutocomplete(options);
 	$(document).on('click', '.sayMessage', function(){
-			var $el = $(this).parent().parent().parent();
-			
-			// var $el = $(this);
-			var sayID = $el.attr('id')
-			fetchSayDetails(sayID);
-			fetchComments(sayID);
-			$('#sayDetailsModal').modal('show');
-			
-			console.log($el.attr('id'));
+		var $el = $(this).parent().parent().parent();
+		
+		// var $el = $(this);
+		var sayID = $el.attr('id')
+		fetchSayDetails(sayID);
+		fetchComments(sayID);
+		$('#sayDetailsModal').modal('show');
+		
+		console.log($el.attr('id'));
 	});
 	
-	$(document).on('click', '.applaud', function(){
-			
-			var $el = $(this).parent().parent().parent().parent();
-			var sayID = $el.attr('id');
-			var action = SayAction(sayID, "applaud")
-			var count = action[0];
-			var image = action[1];
-			$(this).parent().find("span").html(count);			
-			$(this).parent().find("img").attr('src', image);
+	$(document).on('click', '.applaud', function(){		
+		var $el = $(this).parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var action = SayAction(sayID, "applaud")
+		var count = action[0];
+		var image = action[1];
+		$(this).parent().find("span").html(count);			
+		$(this).parent().find("img").attr('src', image);
 			
 	});
 	
 	$(document).on('click', '.reSay', function(){
-			var $el = $(this).parent().parent().parent().parent();
-			var sayID = $el.attr('id');
-			var action = SayAction(sayID, "resay");
-			var count = action[0];
-			var image = action[1];
-			$(this).parent().find("span").html(count);			
-			$(this).parent().find("img").attr('src', image);
+		var $el = $(this).parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var action = SayAction(sayID, "resay");
+		var count = action[0];
+		var image = action[1];
+		$(this).parent().find("span").html(count);			
+		$(this).parent().find("img").attr('src', image);
 	});
 	
 	$(document).on('click', '.boo', function(){
-			var $el = $(this).parent().parent().parent().parent();
-			var sayID = $el.attr('id');
-			var action = SayAction(sayID, "boo");
-			var count = action[0];
-			var image = action[1];
-			$(this).parent().find("span").html(count);			
-			$(this).parent().find("img").attr('src', image);	
-			});
+		var $el = $(this).parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var action = SayAction(sayID, "boo");
+		var count = action[0];
+		var image = action[1];
+		$(this).parent().find("span").html(count);			
+		$(this).parent().find("img").attr('src', image);	
+		});
+
+	$(document).on('click', '.commentPen', function(){
+		var $el = $(this).parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var sayID = $el.attr('id')
+		fetchSayDetails(sayID);
+		fetchComments(sayID);
+		$('#sayDetailsModal').modal('show');
+
+		console.log(sayID);
+		});
 	
 	
 	$("body").tooltip({
