@@ -99,6 +99,7 @@ function addSay(){
 					userName: data.say["userName"],
 					message: data.say["message"],
 					profilePicture: data.say["profileImage"],
+					timeStamp: data.say["timePosted"],
 					timePosted: moment(data.say["timePosted"]).fromNow(),
 					boos: data.say["boos"],
 					applauds: data.say["applauds"],
@@ -127,6 +128,7 @@ function fetchSays(){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
+					timeStamp: element["timePosted"],
 					timePosted: moment(element["timePosted"]).fromNow(),
 					boos: element["boos"],
 					applauds: element["applauds"],
@@ -468,6 +470,13 @@ angular.module('app', ['ngImgCrop'])
   });
 
 $("document").ready(function() {
+	setInterval(function()
+		{
+			$(".say").each(function() {
+				var timeCode = $(this).data("timestamp");
+				$(this).find(".timeStamp").text(moment(timeCode).fromNow());
+			});
+		},60000);
 	$("#userSearch").easyAutocomplete(options);
 	$(document).on('click', '.applaud', function(){		
 		var $el = $(this).parent().parent().parent().parent();

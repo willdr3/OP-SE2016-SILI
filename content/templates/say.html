@@ -1,4 +1,5 @@
-<div class="row say" data-id="sayID"> 
+<div class="row say" data-id="sayID" data-template-bind='[
+     {"attribute": "data-timeStamp", "value": "timeStamp"}]'> 
 	<div class="col-md-1 sayProfilePic"> 
 		<img class="sayProfileImg img-circle pull-right" data-src="profilePicture" /> 
 	</div> 
@@ -8,7 +9,7 @@
 				<span data-content="firstName"></span> <span data-content="lastName"></span> (<span data-content="userName"></span>)
 			</div>
 			<div class="col-md-4 text-right">
-				<span data-content="timePosted"></span> 
+				<span class="timeStamp" data-content="timePosted"></span> 
 			</div>
 		</div> 
 		<div class="row"> 
