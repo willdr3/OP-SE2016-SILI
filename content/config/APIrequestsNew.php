@@ -19,7 +19,7 @@
 	$reqArray["profile"] = [
 		0 => ["GET" => "GetUserAccountSettings", "POST" => "UpdateProfile"],
 		"image" => ["GET"=> "", "POST" => ""],
-		"bio" => ["GET" => "", "POST" => ""],
+		"bio" => ["POST" => "UpdateBio"],
 		"password" => ["POST" => "UpdatePassword"],
 		"email" => ["POST" => ""],
 		"listen" => ["GET" => "ListenToUser"],

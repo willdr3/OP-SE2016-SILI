@@ -88,6 +88,12 @@
 			var data = $(this).serialize();
 			ProfileEdit(data);
 		});
+
+		$(document).on('submit','.userBio-form', function(e){
+			e.preventDefault();
+			var data = $(this).serialize();
+			ProfileBioEdit(data);
+		});
 		});
 	</script>
 

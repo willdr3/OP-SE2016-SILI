@@ -763,4 +763,53 @@ function UpdatePassword($userID)
 	}
 	return $result;
 }
+
+function UpdateBio($userID)
+{
+	global $mysqli, $errorCodes;
+	
+	$result = array();
+	$errors = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	
+	if((!isset($_POST['userBio']) || strlen($_POST['userBio']) == 0))
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+			
+	if(count($errors) == 0) 
+	{
+		$userBio =  htmlentities($_POST['userBio']);
+
+		if($stmt = $mysqli->prepare("UPDATE Profile SET userBio = ? WHERE userID = ?"))
+		{
+			// Bind parameters
+			$stmt->bind_param("si", $userBio, $userID);
+			
+			// Execute Query
+			$stmt->execute();
+		}
+		$stmt->close();	
+	}
+	
+	if(count($errors) == 0) //If no errors user is logged in
+	{
+		$result["message"] = "Bio Updated";
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	return $result;
+}
+
 ?>

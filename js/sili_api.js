@@ -106,7 +106,7 @@ function addSay(){
 					applaudImg: getActionImage("applaud", data.say["applaudStatus"]),
 					resayImg: getActionImage("resay", data.say["resayStatus"]),
 					booImg: getActionImage("boo", data.say["booStatus"]),
-				}, { prepend: true, overwriteCache: true });
+				}, { prepend: true});
 ;
 		}
 	});
@@ -134,12 +134,7 @@ function fetchSays(){
 					applaudImg: getActionImage("applaud", element["applaudStatus"]),
 					resayImg: getActionImage("resay", element["resayStatus"]),
 					booImg: getActionImage("boo", element["booStatus"]),
-				}, { append: true,  overwriteCache: true});	
-			});
-			$('.say').on('click', function () {
-				var $el = $(this);
-				
-				console.log($el.attr('id'));
+				}, { append: true });	
 			});
 		}
 	});
@@ -185,7 +180,7 @@ function fetchComments(sayID){
 					message: element["message"],
 					profilePicture: element["profileImage"],
 					timePosted: moment(element["timePosted"]).fromNow()
-				}, { append: true});
+				}, { append: true });
 			});
 		}
 	});	
@@ -230,8 +225,9 @@ function getUserDetials() {
 	});
 }
 
-function getUserProfile(reqUserName) {
-	reqUserName = window.btoa(reqUserName).replace("=","");
+function getUserProfile(reqUserName = '') {
+
+	reqUserName = window.btoa(reqUserName).replace("=",""); //Remove equals from base64 string	
 	requestUserProfile(reqUserName).done(function(data) {
 		//Button Styling
 	});
@@ -350,6 +346,26 @@ function ProfilePasswordChange(data)
 	return false;
 }
 
+function ProfileBioEdit(data)
+{
+	$.ajax({
+	  type: "POST",
+	  dataType: "json",
+	  url: "API/profile/bio",
+	  data: data,
+	  error: function(jqXHR, textStatus, errorThrown) {
+			
+		},				
+	  success: function(data) {	
+			$('#userBio-form').modal('toggle');
+			$('body').removeClass('modal-open');
+			$('.modal-backdrop').remove();
+			getUserSettings();
+		}
+	});
+	return false;
+}
+
 function getActionImage(action, status)
 {
 	if (action == "applaud")
@@ -427,15 +443,15 @@ var options = {
 
 angular.module('app', ['ngImgCrop'])
   .controller('Ctrl', function($scope) {
-    $scope.myImage='';
-    $scope.myCroppedImage='';
+    $scope.myImage = '';
+    $scope.myCroppedImage = '';
 
     var handleFileSelect=function(evt) {
-      var file=evt.currentTarget.files[0];
+      var file = evt.currentTarget.files[0];
       var reader = new FileReader();
       reader.onload = function (evt) {
         $scope.$apply(function($scope){
-          $scope.myImage=evt.target.result;
+          $scope.myImage = evt.target.result;
         });
       };
 
