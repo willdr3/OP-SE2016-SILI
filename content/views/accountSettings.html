@@ -15,8 +15,8 @@
 						<div class="col-md-5">
 							<h3>Personal Info</h3>
 							<p class="acc-name"></p>
-							<br>
 							<p class="acc-username"></p>
+							<p class="acc-location"></p>
 							<hr>
 							<p class="acc-email"></p>
 							
@@ -100,6 +100,9 @@
 			var data = $(this).serialize();
 			ProfileEmailChange(data);
 		});
+		$(document).on('hidden.bs.modal','#profileImage-form', function (e) {
+		  $('#profileImageUpload').val("");
+		})
 		});
 	</script>
 

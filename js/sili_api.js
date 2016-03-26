@@ -253,6 +253,13 @@ function requestUserProfile(reqUserName) {
 function getUserSettings() {
 	requestUserSettings().done(function(data) {
 			$('body').find('select[name="gender"]').val(data.userProfile["gender"]);
+			$('[data-toggle="datepicker"]').datepicker({
+				autohide: true,
+				format: 'dd/mm/yyyy',
+				zIndex: 10000,
+				startView: 2,
+				date: data.userProfile["dob"]
+			});
 	});
 }
 
@@ -266,7 +273,9 @@ function requestUserSettings() {
 			$(".acc-email").text(data.userProfile["email"]);
 			$(".acc-profileImage").attr("src", data.userProfile["profileImage"]);
 			$(".acc-userbio").text(data.userProfile["userBio"]);
-			
+			$(".acc-gender").text(data.userProfile["gender"]);
+			$(".acc-location").text(data.userProfile["location"]);
+
 			$("#profileModals").html("");
 
 			$("#profileModals").loadTemplate("content/templates/changeEmail.html", "", { append: true });
