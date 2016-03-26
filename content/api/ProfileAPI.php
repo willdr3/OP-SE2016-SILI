@@ -57,7 +57,7 @@ function GetUserAccountSettings($userID)
 				"dob" =>  date("d/m/Y", strtotime($dob)),
 				"gender" =>  $gender,
 				"location" =>  $location,
-				"joinDate" => $joinDate,
+				"joinDate" => strtotime($joinDate) * 1000,
 				"profileImage" => $profileImagePath . $profileImage,
 				];
 				

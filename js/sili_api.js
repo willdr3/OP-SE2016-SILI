@@ -275,6 +275,7 @@ function requestUserSettings() {
 			$(".acc-userbio").text(data.userProfile["userBio"]);
 			$(".acc-gender").text(data.userProfile["gender"]);
 			$(".acc-location").text(data.userProfile["location"]);
+			$(".acc-joined").text(moment(data.userProfile["joinDate"]).format('Do MMMM YYYY'));
 
 			$("#profileModals").html("");
 
