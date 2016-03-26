@@ -21,7 +21,7 @@ function GetUserAccountSettings($userID)
 	
 	if($userID == 0)
 	{
-		array_push($errors, $errorCodes["P002"]);
+		array_push($errors, $errorCodes["G001"]);
 	}
 	else {
 		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userEmail, userName, userBio, dob, gender, location, joinDate, profileImage FROM Profile INNER JOIN UserLogin ON UserLogin.userID=Profile.userID WHERE Profile.userID = ?"))
@@ -97,7 +97,7 @@ function GetUserProfile($userID)
 	
 	if($userID == 0)
 	{
-		array_push($errors, $errorCodes["P002"]);
+		array_push($errors, $errorCodes["G001"]);
 	}
 
 	if($stmt = $mysqli->prepare("SELECT userName FROM Profile WHERE userID = ?"))
@@ -550,35 +550,35 @@ function UpdateProfile($userID)
 	
 	if((!isset($_POST['firstName']) || strlen($_POST['firstName']) == 0))
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["P001"]);
 	}
 	
 	if((!isset($_POST['lastName']) || strlen($_POST['lastName']) == 0))
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["P002"]);
 	}
 	
 	if((!isset($_POST['userName']) || strlen($_POST['userName']) == 0))
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["P003"]);
 	}
 	else
 	{
 		$userNameCheck = "^([a-zA-Z])[a-zA-Z_-]*[\w_-]*[\S]$|^([a-zA-Z])[0-9_-]*[\S]$|^[a-zA-Z]*[\S]{5,20}$";
 		if(!preg_match("/$userNameCheck/", $_POST['userName'])) //check it meets the complexity requirements set above
 		{
-			array_push($errors, $errorCodes["G000"]);
+			array_push($errors, $errorCodes["P004"]);
 		}
 	}
 	
 	if((!isset($_POST['dob']) || strlen($_POST['dob']) == 0))
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["P005"]);
 	}
 	
 	if((!isset($_POST['gender']) || strlen($_POST['gender']) == 0))
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["P006"]);
 	}
 	
 		
@@ -614,7 +614,7 @@ function UpdateProfile($userID)
 			} 
 			else
 			{
-				array_push($errors, $errorCodes["G000"]);
+				array_push($errors, $errorCodes["P007"]);
 			}
 		}
 	}
@@ -650,7 +650,7 @@ function UpdatePassword($userID)
 	
 	if(!isset($_POST['currentPassword']) || strlen($_POST['currentPassword']) == 0)
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["P008"]);
 	}
 	
 	if(isset($_POST['newPassword']) && strlen($_POST['newPassword']) > 0)
@@ -660,7 +660,7 @@ function UpdatePassword($userID)
 		$passwordCheck = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
 		if(!preg_match("/$passwordCheck/", $newPassword )) //check it meets the complexity requirements set above
 		{
-			array_push($errors, $errorCodes["G000"]);
+			array_push($errors, $errorCodes["P009"]);
 		}
 		else 
 		{
@@ -669,12 +669,12 @@ function UpdatePassword($userID)
 				$confirmNewPassword = $_POST['confirmNewPassword'];
 				if($confirmNewPassword != $newPassword) //check the both passwords match
 				{
-					array_push($errors, $errorCodes["G000"]);
+					array_push($errors, $errorCodes["P010"]);
 				}
 			}
 			else 
 			{
-				array_push($errors, $errorCodes["G000"]);
+				array_push($errors, $errorCodes["P011"]);
 			}
 		}
 	}	
@@ -694,7 +694,7 @@ function UpdatePassword($userID)
 			// Store result
 			$stmt->store_result();
 			
-			if($stmt->num_rows > 0)
+			if($stmt->num_rows == 1)
 			{
 				// Bind parameters
 				$stmt->bind_result($hashPass);
@@ -730,14 +730,14 @@ function UpdatePassword($userID)
 					}
 					else
 					{
-						array_push($errors, $errorCodes["G000"]);
+						array_push($errors, $errorCodes["M002"]);
 					}
 					
 					
 				}
 				else
 				{
-					array_push($errors, $errorCodes["G000"]);
+					array_push($errors, $errorCodes["P012"]);
 				}
 			}
 			else
@@ -783,7 +783,7 @@ function UpdateBio($userID)
 	
 	if((!isset($_POST['userBio']) || strlen($_POST['userBio']) == 0))
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["P013"]);
 	}
 			
 	if(count($errors) == 0) 
@@ -812,4 +812,138 @@ function UpdateBio($userID)
 	return $result;
 }
 
+function UpdateEmail($userID)
+{
+	global $mysqli, $errorCodes;
+	
+	$result = array();
+	$errors = array();
+	
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	
+	
+	if(!isset($_POST['currentPassword']) || strlen($_POST['currentPassword']) == 0)
+	{
+		array_push($errors, $errorCodes["P008"]);
+	}
+	
+	if(isset($_POST['newEmail']) && strlen($_POST['newEmail']) > 0)
+	{
+		$newEmailAddress = filter_var($_POST['newEmail'],FILTER_SANITIZE_EMAIL);
+		
+		if (!filter_var($newEmailAddress, FILTER_VALIDATE_EMAIL)) //Check if its a vaild email format 
+		{
+			array_push($errors, $errorCodes["P014"]);
+		}
+		else
+		{
+			if((!isset($_POST['confirmNewEmail'])) || (strlen($_POST['confirmNewEmail']) == 0)) //Check if the confirmation email has been submitted 
+			{
+				array_push($errors, $errorCodes["P015"]);
+			}
+			else
+			{
+				$confirmNewEmail = filter_var($_POST['confirmNewEmail'],FILTER_SANITIZE_EMAIL);
+				if($newEmailAddress != $confirmNewEmail) //Check if both email addresses match
+				{
+					array_push($errors, $errorCodes["P016"]);
+				}
+			}
+		}
+	}	
+		
+	if(count($errors) == 0) 
+	{
+		$userPassword = $_POST['currentPassword'];
+		
+		if($stmt = $mysqli->prepare("SELECT userPassword FROM UserLogin WHERE userID = ?"))
+		{
+			// Bind parameters
+			$stmt->bind_param("i", $userID);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows == 1)
+			{
+				// Bind parameters
+				$stmt->bind_result($hashPass);
+				
+				// Fill with values
+				$stmt->fetch();
+						
+				// Free result
+				$stmt->free_result();
+						
+				// Close stmt
+				$stmt->close();
+						
+				if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
+				{					
+					if($stmt = $mysqli->prepare("SELECT userEmail FROM UserLogin WHERE userEmail = ?"))
+					{
+						// Bind parameters
+						$stmt->bind_param("s", $newEmailAddress);
+						
+						// Execute Query
+						$stmt->execute();
+						
+						// Store result
+						$stmt->store_result();
+						
+						if($stmt->num_rows == 0)
+						{
+							if($stmt = $mysqli->prepare("UPDATE UserLogin SET userEmail = ? WHERE userID = ?"))
+							{
+								// Bind parameters
+								$stmt->bind_param("si", $newEmailAddress, $userID);
+								
+								// Execute Query
+								$stmt->execute();
+							}
+						}
+						else
+						{
+							array_push($errors, $errorCodes["P017"]);
+						}
+					}					
+				}
+				else
+				{
+					array_push($errors, $errorCodes["P012"]);
+				}
+			}
+			else
+			{
+				array_push($errors, $errorCodes["G000"]);
+			}
+			
+		}
+		else
+		{
+			array_push($errors, $errorCodes["M002"]);
+		}
+	}
+	
+	if(count($errors) == 0) //If no errors user is logged in
+	{
+		$result["message"] = "Email Updated";
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	return $result;
+}
 ?>

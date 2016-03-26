@@ -94,6 +94,12 @@
 			var data = $(this).serialize();
 			ProfileBioEdit(data);
 		});
+		
+		$(document).on('submit','.changeEmail-form', function(e){
+			e.preventDefault();
+			var data = $(this).serialize();
+			ProfileEmailChange(data);
+		});
 		});
 	</script>
 

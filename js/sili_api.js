@@ -348,6 +348,26 @@ function ProfilePasswordChange(data)
 	return false;
 }
 
+function ProfileEmailChange(data)
+{
+	$.ajax({
+	  type: "POST",
+	  dataType: "json",
+	  url: "API/profile/email",
+	  data: data,
+	  error: function(jqXHR, textStatus, errorThrown) {
+			
+		},				
+	  success: function(data) {	
+			$('#changeEmail-form').modal('toggle');
+			$('body').removeClass('modal-open');
+			$('.modal-backdrop').remove();
+			getUserSettings();
+		}
+	});
+	return false;
+}
+
 function ProfileBioEdit(data)
 {
 	$.ajax({

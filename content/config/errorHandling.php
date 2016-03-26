@@ -139,12 +139,109 @@ $errorCodes ["S003"] = [
 		];
 		
 // Profile error codes/messages
+$errorCodes ["P001"] = [
+	"code" => "P001",
+	"field" => "firstName",
+	"message" => "First Name is empty", 
+	];
+	
 $errorCodes ["P002"] = [
-		"code" => "P002",
-		"field" => "userID",
-		"message" => "UserID is not set", 
-		];
+	"code" => "P002",
+	"field" => "lastName",
+	"message" => "Last Name is empty", 
+	];
+	
+$errorCodes ["P003"] = [
+	"code" => "P003",
+	"field" => "userName",
+	"message" => "UserName is empty", 
+	];
+	
+$errorCodes ["P004"] = [
+	"code" => "P004",
+	"field" => "userName",
+	"message" => "UserName does not meet requirements", 
+	];
+	
+$errorCodes ["P005"] = [
+	"code" => "P005",
+	"field" => "dob",
+	"message" => "Date of Birth is empty", 
+	];
+	
+$errorCodes ["P006"] = [
+	"code" => "P006",
+	"field" => "gender",
+	"message" => "Gender is empty", 
+	];
+			
+$errorCodes ["P007"] = [
+	"code" => "P007",
+	"field" => "",
+	"message" => "UserName already Exists", 
+	];
+				
+$errorCodes ["P008"] = [
+	"code" => "P008",
+	"field" => "currentPassword",
+	"message" => "Current Password is empty", 
+	];
+				
+$errorCodes ["P009"] = [
+	"code" => "P009",
+	"field" => "newPassword",
+	"message" => "New password does not meet complexity requirements", 
+	];
+				
+$errorCodes ["P010"] = [
+	"code" => "P010",
+	"field" => "",
+	"message" => "New Password does not Match Confirm New Password", 
+	];
+				
+$errorCodes ["P011"] = [
+	"code" => "P011",
+	"field" => "confirmNewPassword",
+	"message" => "Confirm New Password is empty", 
+	];	
+	
+$errorCodes ["P012"] = [
+	"code" => "P012",
+	"field" => "password",
+	"message" => "Incorrect Current Password", 
+	];
 		
+$errorCodes ["P013"] = [
+	"code" => "P013",
+	"field" => "userBio",
+	"message" => "User Bio is empty", 
+	];
+		
+$errorCodes ["P014"] = [
+	"code" => "P014",
+	"field" => "newEmail",
+	"message" => "Email is invaid format", 
+	];	
+	
+			
+$errorCodes ["P015"] = [
+	"code" => "P015",
+	"field" => "confirmNewEmail",
+	"message" => "Confirm New Email is empty", 
+	];	
+	
+$errorCodes ["P016"] = [
+	"code" => "P016",
+	"field" => "",
+	"message" => "New Email does not match Confirm New Email", 
+	];	
+	
+$errorCodes ["P017"] = [
+	"code" => "P017",
+	"field" => "",
+	"message" => "Email is already Registered", 
+	];
+
 // Comment error codes/messages
 $errorCodes ["Co02"] = [
 		"code" => "C002",

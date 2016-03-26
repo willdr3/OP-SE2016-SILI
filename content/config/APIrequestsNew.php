@@ -21,7 +21,7 @@
 		"image" => ["GET"=> "", "POST" => ""],
 		"bio" => ["POST" => "UpdateBio"],
 		"password" => ["POST" => "UpdatePassword"],
-		"email" => ["POST" => ""],
+		"email" => ["POST" => "UpdateEmail"],
 		"listen" => ["GET" => "ListenToUser"],
 		"listeners" => ["GET" => "GetListeners"],
 		"audience" => ["GET" => "GetAudience"],
