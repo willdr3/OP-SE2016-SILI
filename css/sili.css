@@ -136,12 +136,12 @@ input, textarea
 	margin-bottom: 5px;
 }
 
-.sayBox
+textarea
 {
 	resize: none;
 	width: 100%;
 	border-radius: 10px;
-	padding-left: 5px;
+
 }
 
 .sayFormBox, .sayButton, .comButton

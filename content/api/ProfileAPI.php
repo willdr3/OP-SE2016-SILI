@@ -781,14 +781,14 @@ function UpdateBio($userID)
 		array_push($errors, $errorCodes["G001"]);
 	}
 	
-	if((!isset($_POST['userBio']) || strlen($_POST['userBio']) == 0))
+	if (!isset($_POST['userBio']) || strlen($_POST['currentPassword']) == 0 || strlen($_POST['currentPassword']) > 500)
 	{
 		array_push($errors, $errorCodes["P013"]);
 	}
 			
 	if(count($errors) == 0) 
 	{
-		$userBio =  htmlentities($_POST['userBio']);
+		$userBio =  substr(htmlentities($_POST['userBio']),0,500);
 
 		if($stmt = $mysqli->prepare("UPDATE Profile SET userBio = ? WHERE userID = ?"))
 		{
