@@ -7,6 +7,52 @@ if (!isset($internal) && !isset($controller)) //check if its not an internal or 
 	exit;
 }
 
+function CreateProfileID() //Generate a Unique ProfileID
+{
+	global $mysqli;
+	$profileID = "";
+
+	//Generate ProfileID
+	do {
+	  	$bytes = openssl_random_pseudo_bytes(10, $cstrong);
+	   	$hex = bin2hex($bytes);
+	   	
+	   	//Check the generated id doesnt already exist
+	   	if($stmt = $mysqli->prepare("SELECT profileID FROM Profile WHERE profileID = ?"))
+		{
+			
+			$stmt->bind_param("s", $hex);
+			
+			$stmt->execute();
+			
+			
+			$stmt->store_result();
+			
+			if($stmt->num_rows == 0)
+			{
+				$profileID = $hex;
+			}
+		}
+	} while ($profileID == "");
+	
+return $profileID;
+}
+
+function CreateProfile($userID, $firstName, $lastName)
+{
+	global $mysqli;
+	//Generate ProfileID
+	$profileID = CreateProfileID();
+
+	//add user to profile table
+	if ($stmt = $mysqli->prepare("INSERT INTO Profile (profileID, userID, firstName, lastName) VALUES (?,?,?,?)")) 
+	{
+		$stmt->bind_param("siss", $profileID, $userID, $firstName, $lastName);
+		$stmt->execute();
+		$stmt->close();
+	}
+}
+
 function GetUserAccountSettings($userID)
 {
 	global $mysqli, $errorCodes, $profileImagePath, $defaultProfileImg;
@@ -26,21 +72,21 @@ function GetUserAccountSettings($userID)
 	else {
 		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userEmail, userName, userBio, dob, gender, location, joinDate, profileImage FROM Profile INNER JOIN UserLogin ON UserLogin.userID=Profile.userID WHERE Profile.userID = ?"))
 		{
-			// Bind parameters
+			
 			$stmt->bind_param("i", $userID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 			
-			// Store result
+			
 			$stmt->store_result();
 			
 			if($stmt->num_rows == 1)
 			{
-				// Bind parameters
+				
 				$stmt->bind_result($firstName, $lastName, $email, $userName, $userBio, $dob, $gender, $location, $joinDate, $profileImage);
 				
-				// Fill with values
+				
 				$stmt->fetch();
 						
 				if($profileImage == "")
@@ -64,10 +110,10 @@ function GetUserAccountSettings($userID)
 				
 			}
 			
-			/* free result */
+			
 			$stmt->free_result();
 			
-			// Close stmt
+			
 			$stmt->close();
 		}
 	}
@@ -102,21 +148,21 @@ function GetUserProfile($userID)
 
 	if($stmt = $mysqli->prepare("SELECT userName FROM Profile WHERE userID = ?"))
 	{
-		// Bind parameters
+		
 		$stmt->bind_param("i", $userID);
 		
-		// Execute Query
+		
 		$stmt->execute();
 		
-		// Store result
+		
 		$stmt->store_result();
 		
 		if($stmt->num_rows == 1)
 		{
-			// Bind parameters
+			
 			$stmt->bind_result($requestedUserName);
 			
-			// Fill with values
+			
 			$stmt->fetch();
 		}
 	}
@@ -136,21 +182,21 @@ function GetUserProfile($userID)
 
 	if($stmt = $mysqli->prepare("SELECT userID, firstName, lastName, userName, userBio, location, profileImage FROM Profile WHERE userName = ?"))
 	{
-		// Bind parameters
+		
 		$stmt->bind_param("s", $requestedUserName);
 		
-		// Execute Query
+		
 		$stmt->execute();
 		
-		// Store result
+		
 		$stmt->store_result();
 		
 		if($stmt->num_rows == 1)
 		{
-			// Bind parameters
+			
 			$stmt->bind_result($requestedUserID, $firstName, $lastName, $userName, $userBio, $location, $profileImage);
 			
-			// Fill with values
+			
 			$stmt->fetch();
 					
 			if($profileImage == "")
@@ -172,10 +218,10 @@ function GetUserProfile($userID)
 			
 		}
 		
-		/* free result */
+		
 		$stmt->free_result();
 		
-		// Close stmt
+		
 		$stmt->close();
 	}
 	
@@ -212,19 +258,19 @@ function getCount($userID, $type)
 
 	if($stmt = $mysqli->prepare($countQuery))
 	{
-		// Bind parameters
+		
 		$stmt->bind_param("i", $userID);
 		
-		// Execute Query
+		
 		$stmt->execute();
 
 		$stmt->bind_result($count);
 			
-		// Fill with values
+		
 		$stmt->fetch();
 	}
 
-	// Close stmt
+	
 	$stmt->close();
 
 	return $count;
@@ -244,10 +290,10 @@ function UserSearch()
 		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE userName LIKE ? OR firstName LIKE ? OR lastName  LIKE ?"))
 		{
 			
-			// Bind parameters
+			
 			$stmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
 			
-			// Execute Query
+			
 			$stmt->execute();
 			
 			$stmt->bind_result($firstName, $lastName, $userName, $profileImage);
@@ -327,13 +373,13 @@ function ListenToUser($userID)
 		//Check not Already Following
 		if($stmt = $mysqli->prepare("SELECT userID, listenerUserID FROM Listeners WHERE userID = ? AND listenerUserID = ?"))
 		{			
-			// Bind parameters
+			
 			$stmt->bind_param("ii", $userID, $listenerUserID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 			
-			// Store result
+			
 			$stmt->store_result();
 
 			if($stmt->num_rows == 0)
@@ -341,10 +387,10 @@ function ListenToUser($userID)
 				//Follow User
 				if($stmt = $mysqli->prepare("INSERT INTO Listeners (userID, listenerUserID) VALUES (?, ?)"))
 				{	
-					// Bind parameters
+					
 					$stmt->bind_param("ii", $userID, $listenerUserID);
 					
-					// Execute Query
+					
 					$stmt->execute();
 				}
 				else
@@ -404,13 +450,13 @@ function GetListeners($userID)
 		//Check not Already Following
 		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) LIMIT 10"))
 		{			
-			// Bind parameters
+			
 			$stmt->bind_param("i", $userID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 			
-			// Store result
+			
 			$stmt->store_result();
 
 			if($stmt->num_rows > 0)
@@ -481,13 +527,13 @@ function GetAudience($userID)
 		//Check not Already Following
 		if($stmt = $mysqli->prepare("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE userID IN (SELECT userID FROM Listeners WHERE listenerUserID = ?) LIMIT 10"))
 		{			
-			// Bind parameters
+			
 			$stmt->bind_param("i", $userID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 			
-			// Store result
+			
 			$stmt->store_result();
 
 			if($stmt->num_rows > 0)
@@ -594,20 +640,20 @@ function UpdateProfile($userID)
 		{
 			$stmt->bind_param("si",$userName, $userID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 
-			// Store result
+			
 			$stmt->store_result();
 
 			if($stmt->num_rows == 0)
 			{
 				if($stmt = $mysqli->prepare("UPDATE Profile SET firstName = ?, lastName = ?, userName = ?, dob = ?, gender = ? WHERE userID = ?"))
 				{
-					// Bind parameters
+					
 					$stmt->bind_param("sssssi", $firstName, $lastName, $userName, $dob, $gender, $userID);
 					
-					// Execute Query
+					
 					$stmt->execute();
 				}
 				$stmt->close();	
@@ -685,27 +731,27 @@ function UpdatePassword($userID)
 		
 		if($stmt = $mysqli->prepare("SELECT userPassword FROM UserLogin WHERE userID = ?"))
 		{
-			// Bind parameters
+			
 			$stmt->bind_param("i", $userID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 			
-			// Store result
+			
 			$stmt->store_result();
 			
 			if($stmt->num_rows == 1)
 			{
-				// Bind parameters
+				
 				$stmt->bind_result($hashPass);
 				
-				// Fill with values
+				
 				$stmt->fetch();
 						
 				// Free result
 				$stmt->free_result();
 						
-				// Close stmt
+				
 				$stmt->close();
 						
 				if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
@@ -720,10 +766,10 @@ function UpdatePassword($userID)
 					
 					if($stmt = $mysqli->prepare("UPDATE UserLogin SET userPassword = ? WHERE userID = ?"))
 					{
-						// Bind parameters
+						
 						$stmt->bind_param("si", $hashedPassword, $userID);
 						
-						// Execute Query
+						
 						$stmt->execute();
 						
 						$stmt->close();	
@@ -792,10 +838,10 @@ function UpdateBio($userID)
 
 		if($stmt = $mysqli->prepare("UPDATE Profile SET userBio = ? WHERE userID = ?"))
 		{
-			// Bind parameters
+			
 			$stmt->bind_param("si", $userBio, $userID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 		}
 		$stmt->close();	
@@ -866,50 +912,50 @@ function UpdateEmail($userID)
 		
 		if($stmt = $mysqli->prepare("SELECT userPassword FROM UserLogin WHERE userID = ?"))
 		{
-			// Bind parameters
+			
 			$stmt->bind_param("i", $userID);
 			
-			// Execute Query
+			
 			$stmt->execute();
 			
-			// Store result
+			
 			$stmt->store_result();
 			
 			if($stmt->num_rows == 1)
 			{
-				// Bind parameters
+				
 				$stmt->bind_result($hashPass);
 				
-				// Fill with values
+				
 				$stmt->fetch();
 						
 				// Free result
 				$stmt->free_result();
 						
-				// Close stmt
+				
 				$stmt->close();
 						
 				if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
 				{					
 					if($stmt = $mysqli->prepare("SELECT userEmail FROM UserLogin WHERE userEmail = ?"))
 					{
-						// Bind parameters
+						
 						$stmt->bind_param("s", $newEmailAddress);
 						
-						// Execute Query
+						
 						$stmt->execute();
 						
-						// Store result
+						
 						$stmt->store_result();
 						
 						if($stmt->num_rows == 0)
 						{
 							if($stmt = $mysqli->prepare("UPDATE UserLogin SET userEmail = ? WHERE userID = ?"))
 							{
-								// Bind parameters
+								
 								$stmt->bind_param("si", $newEmailAddress, $userID);
 								
-								// Execute Query
+								
 								$stmt->execute();
 							}
 						}
