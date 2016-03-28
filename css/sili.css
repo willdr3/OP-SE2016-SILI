@@ -154,6 +154,11 @@ textarea
 	border:1px solid #91AEC1;
 }
 
+.sayDetails
+{
+	margin: 0px;
+}
+
 .sayProfilePic
 {
 	padding-right: 2.5px;
