@@ -227,7 +227,8 @@ function getUserDetials() {
 	});
 }
 
-function getUserProfile(reqUserName = '') {
+function getUserProfile(reqUserName) {
+	reqUserName = typeof reqUserName !== 'undefined' ? reqUserName : '';
 
 	reqUserName = window.btoa(reqUserName).replace("=",""); //Remove equals from base64 string	
 	requestUserProfile(reqUserName).done(function(data) {
