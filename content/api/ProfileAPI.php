@@ -633,7 +633,9 @@ function UpdateProfile($userID)
 		$firstName =  filter_var($_POST['firstName'], FILTER_SANITIZE_STRING);
 		$lastName = filter_var($_POST['lastName'], FILTER_SANITIZE_STRING);
 		$userName =  strtoupper(filter_var($_POST['userName'], FILTER_SANITIZE_STRING));
-		$dob = date("Y-m-d", strtotime(filter_var($_POST['dob'], FILTER_SANITIZE_STRING)));
+		$dob = filter_var($_POST['dob'], FILTER_SANITIZE_STRING);
+		$dob = str_replace('/', '-', $dob);
+		$dob = date("Y-m-d", strtotime($dob));
 		$gender = substr($_POST['gender'], 0, 1);
 
 		if($stmt = $mysqli->prepare("SELECT userName FROM Profile WHERE userName = ? AND userID != ?"))
