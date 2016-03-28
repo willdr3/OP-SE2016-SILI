@@ -104,9 +104,6 @@ function addSay(){
 					boos: data.say["boos"],
 					applauds: data.say["applauds"],
 					resays: data.say["resays"],
-					applaudImg: getActionImage("applaud", data.say["applaudStatus"]),
-					resayImg: getActionImage("resay", data.say["resayStatus"]),
-					booImg: getActionImage("boo", data.say["booStatus"]),
 				}, { prepend: true});
 ;
 		}
@@ -132,14 +129,21 @@ function fetchSays(){
 					timePosted: moment(element["timePosted"]).fromNow(),
 					boos: element["boos"],
 					applauds: element["applauds"],
-					resays: element["resays"],
-					applaudImg: getActionImage("applaud", element["applaudStatus"]),
-					resayImg: getActionImage("resay", element["resayStatus"]),
-					booImg: getActionImage("boo", element["booStatus"]),
-				}, { append: true });	
+					resays: element["resays"]
+				}, { append: true, afterInsert: function (elem) {
+						asignActionStatus(elem, element);
+				}});	
+				
 			});
 		}
 	});
+}
+
+function asignActionStatus(elem, data) {
+	var sayElement = elem;
+	setActionStatus(sayElement.find("i.applaud"), data["applaudStatus"]);
+	setActionStatus(sayElement.find("i.reSay"), data["resayStatus"]);
+	setActionStatus(sayElement.find("i.boo"), data["booStatus"]);
 }
 
 function fetchSayDetails(sayID){
@@ -158,10 +162,7 @@ function fetchSayDetails(sayID){
 				timePosted: moment(data.say["timePosted"]).fromNow(),
 				boos: data.say["boos"],
 				applauds: data.say["applauds"],
-				resays: data.say["resays"],
-				applaudImg: getActionImage("applaud", data.say["applaudStatus"]),
-				resayImg: getActionImage("resay", data.say["resayStatus"]),
-				booImg: getActionImage("boo", data.say["booStatus"])
+				resays: data.say["resays"]
 			});
 		}
 	});
@@ -305,18 +306,18 @@ function requestUserSettings() {
 
 
 function SayAction(sayID, action) {
-	var count, image;
+	var count, status;
 	$.ajax({
 		dataType: "json",
 		async: false,
 		url: "API/say/" + action + "/" + sayID,
 		success: function(data) {
 			count = data["count"];			
-			image = getActionImage(action, data["status"]);
+			status = data["status"];
 		}
 	});
 	
-	return [count, image];
+	return [count, status];
 }
 
 function ProfileEdit(data)
@@ -399,34 +400,16 @@ function ProfileBioEdit(data)
 	return false;
 }
 
-function getActionImage(action, status)
+function setActionStatus(element, status)
 {
-	if (action == "applaud")
+	if(status == true)
 	{
-		image = "images/applaud.png";
-		if(status == true)
-		{
-			image = "images/applaudActive.png";
-		}
-	}	
-	else if (action == "resay")
+		element.addClass("active");
+	}
+	else
 	{
-		image = "images/resay.png";
-		if(status == true)
-		{
-			image = "images/resayActive.png";
-		}
-	}		
-	else if (action == "boo")
-	{
-		image = "images/boo.png";
-		if(status == true)
-		{
-			image = "images/booActive.png";
-		}
-	}		
-
-	return image;
+		element.removeClass("active");
+	}
 }
 
 getUserDetials().done(function() {
@@ -518,10 +501,9 @@ $("document").ready(function() {
 		var sayID = $el.attr('id');
 		var action = SayAction(sayID, "applaud")
 		var count = action[0];
-		var image = action[1];
+		var status = action[1];
 		$(this).parent().find("span").html(count);			
-		$(this).parent().find("img").attr('src', image);
-			
+		setActionStatus($(this).parent().find("i"), status);	
 	});
 	
 	$(document).on('click', '.reSay', function(){
@@ -529,9 +511,9 @@ $("document").ready(function() {
 		var sayID = $el.attr('id');
 		var action = SayAction(sayID, "resay");
 		var count = action[0];
-		var image = action[1];
+		var status = action[1];
 		$(this).parent().find("span").html(count);			
-		$(this).parent().find("img").attr('src', image);
+		setActionStatus($(this).parent().find("i"), status);
 	});
 	
 	$(document).on('click', '.boo', function(){
@@ -539,9 +521,9 @@ $("document").ready(function() {
 		var sayID = $el.attr('id');
 		var action = SayAction(sayID, "boo");
 		var count = action[0];
-		var image = action[1];
+		var status = action[1];
 		$(this).parent().find("span").html(count);			
-		$(this).parent().find("img").attr('src', image);	
+		setActionStatus($(this).parent().find("i"), status);
 		});
 
 	$(document).on('click', '.commentPen', function(){

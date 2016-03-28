@@ -1,4 +1,5 @@
 @import url("fonts.css");
+@import url("flaticon.css");
 body
 {
     height:100%;
@@ -186,7 +187,17 @@ textarea
 
 .icons
 {
-	max-height:30px;
+	font-size: 30px;
+}
+
+.icons.applaud, .icons.reSay, .icons.boo
+{
+	color: #E8E8E8;
+}
+
+.icons.active, .commentPen
+{
+	color: #373F51;	
 }
 
 .profile
