@@ -173,7 +173,7 @@ function fetchComments(sayID){
 		url: "API/say/comment/" + sayID,
 		success: function(data) {
 			$.each(data.says, function(index, element) {
-				$(".commentFeed").loadTemplate("content/templates/comment.html",
+				$(".commentFeed").loadTemplate("content/templates/say.html",
 				{
 					sayID: element["sayID"],
 					firstName: element["firstName"],
@@ -197,7 +197,7 @@ function addComment(){
 		data: data,
 		success: function(data) {	
 			$(".commentBox").val("");
-			$(".commentFeed").loadTemplate("content/templates/comment.html",
+			$(".commentFeed").loadTemplate("content/templates/say.html",
 				{
 					firstName: data.say["firstName"],
 				    lastName: data.say["lastName"],
