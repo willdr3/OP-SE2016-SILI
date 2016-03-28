@@ -307,6 +307,7 @@ function UserSearch()
 				$userResults = [
 					"name" => $firstName . " " . $lastName . " (" . $userName . ")",
 					"profileImage" => $profileImagePath . $profileImage,
+					"profileLink" => "http://kate.ict.op.ac.nz/~gearl1/SILI/profile/" . $userName,
 				];	
 				array_push($searchResults, $userResults);
 			 }

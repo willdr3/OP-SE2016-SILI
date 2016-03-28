@@ -437,6 +437,7 @@ getUserDetials().done(function() {
 	}
 });
 
+
 var options = {
   url: function(phrase) {
 		return "API/profile/search/" + phrase;
@@ -453,10 +454,10 @@ var options = {
   requestDelay: 500,
 
   template: {
-    type: "iconRight",
-    fields: {
-      iconSrc: "profileImage"
-    }
+  	type: "iconRight",
+		fields: {
+			iconSrc: "profileImage"
+		}
   },
 
   list: {
@@ -469,7 +470,10 @@ var options = {
 		},
 		hideAnimation: {
 		  type: "slide"
-		}
+		},
+		onChooseEvent: function() {
+			window.location = $("#userSearch").getItemData(0).profileLink;
+		}	
   }
 
 };
