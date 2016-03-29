@@ -345,7 +345,7 @@ function UserSearch()
 				$userResults = [
 					"name" => $firstName . " " . $lastName . " (" . $userName . ")",
 					"profileImage" => $profileImagePath . $profileImage,
-					"profileLink" => "http://kate.ict.op.ac.nz/~gearl1/SILI/profile/" . $userName,
+					"profileLink" => "profile/" . $userName,
 				];	
 				array_push($searchResults, $userResults);
 			 }
@@ -452,7 +452,96 @@ function ListenToUser($userID)
 
 	if(count($errors) == 0)
 	{
-		$result["message"] = "Followed User";
+		$result["message"] = "Listening to User";
+	}
+	else
+	{
+		$result["errors"] = $errors;
+	}
+	
+	return $result;
+}
+
+function StopListenToUser($userID)
+{
+	global $mysqli, $errorCodes, $request;
+	
+	$result = array();
+	$errors = array();
+	
+	//Pre Requirments
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+		
+	
+	
+	if(count($request) >= 3)
+	{
+		$listenerUserID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));
+		if ($userID == $listenerUserID) 
+		{
+			array_push($errors, $errorCodes["G000"]);
+		}
+	}
+	else
+	{
+		array_push($errors, $errorCodes["G000"]);
+	}
+	
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{	
+		//Check not Already Following
+		if($stmt = $mysqli->prepare("SELECT userID, listenerUserID FROM Listeners WHERE userID = ? AND listenerUserID = ?"))
+		{			
+			
+			$stmt->bind_param("ii", $userID, $listenerUserID);
+			
+			
+			$stmt->execute();
+			
+			
+			$stmt->store_result();
+
+			if($stmt->num_rows == 1)
+			{
+				//Follow User
+				if($stmt = $mysqli->prepare("DELETE FROM Listeners WHERE userID = ? AND listenerUserID = ?"))
+				{	
+					
+					$stmt->bind_param("ii", $userID, $listenerUserID);
+					
+					
+					$stmt->execute();
+				}
+				else
+				{
+					array_push($errors, $errorCodes["M002"]);
+				}
+			}
+			else
+			{
+				array_push($errors, $errorCodes["G000"]);
+			}
+						
+			 $stmt->close();	 
+		}
+		else
+		{
+			array_push($errors, $errorCodes["M002"]);
+		}
+	}
+
+	if(count($errors) == 0)
+	{
+		$result["message"] = "Stopped Listening to User";
 	}
 	else
 	{
