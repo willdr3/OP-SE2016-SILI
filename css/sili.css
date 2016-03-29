@@ -26,7 +26,7 @@ p, *
 	cursor: default;
 }
 
-a, .icons, .banner .user *, .pointer
+a, .icons, .banner .user *, .pointer, .profileLink *
 {
     cursor: pointer;
 }
@@ -293,4 +293,10 @@ input[type=file].profileImageUpload
 {
 	font-family: 'komika_title_-_kapsregular';
 	font-size: 20px;
+}
+
+.profileLink:link, .profileLink:visited, .profileLink:hover, .profileLink:active
+{
+	text-decoration: none;
+	color: #000000;
 }
