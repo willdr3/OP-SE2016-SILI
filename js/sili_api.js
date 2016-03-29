@@ -131,7 +131,7 @@ function fetchSays(){
 					applauds: element["applauds"],
 					resays: element["resays"]
 				}, { append: true, afterInsert: function (elem) {
-						asignActionStatus(elem, element);
+						assignActionStatus(elem, element);
 				}});	
 			});
 		}
@@ -158,14 +158,14 @@ function fetchUserSays(userName){
 					applauds: element["applauds"],
 					resays: element["resays"]
 				}, { append: true, afterInsert: function (elem) {
-						asignActionStatus(elem, element);
+						assignActionStatus(elem, element);
 				}});	
 			});
 		}
 	});
 }
 
-function asignActionStatus(elem, data) {
+function assignActionStatus(elem, data) {
 	var sayElement = elem;
 	setActionStatus(sayElement.find("i.applaud"), data["applaudStatus"]);
 	setActionStatus(sayElement.find("i.reSay"), data["resayStatus"]);
@@ -185,12 +185,12 @@ function fetchSayDetails(sayID){
 			    userName: data.say["userName"],
 				message: data.say["message"],
 				profilePicture: data.say["profileImage"],
-				timePosted: moment(data.say["timePosted"]).fromNow(),
+				timePosted: moment(data.say["timePosted"]).format('lll'),
 				boos: data.say["boos"],
 				applauds: data.say["applauds"],
 				resays: data.say["resays"]
 			}, { afterInsert: function (elem) {
-						asignActionStatus(elem, element);
+						assignActionStatus(elem, element);
 			}});
 		}
 	});
@@ -210,9 +210,12 @@ function fetchComments(sayID){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
-					timePosted: moment(element["timePosted"]).fromNow()
+					timePosted: moment(element["timePosted"]).fromNow(),
+					boos: data.say["boos"],
+					applauds: data.say["applauds"],
+					resays: data.say["resays"]
 				}, { append: true, afterInsert: function (elem) {
-						asignActionStatus(elem, element);
+						assignActionStatus(elem, element);
 				}});
 			});
 		}
