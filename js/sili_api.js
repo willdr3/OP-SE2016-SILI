@@ -118,11 +118,8 @@ function fetchSays(){
 		url: "API/say/",
 		success: function(data) {			
 			$.each(data.says, function(index, element) {					
-<<<<<<< HEAD
-				$(".sayFeed").loadTemplate("content/templates/ReSay.html",
-=======
 				$(".sayFeed").loadTemplate("content/templates/say.html",
->>>>>>> cbbe0044cc04d5654eb46c242b94b8d99c3e6581
+
 				{
 				    sayID: element["sayID"],
 					firstName: element["firstName"],
@@ -198,11 +195,7 @@ function fetchSayDetails(sayID){
 				resays: data.say["resays"],
 				profileLink: data.say["profileLink"],
 			}, { afterInsert: function (elem) {
-<<<<<<< HEAD
 						assignActionStatus(elem, data.say);
-=======
-						assignActionStatus(elem, data);
->>>>>>> cbbe0044cc04d5654eb46c242b94b8d99c3e6581
 			}});
 		}
 	});
@@ -276,7 +269,6 @@ function getUserDetials() {
 
 function getUserProfile(reqUserName) {
 	reqUserName = typeof reqUserName !== 'undefined' ? reqUserName : '';
-<<<<<<< HEAD
 
 	reqUserName = window.btoa(reqUserName).replace("=",""); //Remove equals from base64 string	
 	requestUserProfile(reqUserName).done(function(data) {
@@ -331,62 +323,6 @@ function getUserSettings() {
 function requestUserSettings() {
 	return $.ajax({
 		dataType: "json",
-=======
-
-	reqUserName = window.btoa(reqUserName).replace("=",""); //Remove equals from base64 string	
-	requestUserProfile(reqUserName).done(function(data) {
-		$(".sayFeed").empty();
-		fetchUserSays(reqUserName);
-	});
-}
-
-function requestUserProfile(reqUserName) {
-	return $.ajax({
-		dataType: "json",
-		url: "API/profile/user/" + reqUserName,
-		success: function(data) {
-			$(".profile-name").text(data.userProfile["firstName"] + " " + data.userProfile["lastName"]);
-			$(".profile-username").text(data.userProfile["userName"]);
-			$(".profile-profileImage").attr("src", data.userProfile["profileImage"]);
-			$(".profile-userbio").text(data.userProfile["userBio"]);
-			$(".profile-listens").text(numeral(data.userProfile["listensTo"]).format('0 a'));
-			$(".profile-audience").text(numeral(data.userProfile["audience"]).format('0 a')); 
-			$(".profile").data("userid", data.userProfile["userID"]);
-			$(".profile").data("username", data.userProfile["userName"]);
-			$(".listenButton").data("listening", data.userProfile["listening"]);
-			if(data.userProfile["listening"] === true) //listens to user
-			{
-				$(".listenButton").html("<i class=\"icons flaticon-nolisten\"></i>Stop Listening To " + data.userProfile["firstName"]);
-			} 
-			else if(data.userProfile["listening"] === false) //not listening to the user
-			{
-				$(".listenButton").html("<i class=\"icons flaticon-listen\"></i>Listen To " + data.userProfile["firstName"]);	
-			}
-			else //Own profile remove button
-			{
-				$(".listenButton").remove();
-			}			
-		}
-	});
-}
-
-function getUserSettings() {
-	requestUserSettings().done(function(data) {
-			$('body').find('select[name="gender"]').val(data.userProfile["gender"]);
-			$('[data-toggle="datepicker"]').datepicker({
-				autohide: true,
-				format: 'dd/mm/yyyy',
-				zIndex: 10000,
-				startView: 2,
-				date: data.userProfile["dob"]
-			});
-	});
-}
-
-function requestUserSettings() {
-	return $.ajax({
-		dataType: "json",
->>>>>>> cbbe0044cc04d5654eb46c242b94b8d99c3e6581
 		url: "API/profile/",
 		success: function(data) {
 			$(".acc-name").text(data.userProfile["firstName"] + " " + data.userProfile["lastName"]);
