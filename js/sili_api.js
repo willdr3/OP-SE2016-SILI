@@ -133,7 +133,6 @@ function fetchSays(){
 				}, { append: true, afterInsert: function (elem) {
 						asignActionStatus(elem, element);
 				}});	
-				
 			});
 		}
 	});
@@ -163,7 +162,9 @@ function fetchSayDetails(sayID){
 				boos: data.say["boos"],
 				applauds: data.say["applauds"],
 				resays: data.say["resays"]
-			});
+			}, { afterInsert: function (elem) {
+						asignActionStatus(elem, element);
+			}});
 		}
 	});
 }
@@ -173,7 +174,7 @@ function fetchComments(sayID){
 		dataType: "json",
 		url: "API/say/comment/" + sayID,
 		success: function(data) {
-			$.each(data.says, function(index, element) {
+			$.each(data.comments, function(index, element) {
 				$(".commentFeed").loadTemplate("content/templates/say.html",
 				{
 					sayID: element["sayID"],
@@ -183,7 +184,9 @@ function fetchComments(sayID){
 					message: element["message"],
 					profilePicture: element["profileImage"],
 					timePosted: moment(element["timePosted"]).fromNow()
-				}, { append: true });
+				}, { append: true, afterInsert: function (elem) {
+						asignActionStatus(elem, element);
+				}});
 			});
 		}
 	});	
