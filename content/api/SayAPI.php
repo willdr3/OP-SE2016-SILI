@@ -361,6 +361,7 @@ function GetActivity($userID, $sayID, $action)
 					"firstName" => $firstName,
 					"lastName" => $lastName,
 					"userName" => $userName,
+					"profileLink" => "profile/" . $userName,
 				];
 			}
 		}
