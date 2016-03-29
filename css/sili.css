@@ -200,6 +200,16 @@ textarea
 	color: #373F51;	
 }
 
+.listening
+{
+	padding-right:10px;
+}
+
+.audience
+{
+	padding-right:10px;
+}
+
 .profile
 {
 	background-color: #DCE0D9;
