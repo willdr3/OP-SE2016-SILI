@@ -450,7 +450,6 @@ getUserDetials().done(function() {
 	}
 });
 
-
 var options = {
   url: function(phrase) {
 		return "API/profile/search/" + phrase;
@@ -485,9 +484,9 @@ var options = {
 		  type: "slide"
 		},
 		onChooseEvent: function() {
-			window.location = $("#userSearch").getItemData(0).profileLink;
-		}	
-  }
+			var index = $("#userSearch").getSelectedItemIndex();
+			window.location = $("#userSearch").getItemData(index).profileLink;
+		}
 
 };
 
