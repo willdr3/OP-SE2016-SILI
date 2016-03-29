@@ -1,4 +1,5 @@
 @import url("fonts.css");
+@import url("flaticon.css");
 body
 {
     height:100%;
@@ -25,7 +26,7 @@ p, *
 	cursor: default;
 }
 
-a, .icons, .banner .user *, .pointer
+a, .icons, .banner .user *, .pointer, .profileLink *
 {
     cursor: pointer;
 }
@@ -76,7 +77,7 @@ input, textarea
 	margin-right: 0;
 }
 
-.registerButton, .loginButton, .sayButton, .comButton
+.registerButton, .loginButton, .sayButton, .comButton, .listenButton
 {
 	background-color:#79B791;
 	color: #FFFFFF;
@@ -136,12 +137,12 @@ input, textarea
 	margin-bottom: 5px;
 }
 
-.sayBox
+textarea
 {
 	resize: none;
 	width: 100%;
 	border-radius: 10px;
-	padding-left: 5px;
+
 }
 
 .sayFormBox, .sayButton, .comButton
@@ -152,6 +153,11 @@ input, textarea
 .comment-div
 {
 	border:1px solid #91AEC1;
+}
+
+.sayDetails
+{
+	margin: 0px;
 }
 
 .sayProfilePic
@@ -181,7 +187,17 @@ input, textarea
 
 .icons
 {
-	max-height:30px;
+	font-size: 30px;
+}
+
+.icons.applaud, .icons.reSay, .icons.boo
+{
+	color: #E8E8E8;
+}
+
+.icons.active, .commentPen
+{
+	color: #373F51;	
 }
 
 .profile
@@ -200,7 +216,7 @@ input, textarea
 	margin: 0;
 }
 
-.acc-profileImage
+.acc-profileImage, .profile-profileImage
 {
 	max-height: 200px;
 }
@@ -266,4 +282,21 @@ input[type=file].profileImageUpload
 {
 	font-size: 700%;
 	font-family: 'komika_title_-_axisregular';
+}
+
+.uppercaseText
+{
+	text-transform: uppercase;
+}
+
+.username
+{
+	font-family: 'komika_title_-_kapsregular';
+	font-size: 20px;
+}
+
+.profileLink:link, .profileLink:visited, .profileLink:hover, .profileLink:active
+{
+	text-decoration: none;
+	color: #000000;
 }

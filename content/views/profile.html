@@ -5,15 +5,15 @@
 			<div class="col-md-8 col-lg-6 profile">
 				<div class="row">
 					<div class="col-md-5">
-						<img src="" class="img-circle center-block acc-profileImage" alt="" />
+						<img src="" class="img-circle center-block profile-profileImage" alt="" />
 					</div>
 					<div class="col-md-1">
 					</div>
 					<div class="col-md-5">
-						<h1 class="acc-name"></h1>
+						<h1 class="profile-name"></h1>
 						<br>
-						<h3>Info About<span class="acc-username"></span></h3>
-						<p class="acc-userbio"></p>
+						<h3>Info About: <span class="profile-username username"></span></h3>
+						<p class="profile-userbio"></p>
 						
 					</div>
 					<div class="col-md-1">
@@ -21,12 +21,29 @@
 				</div>
 				<div class="row">
 					<div class="col-md-5">
+						<button type="button" class="btn btn-default btn-lg btn-block listenButton"><span class="profile-username"></button>
 					</div>
 					<div class="col-md-1">
+						
 					</div>
-					<div class="col-md-5">					
+					<div class="col-md-3">	
+						<h3><i class="icons flaticon-listening"></i>Listens To: <span class="profile-listens"></span></h3>
 					</div>
-					<div class="col-md-1"></div>					
+					<div class="col-md-3">
+						<h3><i class="icons flaticon-audience"></i>Audience: <span class="profile-audience"></span></h3>
+					</div>		
+				</div>
+				<div class="col-md-2"></div>
+				<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	</div>
+
+	<div class="row content">
+			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+			<div class="col-md-2"></div>
+			<div class="col-md-8 col-lg-6">
+				<div class="sayFeed">
+
 				</div>
 			</div>
 			<div class="col-md-2"></div>
@@ -35,7 +52,13 @@
 	</div>
 	<script type="text/javascript">
 		$("document").ready(function(){
-			getUserProfile()
+			var pathArray = window.location.pathname.split( '/' );
+			var requestedUserName = '';
+			if(typeof pathArray[4] !== 'undefined')
+			{
+				requestedUserName = pathArray[4];
+			}
+			getUserProfile(requestedUserName);
 		});
 	</script>
 

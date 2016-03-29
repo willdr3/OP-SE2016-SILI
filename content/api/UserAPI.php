@@ -434,13 +434,8 @@ function UserRegister()
 			$stmt->close();
 		}
 		
-		//add user to profile table
-		if ($stmt = $mysqli->prepare("INSERT INTO Profile (userID, firstName, lastName) VALUES (?,?,?)")) 
-		{
-			$stmt->bind_param("iss", $userID, $firstName, $lastName);
-			$stmt->execute();
-			$stmt->close();
-		}
+		//Create Profile
+		CreateProfile($userID, $firstName, $lastName);
 		
 		//Log the user in 
 		$_SESSION['userID'] = $userID;	

@@ -149,9 +149,10 @@ function FetchSay($sayID) //Fetches the Say
 			
 			$say = [
 			"sayID" => str_replace("=", "", base64_encode($sayIDFill)),
-			"timePosted" => date('g:i:sa j M Y',strtotime($timePosted)),
+			"timePosted" => strtotime($timePosted) * 1000,
 			"message" => $message,
 			"profileImage" => $profileImagePath . $profileImage,
+			"profileLink" => "profile/" . $userName,
 			"firstName" => $firstName,
 			"lastName" => $lastName,
 			"userName" => $userName,
@@ -183,20 +184,55 @@ function GetUserSays($userID) //Get the says of a user
 	{
 		array_push($errors, $errorCodes["M001"]);
 	}
+
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
 	
 	$requestedUserID = 0;
-	
+
 	if(count($request) >= 3)
 	{
-		if(strlen($request[2]) == 0)
+		if(strlen($request[2]) > 0)
+		{
+			$requestedUserName = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));	
+		} 
+		else
 		{
 			$requestedUserID = $userID;
 		}
-		else
+	}
+
+	if(isset($requestedUserName) && strlen($requestedUserName) > 0)
+	{
+		if($stmt = $mysqli->prepare("SELECT userID FROM Profile WHERE userName = ?"))
 		{
-			$requestedUserID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));	
+			
+			$stmt->bind_param("s", $requestedUserName);
+			
+			
+			$stmt->execute();
+			
+			
+			$stmt->store_result();
+			
+			if($stmt->num_rows == 1)
+			{
+				
+				$stmt->bind_result($requestedUserID);
+				
+				
+				$stmt->fetch();
+			}
 		}
 	}
+	
+	if(!isset($requestedUserID))
+	{
+		return null;
+	}
+
 	
 	if ($requestedUserID != 0) 
 	{
@@ -417,7 +453,6 @@ function GetSay($userID)
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
-	$says = array();
 	
 	if ($mysqli->connect_errno) 
 	{
@@ -459,7 +494,7 @@ function GetSay($userID)
 				$stmt->bind_result($sayID);
 				
 				while ($stmt->fetch()) {
-					array_push($says, FetchSay($sayID));
+					$say = FetchSay($sayID);
 				}
 			}	
 			$stmt->close();
@@ -470,7 +505,7 @@ function GetSay($userID)
 	// If no errors insert Say message into database
 	if(count($errors) == 0)
 	{
-		$result["say"] = $says;
+		$result["say"] = $say;
 		
 	}
 	else //return the json of errors 

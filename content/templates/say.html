@@ -1,14 +1,15 @@
-<div class="row say" data-id="sayID"> 
+<div class="row say" data-id="sayID" data-template-bind='[
+     {"attribute": "data-timeStamp", "value": "timeStamp"}]'> 
 	<div class="col-md-1 sayProfilePic"> 
-		<img class="sayProfileImg img-circle pull-right" data-src="profilePicture" /> 
+		<a data-href="profileLink" class="profileLink"><img class="sayProfileImg img-circle pull-right" data-src="profilePicture" /></a>
 	</div> 
 	<div class="col-md-11 sayMessageDetails"> 
 		<div class="row"> 
 			<div class="col-md-8">
-				<span data-content="firstName"></span> <span data-content="lastName"></span> (<span data-content="userName"></span> )
+				<a data-href="profileLink" class="profileLink"><span data-content="firstName"></span> <span data-content="lastName"></span> (<span data-content="userName"></span>)</a>
 			</div>
 			<div class="col-md-4 text-right">
-				<span data-content="timePosted"></span> 
+				<span class="timeStamp" data-content="timePosted"></span> 
 			</div>
 		</div> 
 		<div class="row"> 
@@ -18,18 +19,19 @@
 		</div> 
 		<div class="row"> 
 			<div class="col-md-2">
-			   <img class="icons applaud" src="images/applaud.png" data-toggle="tooltip" data-placement="top" data-src="applaudImg" title="Applaud"/><span class="applaud" data-content="applauds"></span>
+			   <i class="icons applaud flaticon-applaud" data-toggle="tooltip" data-placement="top" title="Applaud"></i><span class="applaud" data-content="applauds"></span>
 			</div> 
 			<div class="col-md-2">
-			    <img class="icons reSay" src="images/resay.png" data-toggle="tooltip" data-placement="top" data-src="resayImg" title="Re-Say"/><span class="reSay" data-content="resays"></span>
+			    <i class="icons reSay flaticon-resay" data-toggle="tooltip" data-placement="top" title="Re-Say"></i><span class="reSay" data-content="resays"></span>
 			</div> 
 			<div class="col-md-2">
-			    <img class="icons boo" src="images/boo.png" data-toggle="tooltip" data-placement="top" data-src="booImg" title="Boo"/><span class="boo" data-content="boos"></span>
+			    <i class="icons boo flaticon-boo" data-toggle="tooltip" data-placement="top" title="Boo"></i><span class="boo" data-content="boos"></span>
 			</div>
 			<div class="col-md-2"></div>
-			<div class="col-md-4">
-				
+			<div class="col-md-3">
+				<i class="icons commentPen flaticon-comment pull-right" data-toggle="tooltip" data-placement="top" title="Leave a Comment"></i><span class="commentPen" data-content="comments"></span>
 			</div>
+			<div class="col-md-1"></div>
 		</div> 
 	</div>
 </div>

@@ -12,19 +12,21 @@
 		"boo" => ["GET" => "Boo"],
 		"applaud" => ["GET" => "Applaud"],
 		"resay" => ["GET" => "Resay"],
+		"user" => ["GET" => "GetUserSays"],
+		"say" => ["GET" => "GetSay"],
 	];
 		
 	$reqArray["profile"] = [
-		0 => ["GET" => "GetUserProfile", "POST" => ""],
+		0 => ["GET" => "GetUserAccountSettings", "POST" => "UpdateProfile"],
 		"image" => ["GET"=> "", "POST" => ""],
-		"bio" => ["GET" => "", "POST" => ""],
-		"password" => ["POST" => ""],
-		"email" => ["POST" => ""],
+		"bio" => ["POST" => "UpdateBio"],
+		"password" => ["POST" => "UpdatePassword"],
+		"email" => ["POST" => "UpdateEmail"],
 		"listen" => ["GET" => "ListenToUser"],
 		"listeners" => ["GET" => "GetListeners"],
 		"audience" => ["GET" => "GetAudience"],
-		"unfollow" => ["POST" => ""],
+		"stoplisten" => ["GET" => "StopListenToUser"],
 		"search" => ["GET" => "UserSearch"],
-		"settings" => ["GET" => "GetUserAccountSettings"],
+		"user" => ["GET" => "GetUserProfile"],
 	];
 ?>
