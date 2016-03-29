@@ -25,7 +25,7 @@
 		"listen" => ["GET" => "ListenToUser"],
 		"listeners" => ["GET" => "GetListeners"],
 		"audience" => ["GET" => "GetAudience"],
-		"unfollow" => ["POST" => ""],
+		"stoplisten" => ["GET" => "StopListenToUser"],
 		"search" => ["GET" => "UserSearch"],
 		"user" => ["GET" => "GetUserProfile"],
 	];

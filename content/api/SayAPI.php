@@ -152,6 +152,7 @@ function FetchSay($sayID) //Fetches the Say
 			"timePosted" => strtotime($timePosted) * 1000,
 			"message" => $message,
 			"profileImage" => $profileImagePath . $profileImage,
+			"profileLink" => "profile/" . $userName,
 			"firstName" => $firstName,
 			"lastName" => $lastName,
 			"userName" => $userName,
