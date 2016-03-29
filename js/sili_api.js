@@ -104,6 +104,7 @@ function addSay(){
 					boos: data.say["boos"],
 					applauds: data.say["applauds"],
 					resays: data.say["resays"],
+					profileLink: data.say["profileLink"],
 				}, { prepend: true});
 ;
 		}
@@ -129,7 +130,8 @@ function fetchSays(){
 					timePosted: moment(element["timePosted"]).fromNow(),
 					boos: element["boos"],
 					applauds: element["applauds"],
-					resays: element["resays"]
+					resays: element["resays"],
+					profileLink: element["profileLink"],
 				}, { append: true, afterInsert: function (elem) {
 						assignActionStatus(elem, element);
 				}});	
@@ -156,7 +158,8 @@ function fetchUserSays(userName){
 					timePosted: moment(element["timePosted"]).fromNow(),
 					boos: element["boos"],
 					applauds: element["applauds"],
-					resays: element["resays"]
+					resays: element["resays"],
+					profileLink: element["profileLink"],
 				}, { append: true, afterInsert: function (elem) {
 						assignActionStatus(elem, element);
 				}});	
@@ -188,9 +191,10 @@ function fetchSayDetails(sayID){
 				timePosted: moment(data.say["timePosted"]).format('lll'),
 				boos: data.say["boos"],
 				applauds: data.say["applauds"],
-				resays: data.say["resays"]
+				resays: data.say["resays"],
+				profileLink: data.say["profileLink"],
 			}, { afterInsert: function (elem) {
-						assignActionStatus(elem, element);
+						assignActionStatus(elem, data);
 			}});
 		}
 	});
@@ -211,9 +215,10 @@ function fetchComments(sayID){
 					message: element["message"],
 					profilePicture: element["profileImage"],
 					timePosted: moment(element["timePosted"]).fromNow(),
-					boos: data.say["boos"],
-					applauds: data.say["applauds"],
-					resays: data.say["resays"]
+					boos: element["boos"],
+					applauds: element["applauds"],
+					resays: element["resays"],
+					profileLink: element["profileLink"],
 				}, { append: true, afterInsert: function (elem) {
 						assignActionStatus(elem, element);
 				}});
@@ -282,8 +287,9 @@ function requestUserProfile(reqUserName) {
 			$(".profile-userbio").text(data.userProfile["userBio"]);
 			$(".profile-listens").text(numeral(data.userProfile["listensTo"]).format('0 a'));
 			$(".profile-audience").text(numeral(data.userProfile["audience"]).format('0 a')); 
-			$(".profile").attr("data-userid", data.userProfile["userID"]);
-			$(".profile").attr("data-username", data.userProfile["userName"]);
+			$(".profile").data("userid", data.userProfile["userID"]);
+			$(".profile").data("username", data.userProfile["userName"]);
+			$(".listenButton").data("listening", data.userProfile["listening"]);
 			if(data.userProfile["listening"] === true) //listens to user
 			{
 				$(".listenButton").html("<i class=\"icons flaticon-nolisten\"></i>Stop Listening To " + data.userProfile["firstName"]);
@@ -295,8 +301,7 @@ function requestUserProfile(reqUserName) {
 			else //Own profile remove button
 			{
 				$(".listenButton").remove();
-			}
-
+			}			
 		}
 	});
 }
@@ -353,10 +358,15 @@ function requestUserSettings() {
 	});
 }
 
-function listenButton(reqUserID, reqUserName) {
+function listenButton(reqUserID, reqUserName, status) {
+	var method = 'listen';
+	if (status === true)
+	{
+		method = 'stoplisten';
+	}
 	return $.ajax({
 		dataType: "json",
-		url: "API/profile/listen/" + reqUserID,
+		url: "API/profile/" + method +"/" + reqUserID,
 		success: function(data) {
 			getUserProfile(reqUserName);
 		}
@@ -598,9 +608,13 @@ $("document").ready(function() {
 
 	$(document).on('click', '.listenButton', function(){
 		var $el = $(this).parent().parent().parent();
-		var userID = $el.attr('data-userid');
-		var userName = $el.attr('data-username');
-		listenButton(userID, userName);
+		var userID = $el.data('userid');
+		var userName = $el.data('username');
+		var listeningStatus = $(this).data("listening");
+		listenButton(userID, userName, listeningStatus);	
+
+		
+		$(this).blur();
 	});	
 	
 	$("body").tooltip({
