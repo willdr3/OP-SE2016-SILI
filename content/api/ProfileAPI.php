@@ -205,6 +205,7 @@ function GetUserProfile($userID)
 			}
 			
 			$profile = [
+			"userID" => str_replace("=", "", base64_encode(str_pad($requestedUserID, 10, '0', STR_PAD_LEFT))),
 			"firstName" => $firstName,
 			"lastName" => $lastName,
 			"userName" => $userName,
@@ -213,6 +214,7 @@ function GetUserProfile($userID)
 			"profileImage" => $profileImagePath . $profileImage,
 			"listensTo" => getCount($requestedUserID, "listening"),
 			"audience" => getCount($requestedUserID, "audience"),
+			"listening" => getListeningStatus($userID, $requestedUserID),
 			];
 			
 			
@@ -235,6 +237,42 @@ function GetUserProfile($userID)
 		$result["errors"] = $errors;
 	}
 		
+	return $result;
+}
+
+//Check if the current User is following the user whos profile we are viewing
+function getListeningStatus($userID, $profileUserID)
+{
+	global $mysqli;
+
+	//check its not themself they are viewing
+	if($userID == $profileUserID)
+	{
+		return null;
+	}
+
+	$result = false;
+
+	if($stmt = $mysqli->prepare("SELECT userID FROM Listeners WHERE userID = ? AND listenerUserID = ?"))
+	{
+		
+		$stmt->bind_param("ii", $userID, $profileUserID);
+		
+		
+		$stmt->execute();
+
+	
+		$stmt->store_result();
+
+		if($stmt->num_rows == 1)
+		{
+			$result = true;
+		}
+	}
+
+	
+	$stmt->close();
+
 	return $result;
 }
 

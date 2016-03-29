@@ -263,7 +263,7 @@ function getUserProfile(reqUserName) {
 
 	reqUserName = window.btoa(reqUserName).replace("=",""); //Remove equals from base64 string	
 	requestUserProfile(reqUserName).done(function(data) {
-		//Button Styling
+		$(".sayFeed").empty();
 		fetchUserSays(reqUserName);
 	});
 }
@@ -279,6 +279,21 @@ function requestUserProfile(reqUserName) {
 			$(".profile-userbio").text(data.userProfile["userBio"]);
 			$(".profile-listens").text(numeral(data.userProfile["listensTo"]).format('0 a'));
 			$(".profile-audience").text(numeral(data.userProfile["audience"]).format('0 a')); 
+			$(".profile").attr("data-userid", data.userProfile["userID"]);
+			$(".profile").attr("data-username", data.userProfile["userName"]);
+			if(data.userProfile["listening"] === true) //listens to user
+			{
+				$(".listenButton").html("<i class=\"icons flaticon-nolisten\"></i>Stop Listening To " + data.userProfile["firstName"]);
+			} 
+			else if(data.userProfile["listening"] === false) //not listening to the user
+			{
+				$(".listenButton").html("<i class=\"icons flaticon-listen\"></i>Listen To " + data.userProfile["firstName"]);	
+			}
+			else //Own profile remove button
+			{
+				$(".listenButton").remove();
+			}
+
 		}
 	});
 }
@@ -331,6 +346,16 @@ function requestUserSettings() {
 				}, { append: true });
 			
 			
+		}
+	});
+}
+
+function listenButton(reqUserID, reqUserName) {
+	return $.ajax({
+		dataType: "json",
+		url: "API/profile/listen/" + reqUserID,
+		success: function(data) {
+			getUserProfile(reqUserName);
 		}
 	});
 }
@@ -487,6 +512,7 @@ var options = {
 			var index = $("#userSearch").getSelectedItemIndex();
 			window.location = $("#userSearch").getItemData(index).profileLink;
 		}
+  }
 
 };
 
@@ -565,10 +591,14 @@ $("document").ready(function() {
 			});
 
 		});
-		
-		console.log(sayID);
-		});
-	
+	});
+
+	$(document).on('click', '.listenButton', function(){
+		var $el = $(this).parent().parent().parent();
+		var userID = $el.attr('data-userid');
+		var userName = $el.attr('data-username');
+		listenButton(userID, userName);
+	});	
 	
 	$("body").tooltip({
 		selector: '[data-toggle="tooltip"]'
