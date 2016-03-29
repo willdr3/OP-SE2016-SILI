@@ -183,20 +183,55 @@ function GetUserSays($userID) //Get the says of a user
 	{
 		array_push($errors, $errorCodes["M001"]);
 	}
+
+	if($userID == 0)
+	{
+		array_push($errors, $errorCodes["G001"]);
+	}
 	
 	$requestedUserID = 0;
-	
+
 	if(count($request) >= 3)
 	{
-		if(strlen($request[2]) == 0)
+		if(strlen($request[2]) > 0)
+		{
+			$requestedUserName = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));	
+		} 
+		else
 		{
 			$requestedUserID = $userID;
 		}
-		else
+	}
+
+	if(isset($requestedUserName) && strlen($requestedUserName) > 0)
+	{
+		if($stmt = $mysqli->prepare("SELECT userID FROM Profile WHERE userName = ?"))
 		{
-			$requestedUserID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));	
+			
+			$stmt->bind_param("s", $requestedUserName);
+			
+			
+			$stmt->execute();
+			
+			
+			$stmt->store_result();
+			
+			if($stmt->num_rows == 1)
+			{
+				
+				$stmt->bind_result($requestedUserID);
+				
+				
+				$stmt->fetch();
+			}
 		}
 	}
+	
+	if(!isset($requestedUserID))
+	{
+		return null;
+	}
+
 	
 	if ($requestedUserID != 0) 
 	{

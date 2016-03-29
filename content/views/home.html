@@ -26,11 +26,12 @@
 	<script type="text/javascript">
 		$("document").ready(function(){
 			$(".say-form").submit(addSay);
-                	$("#fakeLoader").fakeLoader({
-                    		timeToHide:1200,
-		                 bgColor:"#373F51",
-                   		 spinner:"spinner1"
-                	});
+			fetchSays();
+        	$("#fakeLoader").fakeLoader({
+            		timeToHide:1200,
+                 bgColor:"#373F51",
+           		 spinner:"spinner1"
+        	});
 		});
 	</script>
 </body>

@@ -138,6 +138,33 @@ function fetchSays(){
 	});
 }
 
+function fetchUserSays(userName){
+	$.ajax({
+		dataType: "json",
+		url: "API/say/user/" + userName,
+		success: function(data) {			
+			$.each(data.says, function(index, element) {					
+				$(".sayFeed").loadTemplate("content/templates/say.html",
+				{
+				    sayID: element["sayID"],
+					firstName: element["firstName"],
+				    lastName: element["lastName"],
+				    userName: element["userName"],
+					message: element["message"],
+					profilePicture: element["profileImage"],
+					timeStamp: element["timePosted"],
+					timePosted: moment(element["timePosted"]).fromNow(),
+					boos: element["boos"],
+					applauds: element["applauds"],
+					resays: element["resays"]
+				}, { append: true, afterInsert: function (elem) {
+						asignActionStatus(elem, element);
+				}});	
+			});
+		}
+	});
+}
+
 function asignActionStatus(elem, data) {
 	var sayElement = elem;
 	setActionStatus(sayElement.find("i.applaud"), data["applaudStatus"]);
@@ -237,6 +264,7 @@ function getUserProfile(reqUserName) {
 	reqUserName = window.btoa(reqUserName).replace("=",""); //Remove equals from base64 string	
 	requestUserProfile(reqUserName).done(function(data) {
 		//Button Styling
+		fetchUserSays(reqUserName);
 	});
 }
 
@@ -419,7 +447,6 @@ getUserDetials().done(function() {
 	if(loggedIn) {
 		$("#profileImage").attr("src", profileImage);
 		$("#userName").text(firstName);
-		fetchSays();
 	}
 });
 
