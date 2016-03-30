@@ -140,13 +140,8 @@ function FetchSay($sayID, $justMe = false, $requestedUserID = 0) //Fetches the S
 				$profileImage = $defaultProfileImg;
 			}
 			
-			$ownSay = false;
-			
-			if($postUserID == $userID)
-			{
-				$ownSay = true;
-			}
-			
+			$ownSay = GetOwnSayStatus($sayID, $userID);
+
 			$say = [
 			"sayID" => str_replace("=", "", base64_encode($sayIDFill)),
 			"timePosted" => strtotime($timePosted) * 1000,
@@ -288,6 +283,31 @@ function GetActivityCount($sayID, $action)
 	return $count;
 }
 
+function GetOwnSayStatus($sayID, $userID)
+{
+	global $mysqli;
+	$status = false;
+	if($stmt = $mysqli->prepare("SELECT userID FROM Says WHERE sayID = ?"))
+	{
+		// Bind parameters
+		$stmt->bind_param("i", $sayID);
+		
+		// Execute Query
+		$stmt->execute();
+		
+		$stmt->bind_result($postUserID);
+		
+		$stmt->fetch();
+
+		if($userID == $postUserID)
+		{
+			$status = true;
+		}
+		
+	}
+	$stmt->close();
+	return $status;
+}
 function GetActivityStatus($userID, $sayID, $action)
 {
 	global $mysqli;
@@ -602,6 +622,10 @@ function SayActivity($userID, $action)
 	if(count($request) >= 3)
 	{
 		$sayID = base64_decode(filter_var($request[2], FILTER_SANITIZE_STRING));
+		if($action == "Re-Say" && GetOwnSayStatus($sayID, $userID))
+		{
+			array_push($errors, $errorCodes["G000"]);	
+		}
 	}
 	else
 	{
@@ -612,23 +636,26 @@ function SayActivity($userID, $action)
 	{
 		array_push($errors, $errorCodes["G001"]);
 	}
+
+
 	$status = "";
+	$reverseAction = "";
+	
+	if ($action == "Boo") 
+	{
+		$reverseAction = "Applaud";
+	}
+	elseif ($action == "Applaud")
+	 {
+		$reverseAction = "Boo";
+	 }
+
 	//Process
 	if(count($errors) == 0) //If theres no errors so far
 	{	
-		//Check not Already Following
-		if($stmt = $mysqli->prepare("SELECT userID, sayID, activity FROM Activity WHERE userID = ? AND sayID = ? AND activity = ?"))
-		{			
-			// Bind parameters
-			$stmt->bind_param("iis", $userID, $sayID, $action);
-			
-			// Execute Query
-			$stmt->execute();
-			
-			// Store result
-			$stmt->store_result();
-
-			if($stmt->num_rows == 0)
+		if ($action == "Re-Say" || !GetActivityStatus($userID, $sayID, $reverseAction)) 
+		{
+			if(!GetActivityStatus($userID, $sayID, $action))
 			{
 				//Follow User
 				if($stmt = $mysqli->prepare("INSERT INTO Activity (userID, sayID, activity) VALUES (?, ?, ?)"))
@@ -646,7 +673,7 @@ function SayActivity($userID, $action)
 					array_push($errors, $errorCodes["M002"]);
 				}
 			}
-			else if ($stmt->num_rows == 1)
+			else
 			{
 				if($stmt = $mysqli->prepare("DELETE FROM Activity  WHERE userID = ? AND sayID = ? AND activity = ? "))
 				{	
@@ -665,19 +692,14 @@ function SayActivity($userID, $action)
 					array_push($errors, $errorCodes["M002"]);
 				}
 			}
-			else
-			{
-				array_push($errors, $errorCodes["G000"]);
-			}
-
-			 $stmt->close();	 
+			$stmt->close();	 
 		}
 		else
 		{
-			array_push($errors, $errorCodes["M002"]);
+			array_push($errors, $errorCodes["G000"]);		
 		}
 	}
-
+	
 	if(count($errors) == 0)
 	{
 		$result["message"] = "Action Completed";

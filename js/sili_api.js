@@ -189,6 +189,12 @@ function assignActionStatus(elem, data) {
 	setActionStatus(sayElement.find("i.applaud"), data["applaudStatus"]);
 	setActionStatus(sayElement.find("i.reSay"), data["resayStatus"]);
 	setActionStatus(sayElement.find("i.boo"), data["booStatus"]);
+	if(data["ownSay"] === true)
+	{
+		
+		sayElement.find("i.reSay").addClass("reSayOwn");
+		sayElement.find("i.reSay").removeClass("reSay");
+	}
 }
 
 function fetchSayDetails(sayID){

@@ -200,9 +200,14 @@ textarea
 	font-size: 30px;
 }
 
-.icons.applaud, .icons.reSay, .icons.boo
+.icons.applaud, .icons.reSay, .icons.boo, .icons.reSayOwn
 {
 	color: #E8E8E8;
+}
+
+.icons.reSayOwn
+{
+	cursor:default;
 }
 
 .icons.active, .commentPen
