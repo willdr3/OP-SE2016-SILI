@@ -310,3 +310,11 @@ input[type=file].profileImageUpload
 	text-decoration: none;
 	color: #000000;
 }
+.resayHeader , .resayHeader *
+{
+	color:#91AEC1;
+}
+.resayHeader
+{
+	margin-left:15px;
+}
