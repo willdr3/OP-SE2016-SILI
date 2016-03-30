@@ -4,7 +4,7 @@
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			</div>
-			<div class="modal-body">
+			<div class="modal-body" data-id="sayID">
 				<div class="row sayDetails">
 					<div class="col-md-1 sayProfilePic"> 
 						<img class="sayProfileImg img-circle pull-right" data-src="profilePicture" /> 
@@ -37,10 +37,7 @@
 						</div> 
 					</div>
 				</div>
-				<!-- COMMENTS GO IN HERE -->
-				<div class="commentFeed">
-					
-				</div>				
+			
 				<form class="form-horizontal comment-form" accept-charset="utf-8">
 					<div class="form-group newComment">
 						<label for="newComment" class="sr-only">Enter Your Comment</label>
@@ -49,11 +46,15 @@
 					<div class = "row">
 						<div class="col-md-4"></div>
 							<div class="col-md-4">
-								<button class="btn btn-default sayButton" type="submit">Leave your Comment!</button>
+								<button class="btn btn-default comButton" type="submit">Leave your Comment!</button>
 							</div>
 						<div class="col-md-4"></div>
 					</div>
 				</form>
+				<!-- COMMENTS GO IN HERE -->
+				<div class="commentFeed">
+					
+				</div>	
 			</div><!-- /.modal-body -->
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal-dialog -->

@@ -54,9 +54,9 @@
 		$("document").ready(function(){
 			var pathArray = window.location.pathname.split( '/' );
 			var requestedUserName = '';
-			if(typeof pathArray[4] !== 'undefined')
+			if(typeof pathArray[3] !== 'undefined')
 			{
-				requestedUserName = pathArray[4];
+				requestedUserName = pathArray[3];
 			}
 			getUserProfile(requestedUserName);
 		});

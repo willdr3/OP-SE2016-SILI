@@ -81,7 +81,7 @@ function GetSays($userID) //Returns all the says based of the people listened to
 	
 	if ($userID != 0) 
 	{
-		$saysQuery = "SELECT sayID FROM Says WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) OR userID = ? OR sayID IN (SELECT sayID FROM Activity WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) AND activity = \"Re-Say\") ORDER BY timePosted DESC";	
+		$saysQuery = "SELECT sayID FROM Says WHERE (userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) OR userID = ? OR sayID IN (SELECT sayID FROM Activity WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) AND activity = \"Re-Say\")) AND sayID NOT IN (SELECT commentID FROM Comments) ORDER BY timePosted DESC";	
 		
 		if($stmt = $mysqli->prepare($saysQuery))
 		{
@@ -422,6 +422,10 @@ function CommentSayIt($userID)
 					$stmt->bind_param("ii", $sayID, $commentID);
 					$stmt->execute();
 					$stmt->close();
+				}
+				else
+				{
+					array_push($errors, $errorCodes["M002"]);
 				}			
 			}
 			else

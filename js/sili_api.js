@@ -233,7 +233,7 @@ function fetchComments(sayID){
 		url: "API/say/comment/" + sayID,
 		success: function(data) {
 			$.each(data.comments, function(index, element) {
-				$(".commentFeed").loadTemplate("content/templates/say.html",
+				$(".commentFeed").loadTemplate("content/templates/sayDetailsComment.html",
 				{
 					sayID: element["sayID"],
 					firstName: element["firstName"],
@@ -241,6 +241,7 @@ function fetchComments(sayID){
 				    userName: element["userName"],
 					message: element["message"],
 					profilePicture: element["profileImage"],
+					timeStamp: element["timePosted"],
 					timePosted: moment(element["timePosted"]).fromNow(),
 					boos: element["boos"],
 					applauds: element["applauds"],
@@ -254,24 +255,26 @@ function fetchComments(sayID){
 	});	
 }
 
-function addComment(){
-	var data = $(this).serialize();
+function addComment(data, sayID){
+	console.log(sayID);
+	console.log(data);
 	$.ajax({
 		type: "POST",
 		dataType: "json",
-		url: "API/say/comment/",
+		url: "API/say/comment/" + sayID,
 		data: data,
 		success: function(data) {	
 			$(".commentBox").val("");
-			$(".commentFeed").loadTemplate("content/templates/say.html",
+			$(".commentFeed").loadTemplate("content/templates/sayDetailsComment.html",
 				{
-					firstName: data.say["firstName"],
-				    lastName: data.say["lastName"],
-				    userName: data.say["userName"],
-					message: data.say["message"],
-					profilePicture: data.say["profileImage"],
-					timePosted: moment(data.say["timePosted"]).fromNow()
-				}, { append: true });
+					firstName: data.comment["firstName"],
+				    lastName: data.comment["lastName"],
+				    userName: data.comment["userName"],
+					message: data.comment["message"],
+					profilePicture: data.comment["profileImage"],
+					timePosted: moment(data.comment["timePosted"]).fromNow(),
+					profileLink: data.comment["profileLink"]
+				}, { prepend: true });
 		}
 	});
 	return false;
@@ -629,7 +632,6 @@ $("document").ready(function() {
 			{
 				$('#sayDetailsModal').modal('show');
 			});
-
 		});
 	});
 
@@ -639,10 +641,18 @@ $("document").ready(function() {
 		var userName = $el.data('username');
 		var listeningStatus = $(this).data("listening");
 		listenButton(userID, userName, listeningStatus);	
-
-		
 		$(this).blur();
 	});	
+
+
+	$(document).on('submit','.comment-form', function(e){
+		console.log(this);
+		e.preventDefault();
+		var data = $(this).serialize();
+		var sayID = $(this).parent().attr('id');
+		addComment(data, sayID);
+		$(this).blur();
+	});
 	
 	$("body").tooltip({
 		selector: '[data-toggle="tooltip"]'
