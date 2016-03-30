@@ -1,29 +1,26 @@
 <?php
 
-if (!isset($internal) && !isset($controller)) //check if its an internal request
+if (!isset($internal) && !isset($controller)) //check if its not an internal or controller request
 {
+	//Trying to direct access
 	http_response_code(403);
 	exit;
 }
 
 
-function UserLogin($host, $userMS, $passwordMS, $database)
+function UserLogin()
 {
-	// Connect to mysqli
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
-	if ($mysqli->connect_errno) 
-	{
-		$tempError = [
-		"code" => "L001",
-		"field" => "email",
-		"message" => "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error,
-		];
-	}
-
+	global $mysqli, $errorCodes;
 	// Arrays for jsons
 	$result = array();
 	$errors = array();
 
+	//Pre Requirments
+	if ($mysqli->connect_errno) 
+	{
+		array_push($errors, $errorCodes["M001"]);
+	}
+	
 	// email validation
 	if((!isset($_POST['email'])) || (strlen($_POST['email']) == 0)) // Check if the email has been submitted and is longer than 0 chars
 	{
@@ -36,66 +33,73 @@ function UserLogin($host, $userMS, $passwordMS, $database)
 		{
 			array_push($errors, $errorCodes["L003"]);
 		}
-		else
-		{
-			if(!isset($_POST['password']) || (strlen($_POST['password']) == 0)) // Check if the password has been submitted and is longer than 0 chars
-			{
+	}
+	
+	//Password validation
+	if(!isset($_POST['password']) || (strlen($_POST['password']) == 0)) // Check if the password has been submitted and is longer than 0 chars
+	{
 
-				array_push($errors, $errorCodes["L004"]);
-			}
-			else
-			{
-				$userPassword = $_POST['password'];
+		array_push($errors, $errorCodes["L004"]);
+	}
+	
+	//Process
+	if(count($errors) == 0) //If theres no errors so far
+	{
+		$userPassword = $_POST['password'];
 				
-				//Prepared statement to prevent (mostly) sql injection
-				if($stmt = $mysqli->prepare("SELECT userID, userPassword FROM UserLogin WHERE userEmail = ?"))
+		//Prepared statement to prevent (mostly) sql injection
+		if($stmt = $mysqli->prepare("SELECT userID, userPassword FROM UserLogin WHERE userEmail = ?"))
+		{
+			// Bind parameters
+			$stmt->bind_param("s", $emailAddress);
+			
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows > 0)
+			{
+				// Bind parameters
+				$stmt->bind_result($userID, $hashPass);
+				
+				// Fill with values
+				$stmt->fetch();
+						
+				// Free result
+				$stmt->free_result();
+						
+				// Close stmt
+				$stmt->close();
+						
+				if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
 				{
-					// Bind parameters
-					$stmt->bind_param("s", $emailAddress);
-					
-					// Execute Query
-					$stmt->execute();
-					
-					// Store result
-					$stmt->store_result();
-					
-					if($stmt->num_rows > 0)
-					{
-						// Bind parameters
-						$stmt->bind_result($userID, $hashPass);
-						
-						// Fill with values
-						$stmt->fetch();
-						
-						// Free result
-						$stmt->free_result();
-						
-						// Close stmt
-						$stmt->close();
-						
-						if(hash_equals(crypt($userPassword, $hashPass),$hashPass))
-						{
-							$_SESSION['userID'] = $userID;
-						}
-						else
-						{
-							array_push($errors, $errorCodes["L005"]);
-						}
-					}
-					else
-					{
-						array_push($errors, $errorCodes["L006"]);
-					}
+					$_SESSION['userID'] = $userID;
 				}
 				else
 				{
-					array_push($errors, $errorCodes["L007"]);
+					array_push($errors, $errorCodes["L005"]);
+				}
+				
+				if(isset($_POST['rememberMe']))
+				{
+					newUserRememberMeCookie($userID);
 				}
 			}
-			
+			else
+			{
+				array_push($errors, $errorCodes["L006"]);
+			}
+		}
+		else
+		{
+			array_push($errors, $errorCodes["L007"]);
 		}
 	}
-	if(count($errors) == 0) //If no errors user logged in
+	
+	//Post Processing
+	if(count($errors) == 0) //If no errors user is logged in
 	{
 		$result["message"] = "User Login Successful";
 	}
@@ -109,31 +113,128 @@ function UserLogin($host, $userMS, $passwordMS, $database)
 	return $result;
 }
 
-function CheckLogin($host, $userMS, $passwordMS, $database)
+function CookieLogin()
 {
+	global $mysqli, $errorCodes, $cookieSecret;
+	if (isset($_COOKIE['rememberMe'])) {
+		list ($userID, $token, $hash) = explode(':', $_COOKIE['rememberMe']);
+
+		if ($hash == hash('sha256', $userID . ':' . $token . $cookieSecret) && !empty($token)) 
+		{
+			$stmt = $mysqli->prepare("SELECT userID FROM UserSessions WHERE rememberMeToken = ?");
+		
+			// Bind parameters
+			$stmt->bind_param("s", $token);
+		
+			// Execute Query
+			$stmt->execute();
+			
+			// Store result
+			$stmt->store_result();
+			
+			if($stmt->num_rows > 0)
+			{
+				// Bind parameters
+				$stmt->bind_result($userID);
+				
+				// Fill with values
+				$stmt->fetch();
+						
+				// Free result
+				$stmt->free_result();
+						
+				// Close stmt
+				$stmt->close();
+				
+				$_SESSION['userID'] = $userID;
+				// Cookie token usable only once
+				newUserRememberMeCookie($userID, $token);
+				return $userID;
+			}
+		}
+		deleteRememberMeCookie($userID);
+	}
+	return false;
+}
+
+function newUserRememberMeCookie($userID, $currentToken = '')
+{
+	global $mysqli, $errorCodes, $cookieSecret;
+	$randomToken = hash('sha256', mt_rand());
+	
+	if ($currentToken== '') {
+		$stmt = $mysqli->prepare("INSERT INTO UserSessions (userID, rememberMeToken, loginAgent, loginIP, loginDatetime, lastVisit) VALUES (?, ?, ?, ?, now(), now())");
+		
+		// Bind parameters
+		$stmt->bind_param("isss", $userID, $randomToken, $_SERVER['HTTP_USER_AGENT'], $_SERVER['REMOTE_ADDR']);
+		
+		// Execute Query
+		$stmt->execute();
+	}
+	else {
+		$stmt = $mysqli->prepare("UPDATE UserSessions SET rememberMeToken = ?, lastVisit = now(), lastVisitAgent = ? WHERE userID = ? AND rememberMeToken = ?");
+
+		// Bind parameters
+		$stmt->bind_param("ssis", $randomToken, $_SERVER['HTTP_USER_AGENT'], $userID, $currentToken);
+		
+		// Execute Query
+		$stmt->execute();
+	}
+	
+	// generate cookie string that consists of userid, randomstring and combined hash of both
+	$cookieFirstPart = $userID . ':' . $randomToken;
+	$cookieHash = hash('sha256', $cookieFirstPart . $cookieSecret);
+	$cookie = $cookieFirstPart . ':' . $cookieHash;
+	// set cookie
+	setcookie('rememberMe', $cookie, time() + 1209600, "/", "kate.ict.op.ac.nz");
+}
+
+function deleteRememberMeCookie($userID)
+{
+	global $mysqli, $errorCodes;
+	if (isset($_COOKIE['rememberMe'])) {
+            list ($user_id, $token, $hash) = explode(':', $_COOKIE['rememberMe']);
+            
+            if ($hash == hash('sha256', $user_id . ':' . $token . $cookieSecret) && !empty($token)) {
+                $stmt = $mysqli->prepare("DELETE FROM UserSessions WHERE rememberMeToken = ? AND userID = ?");
+		
+				// Bind parameters
+				$stmt->bind_param("si", $token, $userID);
+		
+				// Execute Query
+				$stmt->execute();
+			}
+        setcookie('rememberMe', false, time() - (3600 * 3650), '/', "kate.ict.op.ac.nz");
+    }
+}
+
+function CheckLogin()
+{
+	global $mysqli, $errorCodes, $profileImagePath, $defaultProfileImg;
 	$result = array();
 	$errors = array();
 
 	//Path for profile Images
 	$profileImagePath = "content/profilePics/";
 
-	// Connect to mysqli
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
-		$tempError = [
-		"code" => "C003",
-		"field" => "MySQL",
-		"message" => "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error, 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["M001"]);
 	}
 
-
-	if(isset($_SESSION['userID']))
+	if ((count($errors) == 0) && (isset($_SESSION['userID'])))
 	{
 		$userID = $_SESSION['userID'];
-		
+	}
+	elseif((count($errors) == 0) && isset($_COOKIE['rememberMe']))
+	{
+		$userID = CookieLogin();
+	}
+	
+	//Process
+	if ((count($errors) == 0) && (isset($userID)) && ($userID != false))
+	{
 		//Pull user details from the db
 		if($stmt = $mysqli->prepare("SELECT userName, firstName, lastName, profileImage FROM Profile WHERE userID = ?"))
 		{
@@ -156,7 +257,7 @@ function CheckLogin($host, $userMS, $passwordMS, $database)
 						
 				if($profileImage == "")
 				{
-					$profileImage = "blankprofilepic.png";
+					$profileImage = $defaultProfileImg;
 				}
 				
 				$userData = [
@@ -180,12 +281,7 @@ function CheckLogin($host, $userMS, $passwordMS, $database)
 		}
 		else
 		{
-			$tempError = [
-				"code" => "C004",
-				"field" => "MySQL",
-				"message" => "MySQL failed to prepare statement", 
-				];
-				array_push($errors, $tempError);
+			array_push($errors, $errorCodes["M002"]);
 		}
 	}
 	else
@@ -207,19 +303,16 @@ function CheckLogin($host, $userMS, $passwordMS, $database)
 	return $result;
 }
 
-function UserRegister($host, $userMS, $passwordMS, $database)
+function UserRegister()
 {
+	global $mysqli, $errorCodes;
 	$result = array();
 	$errors = array();
-	$mysqli = new mysqli($host, $userMS, $passwordMS, $database);
+	
+	//Pre Requirments
 	if ($mysqli->connect_errno) 
 	{
-		$tempError = [
-		"code" => "R001",
-		"field" => "MySQL",
-		"message" => "Failed to connect to MySQLi: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error, 
-		];
-		array_push($errors, $tempError);
+		array_push($errors, $errorCodes["M001"]);
 	}
 	
 	//Email Validation
@@ -272,12 +365,7 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 					}
 					else
 					{
-						$tempError = [
-							"code" => "R007",
-							"field" => "MySQLi",
-							"message" => "MySQLi failed to prepare statement", 
-							];
-							array_push($errors, $tempError);
+						array_push($errors, $errorCodes["M002"]);
 					}
 				}
 			}
@@ -322,6 +410,7 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 		array_push($errors, $errorCodes["R013"]);
 	}
 	
+	//Process
 	if(count($errors) == 0) //If no errors add the user to the system
 	{
 		$firstName = filter_var($_POST['firstName'], FILTER_SANITIZE_STRING);
@@ -345,23 +434,18 @@ function UserRegister($host, $userMS, $passwordMS, $database)
 			$stmt->close();
 		}
 		
-		//add user to profile table
-		if ($stmt = $mysqli->prepare("INSERT INTO Profile (userID, firstName, lastName) VALUES (?,?,?)")) 
-		{
-			$stmt->bind_param("iss", $userID, $firstName, $lastName);
-			$stmt->execute();
-			$stmt->close();
-		}
-
-		$result["message"] = "User Registration successful";	
+		//Create Profile
+		CreateProfile($userID, $firstName, $lastName);
+		
+		//Log the user in 
+		$_SESSION['userID'] = $userID;	
+		$result["message"] = "User Registration successful";
 	}
 	else //return the json of errors 
 	{	
 		$result["message"] = "User Registration failed";	
 		$result["errors"] = $errors;
 	}
-
-	$mysqli->close();
 	
 	return $result;
 }

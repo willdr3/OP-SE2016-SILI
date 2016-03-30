@@ -10,41 +10,53 @@ if(isset($_GET['request']))
 //Check if the user is actually logged in	
 $internal = true; //Used to tell the API that is being used internally
 include("content/config/dbconnect.inc.php");
+include("content/config/errorHandling.php");
+include("content/config/config.inc.php");
 include("content/api/UserAPI.php");
-$loginDetails = CheckLogin($host, $userMS, $passwordMS, $database); //Check if the use is logged in
-include("content/views/header.inc.html");
-if($loginDetails["message"] == "User Logged In") //If the message returns that the user is logged in 
+include("content/config/errorHandling.php");
+include("content/config/pageRequests.php");
+$loginDetails = CheckLogin($mysqli, $errorCodes); //Check if the use is logged in
+
+$page = "";
+$login = false;
+$error = false;
+
+if(array_key_exists("userData", $loginDetails)) //If the userData is returned then the user is logged in
 {
+	
+	$userID = $_SESSION['userID'];
 	if (empty($request)) 
 	{
-		include("content/views/home.html");
-		exit;
+		$page = $viewsLocation . $pageRequests["home"]["file"];
 	} 
-	else
+	elseif(array_key_exists($request[0], $pageRequests))
 	{
-		if($request[0] == "logout")
-		{
-		    session_unset();     // unset $_SESSION variable for the run-time 
-		    session_destroy();   // destroy session data in storage
-			header("Location: http://kate.ict.op.ac.nz/~gearl1/SILI/");
-			exit;
-		}
-		elseif($request[0] == "profile")
-		{
-			include("content/views/profile.html");
-
-			exit;
-		}
-
+		$page = $viewsLocation . $pageRequests[$request[0]]["file"];
 	}
-	//If the request wasnt found
-	http_response_code(404);
-	exit;	
-	
+	else 
+	{
+		//If the request wasnt found
+		http_response_code(404);
+		$error = true;
+		$page = "404.html";
+	}
 }
 else //Not logged in show login page
 {
-	include("content/views/login.html");
-	exit;
+	$login = true;
+	$page = "content/views/login.html";
 }
+
+if(!$error)
+{
+	include("content/views/header.inc.html");
+}
+if(!$login && !$error)
+{
+	include("content/views/banner.inc.html");
+}
+
+include($page);
+
+$mysqli->close();	
 ?>

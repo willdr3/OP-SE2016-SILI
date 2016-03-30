@@ -8,41 +8,47 @@ if($status == PHP_SESSION_NONE){
 $controller = true;
 
 //Include all the API file
+include("../config/dbconnect.inc.php");
+include("../config/errorHandling.php");
+include("../config/APIrequests.php");
+include("../config/config.inc.php");
 include("UserAPI.php");
 include("SayAPI.php");
 include("ProfileAPI.php");
-include("../config/APIrequests.php");
-include("../config/errorhandling.php");
+
 
 //Check if the request is coming from one of the scripts
 if (is_ajax())
 {
+	//Get UserID from session
 	$userID = 0;
 	if(isset($_SESSION['userID']))
 	{
 		$userID = $_SESSION['userID'];
 	}
-	include("../config/dbconnect.inc.php");
+
+	//Check if a request for an API was actually made
 	if(isset($_GET['request']))
 	{	
-		$request = $_GET['request'];
-		//Based on the request return the correct json_decode
+		$request = explode("/", $_GET['request']);
 		
-		if (in_array($request, $reqArray)) {
-			$result = $reqArray[$request]["func"];
+		//Check if the request is a vaild request
+		if (array_key_exists($request[0], $reqArray)) {
+			$result = $reqArray[$request[0]]($userID);
 		}
-		else 
+		else //Request not found
 		{
 			http_response_code(404);
 			exit;	
 		}
 	} 
-	else
+	else //No Request provided
 	{
 		http_response_code(404);
 		exit;
 	}
 	
+	//Output Request json result
 	header('Content-Type: application/json');
 	if(array_key_exists('errors', $result))
 	{
@@ -54,7 +60,7 @@ if (is_ajax())
 	}
 	echo json_encode($result);	
 } 
-else
+else //Not json Forbiden
 {
 	http_response_code(403);
 	exit;
@@ -65,3 +71,7 @@ function is_ajax()
 {
 	return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
+
+$mysqli->close();	
+
+?>

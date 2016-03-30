@@ -1,0 +1,113 @@
+		<div ng-app="app" ng-controller="Ctrl">
+			<div class="row content">
+				<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+				<div class="col-md-2"></div>
+				<div class="col-md-8 col-lg-6 profile">
+					<h2 class="text-center">Account Settings</h2>
+					<div class="row">
+						<div class="col-md-5">
+							<img src="" class="img-circle center-block acc-profileImage" alt="" />
+						</div>
+						<div class="col-md-1">
+							<input type="file" accept="image/jpg, image/jpeg, image/png" id="profileImageUpload" class="profileImageUpload" />
+							<label class="profileImageUpload pointer" for="profileImageUpload">Edit</label>
+						</div>
+						<div class="col-md-5">
+							<h3>Personal Info</h3>
+							<p class="acc-name"></p>
+							<p class="acc-username"></p>
+							Location: <p class="acc-location"></p>
+							Joined SILI: <span class="acc-joined"></span>
+							<hr>
+							<p class="acc-email"></p>
+							
+						</div>
+						<div class="col-md-1">
+							<h4 data-toggle="modal" data-target="#personal-form" class="pointer">Edit</h4>
+							<br>
+							<br>
+							<br>
+							<br>
+							<br>
+							<br>
+							<h4 data-toggle="modal" data-target="#changeEmail-form" class="pointer">Edit</h4>
+						</div>					
+					</div>
+					<div class="row">
+						<div class="col-md-5">
+							<h3>Info About: <span class="acc-username username"></span></h3>
+							<p class="acc-userbio"></p>
+						</div>
+						<div class="col-md-1">
+							<h4 data-toggle="modal" data-target="#userBio-form" class="pointer">Edit</h4>
+						</div>
+						<div class="col-md-5">
+							<h3>Change password</h3>					
+						</div>
+						<div class="col-md-1">
+							<h4 data-toggle="modal" data-target="#changePassword-form" class="pointer">Edit</h4>
+						</div>					
+					</div>
+				</div>
+				<div class="col-md-2"></div>
+				<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+			</div>			
+
+			<div class="modal fade" id="profileImage-form" tabindex="-1" role="dialog" aria-labelledby="Profile Image">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>      
+			      </div>
+			      <div class="modal-body">
+				<form class="form-horizontal profileImage-form" accept-charset="utf-8">
+					<div class="cropArea">
+						<img-crop image="myImage" result-image="myCroppedImage" result-image-format="image/jpeg" result-image-size="500" on-load-done="onLoadDone()" on-load-error="onLoadError()"></img-crop>
+					</div>
+					<input type="hidden" name="image64" value="{{myCroppedImage}}">
+					
+					<button class="btn btn-lg btn-block userProfile" type="submit">Submit</button>
+				</form>
+					</div>     
+			    </div>
+			  </div>
+			</div>
+		</div>
+	</div>
+
+	<div id="profileModals"></div>
+
+	<script type="text/javascript">
+		$("document").ready(function(){
+		getUserSettings();
+		$(document).on('submit','.changePassword-form', function(e){
+			e.preventDefault();
+			var data = $(this).serialize();
+			ProfilePasswordChange(data);
+		});
+
+		$(document).on('submit','.personal-form', function(e){
+			e.preventDefault();
+			var data = $(this).serialize();
+			ProfileEdit(data);
+		});
+
+		$(document).on('submit','.userBio-form', function(e){
+			e.preventDefault();
+			var data = $(this).serialize();
+			ProfileBioEdit(data);
+		});
+		
+		$(document).on('submit','.changeEmail-form', function(e){
+			e.preventDefault();
+			var data = $(this).serialize();
+			ProfileEmailChange(data);
+		});
+		$(document).on('hidden.bs.modal','#profileImage-form', function (e) {
+		  $('#profileImageUpload').val("");
+		})
+		});
+	</script>
+
+</body>
+</html>

@@ -1,93 +1,70 @@
-<body>
-	<div class="container-fluid">
-		<div class="row banner box-shadow">
-			<div class="col-md-3"><img id="logo-img" src="images/Logo.png" class="img-responsive center-block" /></div>
-			<div class="col-md-6"></div>
-			<div class="col-md-1 user"><img id="profileImage" src=""  class="img-circle pull-right"/></div>
-			<div class="col-md-2 user">
-				<div class="dropdown">
-				
-					<p class="dropdown-toggle" id="userDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span id="userName"></span><span class="caret"></span></p>
-					
-					 <ul class="dropdown-menu" aria-labelledby="userDropDown">
-						<li><a href="profile">Profile</a></li>
-						<li role="separator" class="divider"></li>
-						<li><a href="logout">Logout</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>
-			
+
 		<div class="row content">
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 			<div class="col-md-2"></div>
 			<div class="col-md-8 col-lg-6 profile">
-				<h2 class="text-center">Account Settings</h2>
 				<div class="row">
 					<div class="col-md-5">
-						<img src="" class="img-circle center-block acc-profileImage" alt="" />
+						<img src="" class="img-circle center-block profile-profileImage" alt="" />
 					</div>
 					<div class="col-md-1">
-						<h4>Edit</h4>
 					</div>
 					<div class="col-md-5">
-						<h3>Personal Info</h3>
-						<p class="acc-name"></p>
+						<h1 class="profile-name"></h1>
 						<br>
-						<p class"acc-username"></p>
-						<hr>
-						<p class="acc-email"></p>
+						<h3>Info About: <span class="profile-username username"></span></h3>
+						<p class="profile-userbio"></p>
 						
 					</div>
 					<div class="col-md-1">
-						<h4>Edit</h4>
-						<br>
-						<br>
-						<br>
-						<br>
-						<h4>Edit</h4>
 					</div>					
 				</div>
 				<div class="row">
 					<div class="col-md-5">
-						<h3>Info About<span class="acc-username"></span></h3>
-						<p class="acc-userbio"></p>
+						<button type="button" class="btn btn-default btn-lg btn-block listenButton"></button>
 					</div>
 					<div class="col-md-1">
-						<h4>Edit</h4>
+						
 					</div>
+					<div class="col-md-3">	
+						<h3><i class="icons flaticon-listening listening"></i>Listens To: <span class="profile-listens"></span></h3>
+					</div>
+					<div class="col-md-3">
+						<h3><i class="icons flaticon-audience audience"></i>Audience: <span class="profile-audience"></span></h3>
+					</div>		
+				</div>
+				<div class="row">
 					<div class="col-md-5">
-						<h3>Change password</h3>					
+						<button type="button" class="btn btn-default btn-lg btn-block messageButton"><i class="icons flaticon-message message"></i>Send this person a message!<span class="profile-message"></span></button>
 					</div>
-					<div class="col-md-1"></div>					
+					<div class="col-md-7"></div>
+				</div>
+				<div class="col-md-2"></div>
+				<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	</div>
+
+	<div class="row content">
+			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+			<div class="col-md-2"></div>
+			<div class="col-md-8 col-lg-6">
+				<div class="sayFeed">
+
 				</div>
 			</div>
 			<div class="col-md-2"></div>
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 		</div>
-
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
 	</div>
-
 	<script type="text/javascript">
 		$("document").ready(function(){
-			getUserProfile()
+			var pathArray = window.location.pathname.split( '/' );
+			var requestedUserName = '';
+			if(typeof pathArray[3] !== 'undefined')
+			{
+				requestedUserName = pathArray[3];
+			}
+			getUserProfile(requestedUserName);
 		});
 	</script>
 
