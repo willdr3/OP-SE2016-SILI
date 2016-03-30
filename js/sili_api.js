@@ -118,53 +118,58 @@ function fetchSays(){
 		url: "API/say/",
 		success: function(data) {			
 			$.each(data.says, function(index, element) {					
-				if(element["activityStatus"] === false || element["ownSay"] === true) 
-				{
-					$(".sayFeed").loadTemplate("content/templates/say.html",
-					{
-					    sayID: element["sayID"],
-						firstName: element["firstName"],
-					    lastName: element["lastName"],
-					    userName: element["userName"],
-						message: element["message"],
-						profilePicture: element["profileImage"],
-						timeStamp: element["timePosted"],
-						timePosted: moment(element["timePosted"]).fromNow(),
-						boos: element["boos"],
-						applauds: element["applauds"],
-						resays: element["resays"],
-						profileLink: element["profileLink"],
-					}, { append: true, async: false, afterInsert: function (elem) {
-							assignActionStatus(elem, element);
-					}});	
-				} 
-				else
-				{
-					$(".sayFeed").loadTemplate("content/templates/resay.html",
-					{
-					    sayID: element["sayID"],
-						firstName: element["firstName"],
-					    lastName: element["lastName"],
-					    userName: element["userName"],
-						message: element["message"],
-						profilePicture: element["profileImage"],
-						timeStamp: element["timePosted"],
-						timePosted: moment(element["timePosted"]).fromNow(),
-						boos: element["boos"],
-						applauds: element["applauds"],
-						resays: element["resays"],
-						profileLink: element["profileLink"],
-						resayFirstName: element.activityStatus["firstName"],
-						resayLastName: element.activityStatus["lastName"],
-						resayUserName: element.activityStatus["userName"],
-						resayProfileLink:element.activityStatus["profileLink"],
-					}, { append: true, async: false, afterInsert: function (elem) {
-							assignActionStatus(elem, element);
-					}});	
-				}
+				loadSay(".sayFeed",element);
 			});
 		}
 	});
+}
+
+function loadSay(location, element)
+{
+	if(element["activityStatus"] === false || element["ownSay"] === true) 
+	{
+		$(location).loadTemplate("content/templates/say.html",
+		{
+		    sayID: element["sayID"],
+			firstName: element["firstName"],
+		    lastName: element["lastName"],
+		    userName: element["userName"],
+			message: element["message"],
+			profilePicture: element["profileImage"],
+			timeStamp: element["timePosted"],
+			timePosted: moment(element["timePosted"]).fromNow(),
+			boos: element["boos"],
+			applauds: element["applauds"],
+			resays: element["resays"],
+			profileLink: element["profileLink"],
+		}, { append: true, async: false, afterInsert: function (elem) {
+				assignActionStatus(elem, element);
+		}});	
+	} 
+	else
+	{
+		$(location).loadTemplate("content/templates/resay.html",
+		{
+		    sayID: element["sayID"],
+			firstName: element["firstName"],
+		    lastName: element["lastName"],
+		    userName: element["userName"],
+			message: element["message"],
+			profilePicture: element["profileImage"],
+			timeStamp: element["timePosted"],
+			timePosted: moment(element["timePosted"]).fromNow(),
+			boos: element["boos"],
+			applauds: element["applauds"],
+			resays: element["resays"],
+			profileLink: element["profileLink"],
+			resayFirstName: element.activityStatus["firstName"],
+			resayLastName: element.activityStatus["lastName"],
+			resayUserName: element.activityStatus["userName"],
+			resayProfileLink:element.activityStatus["profileLink"],
+		}, { append: true, async: false, afterInsert: function (elem) {
+				assignActionStatus(elem, element);
+		}});	
+	}
 }
 
 function fetchUserSays(userName){
@@ -172,24 +177,8 @@ function fetchUserSays(userName){
 		dataType: "json",
 		url: "API/say/user/" + userName,
 		success: function(data) {			
-			$.each(data.says, function(index, element) {					
-				$(".sayFeed").loadTemplate("content/templates/say.html",
-				{
-				    sayID: element["sayID"],
-					firstName: element["firstName"],
-				    lastName: element["lastName"],
-				    userName: element["userName"],
-					message: element["message"],
-					profilePicture: element["profileImage"],
-					timeStamp: element["timePosted"],
-					timePosted: moment(element["timePosted"]).fromNow(),
-					boos: element["boos"],
-					applauds: element["applauds"],
-					resays: element["resays"],
-					profileLink: element["profileLink"],
-				}, { append: true, afterInsert: function (elem) {
-						assignActionStatus(elem, element);
-				}});	
+			$.each(data.says, function(index, element) {				
+				loadSay(".sayFeed", element);		
 			});
 		}
 	});

@@ -41,7 +41,7 @@ function SayIt($userID) //Adds A Say
 				$sayID = $stmt->insert_id;
 				$stmt->close();
 				
-				$say = fetchSay($sayID);
+				$say = FetchSay($sayID);
 				
 			}
 			else
@@ -112,7 +112,7 @@ function GetSays($userID) //Returns all the says based of the people listened to
 	return $result;
 }
 
-function FetchSay($sayID) //Fetches the Say
+function FetchSay($sayID, $justMe = false, $requestedUserID = 0) //Fetches the Say
 {
 	global $mysqli, $profileImagePath, $defaultProfileImg, $userID;
 	$say = array();
@@ -163,7 +163,7 @@ function FetchSay($sayID) //Fetches the Say
 			"applaudStatus" => GetActivityStatus($userID, $sayID, "Applaud"),
 			"resayStatus" => GetActivityStatus($userID, $sayID, "Re-Say"),
 			"ownSay" => $ownSay,
-			"activityStatus" => GetActivity($userID, $sayID, "Re-Say"),
+			"activityStatus" => GetActivity($userID, $sayID, "Re-Say", $justMe, $requestedUserID),
 			];
 		}	
 		
@@ -236,12 +236,12 @@ function GetUserSays($userID) //Get the says of a user
 	
 	if ($requestedUserID != 0) 
 	{
-		$saysQuery = "SELECT sayID FROM Says WHERE userID = ? ORDER BY timePosted DESC LIMIT 10";	
+		$saysQuery = "SELECT sayID FROM Says WHERE userID = ?  OR sayID IN (SELECT sayID FROM Activity WHERE userID = ? AND activity = \"Re-Say\") ORDER BY timePosted DESC LIMIT 10";	
 		
 		if($stmt = $mysqli->prepare($saysQuery))
 		{
 			// Bind parameters
-			$stmt->bind_param("i", $requestedUserID);
+			$stmt->bind_param("ii", $requestedUserID, $requestedUserID);
 			
 			// Execute Query
 			$stmt->execute();
@@ -255,7 +255,7 @@ function GetUserSays($userID) //Get the says of a user
 				$stmt->bind_result($sayID);
 				
 				while ($stmt->fetch()) {
-					array_push($says, FetchSay($sayID));
+					array_push($says, FetchSay($sayID, true, $requestedUserID));
 				}
 			}	
 			$stmt->close();
@@ -318,14 +318,23 @@ function GetActivityStatus($userID, $sayID, $action)
 	return $status;
 }
 
-function GetActivity($userID, $sayID, $action)
+function GetActivity($userID, $sayID, $action, $justMe = false, $requestedUserID = 0)
 {
 	global $mysqli, $profileImagePath, $defaultProfileImg;
 	$activity = false;
-	if($stmt = $mysqli->prepare("SELECT userID FROM Activity WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) AND activity = ? AND sayID = ?"))
+	if ($justMe)
+	{
+		$activityQuery = "SELECT userID FROM Activity WHERE userID = ? AND activity = ? AND sayID = ?";	
+	}
+	else
+	{
+		$activityQuery = "SELECT userID FROM Activity WHERE userID IN (SELECT listenerUserID FROM Listeners WHERE userID = ?) AND activity = ? AND sayID = ?";
+		$requestedUserID = $userID;
+	}
+	if($stmt = $mysqli->prepare($activityQuery))
 	{
 		// Bind parameters
-		$stmt->bind_param("isi",$userID, $action, $sayID);
+		$stmt->bind_param("isi",$requestedUserID, $action, $sayID);
 		
 		// Execute Query
 		$stmt->execute();
