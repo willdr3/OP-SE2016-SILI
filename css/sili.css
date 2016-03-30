@@ -137,6 +137,16 @@ input, textarea
 	margin-bottom: 5px;
 }
 
+.comFeed
+{
+	background-color: #DCE0D9;
+	border: 1px solid #91AEC1;
+	border-radius: 3px;
+	margin: 0px;
+	padding-left: 10px;
+	padding-top: 3px;
+}
+
 textarea
 {
 	resize: none;
