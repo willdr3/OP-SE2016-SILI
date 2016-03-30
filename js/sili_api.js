@@ -326,6 +326,7 @@ function requestUserProfile(reqUserName) {
 			else //Own profile remove button
 			{
 				$(".listenButton").remove();
+				$(".messageButton").remove();
 			}			
 		}
 	});
