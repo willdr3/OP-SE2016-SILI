@@ -957,7 +957,7 @@ function UpdateBio($userID)
 		array_push($errors, $errorCodes["G001"]);
 	}
 	
-	if (!isset($_POST['userBio']) || strlen($_POST['currentPassword']) == 0 || strlen($_POST['currentPassword']) > 500)
+	if (!isset($_POST['userBio']) || strlen($_POST['userBio']) > 500)
 	{
 		array_push($errors, $errorCodes["P013"]);
 	}
