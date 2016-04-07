@@ -80,7 +80,7 @@ function GetUserAccountSettings($userID)
 				$profileImage = $defaultProfileImg;
 			}
 			
-			$queryResult = [
+			$profile = [
 			"firstName" => $firstName,
 			"lastName" => $lastName,
 			"userName" => $userName,
@@ -99,7 +99,7 @@ function GetUserAccountSettings($userID)
 	
 	if (count($errors) == 0) //If no errors user is logged in
 	{
-		$result["userProfile"] = $queryResult;
+		$result["userProfile"] = $profile;
 	}
 	else
 	{
@@ -164,7 +164,7 @@ function GetUserProfile($userID)
 			$profileImage = $defaultProfileImg;
 		}
 		
-		$queryResult = [
+		$profile = [
 		"userID" => str_replace("=", "", base64_encode(str_pad($requestedUserID, 10, '0', STR_PAD_LEFT))),
 		"firstName" => $firstName,
 		"lastName" => $lastName,
@@ -183,7 +183,7 @@ function GetUserProfile($userID)
 	
 	if (count($errors) == 0) //If no errors user is logged in
 	{
-		$result["userProfile"] = $queryResult;
+		$result["userProfile"] = $profile;
 	}
 	else
 	{
@@ -194,19 +194,19 @@ function GetUserProfile($userID)
 }
 
 //Check if the current User is following the user whos profile we are viewing
-function getListeningStatus($userID, $queryResultUserID)
+function getListeningStatus($userID, $profileUserID)
 {
 	global $db;
 
 	//check its not themself they are viewing
-	if ($userID == $queryResultUserID)
+	if ($userID == $profileUserID)
 	{
 		return null;
 	}
 
 	$result = false;
 
-	$queryResult = $db->rawQuery("SELECT userID FROM Listeners WHERE userID = ? AND listenerUserID = ?", Array($userID, $queryResultUserID));
+	$queryResult = $db->rawQuery("SELECT userID FROM Listeners WHERE userID = ? AND listenerUserID = ?", Array($userID, $profileUserID));
 	if (count($queryResult) == 1)
 	{
 		$result = true;
