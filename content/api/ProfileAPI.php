@@ -10,7 +10,7 @@ if (!isset($internal) && !isset($controller)) //check if its not an internal or 
 function CreateProfileID() //Generate a Unique ProfileID
 {
 	global $db;
-	$queryResultID = "";
+	$profileID = "";
 
 	//Generate ProfileID
 	do {
@@ -21,22 +21,22 @@ function CreateProfileID() //Generate a Unique ProfileID
 	   	//Check the generated id doesnt already exist
 		if (count($queryResult) == 0)
 		{
-			$queryResultID = $hex;
+			$profileID = $hex;
 		}
-	} while ($queryResultID == "");
+	} while ($profileID == "");
 	
-return $queryResultID;
+return $profileID;
 }
 
 function CreateProfile($userID, $firstName, $lastName)
 {
 	global $db;
 	//Generate ProfileID
-	$queryResultID = CreateProfileID();
+	$ProfileID = CreateProfileID();
 
 	//add user to profile table
 	$data = Array(
-			"profileID" => $queryResultID,
+			"profileID" => $profileID,
             "userID" => $userID,
             "firstName" => $firstName,
 			"lastName" => $lastName
