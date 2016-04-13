@@ -408,7 +408,11 @@ function GetActivity($profileID, $sayID, $action, $justMe = false, $requestedPro
 	if (count($queryResult) >= 1)
 	{
 	
+<<<<<<< a12d17b7f31a76bf7eb2ce0f408f5cb9c0db2507
 		$activityProfileID = $queryResult[0]["profileID"];
+=======
+		$activityUserID = $queryResult[0]["profileID"];
+>>>>>>> Backend API for direct messages started
 	
 		$queryResult = $db->rawQuery("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE profileID = ?" , Array($activityProfileID));
 	
