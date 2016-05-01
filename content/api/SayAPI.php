@@ -837,14 +837,36 @@ function GetActivityUsers($profileID, $action)
 		array_push($errors, $errorCodes["M001"]);
 	}
 	
-	if (count($request) >= 3)
+	$timestamp = microtime();
+	$offset = 0;
+	
+	if (count($request) == 3)
 	{
-		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);
+		if (strlen($request[2]) > 0)
+		{
+			$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);	
+		}
+	}
+	elseif (count($request) >= 5)
+	{
+		if (strlen($request[2]) > 0)
+		{
+			$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);	
+		}
+		if (strlen($request[3]) > 0)
+		{
+			$offset = filter_var($request[3], FILTER_SANITIZE_NUMBER_INT);	
+		}
+		if (strlen($request[4]) > 0)
+		{
+			$timestamp = filter_var($request[4], FILTER_SANITIZE_NUMBER_INT);	
+		}
 	}
 	else
 	{
 		array_push($errors, $errorCodes["S000"]);
 	}
+	
 	
 	if ($profileID === 0)
 	{
@@ -854,7 +876,8 @@ function GetActivityUsers($profileID, $action)
 	//Process
 	if (count($errors) == 0) //If theres no errors so far
 	{			
-		$queryResult = $db->rawQuery("SELECT profileID FROM Activity WHERE sayID = ? AND activity = ? LIMIT 10", Array($sayID, $action));
+		$offset *= 10;
+		$queryResult = $db->rawQuery("SELECT profileID FROM Activity WHERE sayID = ? AND activity = ? AND timeOfAction >= ? ORDER BY timeOfAction LIMIT ?,10", Array($sayID, $action, $timestamp, $offset));
 		if (count($queryResult) > 0)
 		{
 			foreach ($queryResult as $user) 
@@ -864,6 +887,8 @@ function GetActivityUsers($profileID, $action)
 			}				
  
 		}
+		
+		$result["totalPages"] = CalculateActivityPages($sayID, $timestamp, $action);
 		$result["users"] = $users;
 	}
 
@@ -873,6 +898,41 @@ function GetActivityUsers($profileID, $action)
 	}
 	
 	return $result;
+}
+
+/**
+ *
+ * Returns the total number of users that performed the given activity
+ *
+ *
+ * @param    int  $sayID
+ * @param    int  $timestamp the time we are calcuating users from
+ * @param    string $view the type of view (Applaud|Re-Say|Boo)
+ * @return   int the number of pages there will be
+ *
+ */
+function CalculateActivityPages($sayID, $timestamp, $view)
+{
+	global $db;
+	$totalSays = 0;
+	
+	$countQuery = "SELECT count(*) AS totalUsers FROM Activity WHERE sayID = ? AND timeOfAction >= ? AND activity = ?";
+	$queryResult = $db->rawQuery($countQuery, Array($sayID, $timestamp, $view));
+
+	if (count($queryResult) >= 1)
+	{
+		$totalSays = $queryResult[0]["totalUsers"];
+	}
+
+	$nbrPages = floor($totalSays / 10);
+
+	if ($totalSays % 10 > 0)
+	{
+		$nbrPages += 1;
+	}
+
+
+	return $nbrPages;
 }
 
 /**

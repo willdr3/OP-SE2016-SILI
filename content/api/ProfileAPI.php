@@ -213,7 +213,7 @@ function GetUserProfile($profileID, $requestedProfileID, $filter= "")
 
 	if (count($queryResult) == 1)
 	{	
-		if (true)//$queryResult[0]["profileImage"] == "")
+		if ($queryResult[0]["profileImage"] == "")
 		{
 			$profileImage = "identicon/" . $queryResult[0]["userName"] . ".png";
 		}
@@ -230,7 +230,7 @@ function GetUserProfile($profileID, $requestedProfileID, $filter= "")
 		$fields["audience"] = getCount($requestedProfileID, "audience");
 		$fields["listening"] = getListeningStatus($profileID, $requestedProfileID);
 		$fields["profileImage"] = $profileImage;
-		$fields["email"] = GetUserEmail(GetUserProfileID($requestedProfileID));
+		$fields["email"] = GetUserEmail(GetProfileUserID($requestedProfileID));
 		$fields["dob"] =  date("d/m/Y", strtotime($queryResult[0]["dob"]));
 		$fields["fullNameUserName"] = $queryResult[0]["firstName"] . " " . $queryResult[0]["lastName"] . " (" . $queryResult[0]["userName"] . ")";
 
@@ -710,12 +710,12 @@ function GetListeners($profileID)
 	if (count($errors) == 0) //If theres no errors so far
 	{		
 		$offset *= 10;
-		$queryResult = $db->rawQuery("SELECT listenerprofileID FROM Listeners WHERE profileID = ? AND dateFollowed >= ? ORDER BY dateFollowed LIMIT ?,10", Array($requestedProfileID, $timestamp, $offset));
+		$queryResult = $db->rawQuery("SELECT listenerProfileID FROM Listeners WHERE profileID = ? AND dateFollowed >= ? ORDER BY dateFollowed LIMIT ?,10", Array($requestedProfileID, $timestamp, $offset));
 		if (count($queryResult) > 0)
 		{
 			foreach ($queryResult as $user) 
 			{
-				$listener = GetUserProfile($profileID, $user["profileID"], "firstName, lastName, userName, profileImage");
+				$listener = GetUserProfile($profileID, $user["listenerProfileID"], "firstName, lastName, userName, profileImage, profileLink");
 				array_push($users, $listener);
 			}				
  
@@ -806,7 +806,7 @@ function GetAudience($profileID)
 		{
 			foreach ($queryResult as $user) 
 			{
-				$audience = GetUserProfile($profileID, $user["profileID"], "firstName, lastName, userName, profileImage");
+				$audience = GetUserProfile($profileID, $user["profileID"], "firstName, lastName, userName, profileImage, profileLink");
 				array_push($users, $audience);
 			 }
 		}	

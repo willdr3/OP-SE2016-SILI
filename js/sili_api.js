@@ -10,6 +10,9 @@ var currentUserPage = 0;
 var totalUserPages = 0;
 var currentAction = "";
 var currentViewedProfileID = "";
+var currentViewedSayID = "";
+var currentActionPage = "";
+var totalActionPages = "";
 
 window.emojioneVersion = "2.1.1";
 
@@ -698,6 +701,10 @@ function GetActionUser(sayID, action) {
 		async: false,
 		url: "API/say/" + action + "users/" + sayID,
 		success: function(data) {
+			currentActionPage = 0;
+			totalActionPages = data["totalPages"];
+			currentViewedSayID = sayID;
+			currentAction = action;
 			var actionHeader = action;
 			if (action == "resay")
 			{
@@ -793,6 +800,31 @@ function fetchMoreUsers()
 		success: function(data) {		
 			$.each(data.users, function(index, element) {	
 				$(".profileFeed").loadTemplate("content/templates/activityDisplay.html",
+					{
+						profileLink:element["profileLink"],
+						profilePicture:element["profileImage"],
+						firstName:element["firstName"],
+						lastName:element["lastName"],
+						userName:element["userName"],
+					},{append: true});				
+				
+			});
+			
+			
+		}
+	});
+}
+
+function fetchMoreActionUsers()
+{
+	currentActionPage = currentActionPage + 1;
+	return $.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/say/" + currentAction + "users/" + currentViewedSayID + "/" + currentActionPage + "/" + timeNow,
+		success: function(data) {		
+			$.each(data.users, function(index, element) {	
+				$(".activityFeed").loadTemplate("content/templates/activityDisplay.html",
 					{
 						profileLink:element["profileLink"],
 						profilePicture:element["profileImage"],
@@ -1069,6 +1101,7 @@ $("document").ready(function() {
 		var $el = $(this).parent().parent().parent().parent().parent();
 		var sayID = $el.attr('id');
 		var action = $(this).data('action');
+
 		GetActionUser(sayID, action);
 
 		$('#activityModal').modal('show');
@@ -1153,6 +1186,16 @@ $("document").ready(function() {
 	  	fetchMoreUsers().done( function() { 
 	  		$this.button('reset');
 	  		if (currentUserPage + 1 == totalUserPages) {
+	  			$this.remove();
+	  		} });
+	});
+	
+	$(document).on('click' , '#loadMoreActionUsers', function() {
+	    var $this = $(this);
+	  	$this.button('loading');
+	  	fetchMoreActionUsers().done( function() { 
+	  		$this.button('reset');
+	  		if (currentActionPage + 1 == totalActionPages) {
 	  			$this.remove();
 	  		} });
 	});
