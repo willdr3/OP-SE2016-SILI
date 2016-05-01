@@ -92,7 +92,7 @@ function SayIt($profileID) //Adds A Say
 		// Check if the Say has been submitted and is longer than 0 chars
 		if ((!isset($_POST['sayBox'])) || (strlen($_POST['sayBox']) == 0))
 		{
-			array_push($errors, $errorCodes["S003"]);
+			array_push($errors, $errorCodes["S001"]);
 		}
 		else
 		{
@@ -114,9 +114,7 @@ function SayIt($profileID) //Adds A Say
 	// If no errors insert Say message into database
 	if (count($errors) == 0)
 	{
-		$result["message"] = "Say has been added";
 		$result["say"] = $say;
-		
 	}
 	else //return the json of errors 
 	{	
@@ -141,8 +139,10 @@ function SayIt($profileID) //Adds A Say
 function GetSays($profileID) //Returns all the says based of the people listened to by the logged in user
 {	
 	global $db, $errorCodes, $request;
+	
 	// Arrays for jsons
 	$result = array();
+	$errors = array();
 	$says = array();
 	
 	if ($db->ping() !== TRUE) 
@@ -175,16 +175,20 @@ function GetSays($profileID) //Returns all the says based of the people listened
 		if (count($queryResult) >= 1)
 		{
 			foreach ($queryResult as $value) {
-				$sayID = $value["sayID"];
-				array_push($says, FetchSay($sayID));
+				array_push($says, FetchSay($value["sayID"]));
 			}
 		}	
 
-		$totalPages = CalcuateSaysPages($profileID, $timestamp, "says");
 		//$currentPage = $offset / 10;
 		$result["says"] = $says;
 		//$result["currentPage"] = $currentPage;
-		$result["totalPages"] = $totalPages;
+		$result["totalPages"] = CalcuateSaysPages($profileID, $timestamp, "says");
+	}
+	
+	if (count($errors) != 0)
+	{
+		$result["errors"] = $errors;
+		
 	}
 	
 	return $result;
@@ -262,10 +266,6 @@ function FetchSay($sayID, $justMe = false, $requestedProfileID = 0) //Fetches th
 		
 	if (count($queryResult) == 1)
 	{
-
-		$sayID = $queryResult[0]["sayID"];
-		$timePosted = $queryResult[0]["timePosted"];
-		$message = $queryResult[0]["message"];
 		$profileImage = $queryResult[0]["profileImage"];
 		$firstName = $queryResult[0]["firstName"];
 		$lastName = $queryResult[0]["lastName"];
@@ -276,26 +276,26 @@ function FetchSay($sayID, $justMe = false, $requestedProfileID = 0) //Fetches th
 			$profileImage = $defaultProfileImg;
 		}
 		
-		$ownSay = GetOwnSayStatus($sayID, $profileID);
+		$ownSay = GetOwnSayStatus($queryResult[0]["sayID"], $profileID);
 
 		$say = [
-		"sayID" => $sayID,
-		"timePosted" => strtotime($timePosted) * 1000,
-		"message" => $Emojione->toImage($message),
-		"messageClean" => $message,
+		"sayID" => $queryResult[0]["sayID"],
+		"timePosted" => strtotime($queryResult[0]["timePosted"]) * 1000,
+		"message" => $Emojione->toImage($queryResult[0]["message"]),
+		"messageClean" => $queryResult[0]["message"],
 		"profileImage" => $profileImagePath . $profileImage,
 		"profileLink" => "profile/" . $userName,
 		"firstName" => $firstName,
 		"lastName" => $lastName,
 		"userName" => $userName,
-		"boos" => GetActivityCount($sayID, "Boo"),
-		"applauds" => GetActivityCount($sayID, "Applaud"),
-		"resays" => GetActivityCount($sayID, "Re-Say"),
-		"booStatus" => GetActivityStatus($profileID, $sayID, "Boo"),
-		"applaudStatus" => GetActivityStatus($profileID, $sayID, "Applaud"),
-		"resayStatus" => GetActivityStatus($profileID, $sayID, "Re-Say"),
+		"boos" => GetActivityCount($queryResult[0]["sayID"], "Boo"),
+		"applauds" => GetActivityCount($queryResult[0]["sayID"], "Applaud"),
+		"resays" => GetActivityCount($queryResult[0]["sayID"], "Re-Say"),
+		"booStatus" => GetActivityStatus($profileID, $queryResult[0]["sayID"], "Boo"),
+		"applaudStatus" => GetActivityStatus($profileID, $queryResult[0]["sayID"], "Applaud"),
+		"resayStatus" => GetActivityStatus($profileID, $queryResult[0]["sayID"], "Re-Say"),
 		"ownSay" => $ownSay,
-		"activityStatus" => GetActivity($profileID, $sayID, "Re-Say", $justMe, $requestedProfileID),
+		"activityStatus" => GetActivity($profileID, $queryResult[0]["sayID"], "Re-Say", $justMe, $requestedProfileID),
 		];
 	}	
 	
@@ -315,6 +315,7 @@ function GetUserSays($profileID) //Get the says of a user
 	global $db, $errorCodes, $request;
 	// Arrays for jsons
 	$result = array();
+	$errors = array();
 	$says = array();
 	
 	if ($db->ping() !== TRUE) 
@@ -324,13 +325,14 @@ function GetUserSays($profileID) //Get the says of a user
 
 	if ($profileID === 0)
 	{
-		array_push($errors, $errorCodes["G001"]);
+		array_push($errors, $errorCodes["G002"]);
 	}
 	
 	$requestedProfileID = 0;
 	$timestamp = microtime();
 	$offset = 0;
 
+	//Requesting Says of another persons profile
 	if (count($request) >= 5)
 	{
 		if (strlen($request[2]) > 0)
@@ -348,7 +350,7 @@ function GetUserSays($profileID) //Get the says of a user
 			$timestamp = filter_var($request[4], FILTER_SANITIZE_NUMBER_INT);	
 		} 	
 	}
-	elseif (count($request) >= 4)
+	elseif (count($request) >= 2) //Requesting the current users says
 	{
 		$requestedProfileID = $profileID;
 
@@ -395,12 +397,16 @@ function GetUserSays($profileID) //Get the says of a user
 				array_push($says, FetchSay($sayID, true, $requestedProfileID));
 			}
 		}	
-	}
-	
-	$totalPages = CalcuateSaysPages($requestedProfileID, $timestamp, "profile");
 
-	$result["says"] = $says;
-	$result["totalPages"] = $totalPages;
+		$result["says"] = $says;
+		$result["totalPages"] = CalcuateSaysPages($requestedProfileID, $timestamp, "profile");
+	}
+
+	if (count($errors) != 0)
+	{
+		$result["errors"] = $errors;
+		
+	}
 
 	return $result;
 }
@@ -577,25 +583,25 @@ function CommentSayIt($profileID)
 	}
 	else
 	{
-		array_push($errors, $errorCodes["Co04"]);
+		array_push($errors, $errorCodes["S000"]);
 	}
 	
 	if ($profileID === 0)
 	{
-		array_push($errors, $errorCodes["Co02"]);
+		array_push($errors, $errorCodes["G002"]);
 	}
 	else {
 		// Check if the Say has been submitted and is longer than 0 chars
 		if ((!isset($_POST['commentBox'])) || (strlen($_POST['commentBox']) == 0))
 		{
-			array_push($errors, $errorCodes["Co03"]);
+			array_push($errors, $errorCodes["S002"]);
 		}
 		else
 		{
 			$sayContent = htmlspecialchars($_POST['commentBox']);
 			$commentID = GenerateSayID();
 
-
+			//Add the comment
 			$data = Array(
 							"sayID" => $commentID, //This Say is a comment so therefore this is the comment ID
 							"profileID" => $profileID,
@@ -605,6 +611,7 @@ function CommentSayIt($profileID)
 
 			$db->insert("Says", $data);
 
+			//Create a link to the orginal say and the comment that was just added
 			$data = Array(
 							"sayID" => $sayID, // THIS is posted with the form and dealt with higher up
 							"commentID" => $commentID
@@ -619,9 +626,7 @@ function CommentSayIt($profileID)
 	// If no errors insert Comment message into database
 	if (count($errors) == 0)
 	{
-		$result["message"] = "Comment has been added";
 		$result["comment"] = $say;
-		
 	}
 	else //return the json of errors 
 	{	
@@ -661,7 +666,7 @@ function GetSay($profileID)
 	}
 	else
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["S000"]);
 	}
 	
 	if ($profileID === 0)
@@ -679,16 +684,10 @@ function GetSay($profileID)
 			$sayID = $queryResult[0]["sayID"];
 			$say = FetchSay($sayID);
 		}	
-
+		$result["say"] = $say;
 	}
 	
-	// If no errors insert Say message into database
-	if (count($errors) == 0)
-	{
-		$result["say"] = $say;
-		
-	}
-	else //return the json of errors 
+	if (count($errors) != 0)
 	{	
 		$result["message"] = "Say Fetch failed";	
 		$result["errors"] = $errors;
@@ -723,7 +722,7 @@ function GetComments($profileID)
 	}
 	else
 	{
-		array_push($errors, $errorCodes["Co04"]);
+		array_push($errors, $errorCodes["S000"]);
 	}
 	
 	$comments = array();
@@ -741,6 +740,12 @@ function GetComments($profileID)
 			}
 		}	
 		$result["comments"] = $comments;
+	}
+
+	if (count($errors) != 0)
+	{	
+		$result["message"] = "Say Comments Fetch failed";	
+		$result["errors"] = $errors;
 	}
 	return $result;
 }
@@ -774,17 +779,17 @@ function SayActivity($profileID, $action)
 		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);
 		if ($action == "Re-Say" && GetOwnSayStatus($sayID, $profileID))
 		{
-			array_push($errors, $errorCodes["G000"]);	
+			array_push($errors, $errorCodes["S003"]);	
 		}
 	}
 	else
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["S000"]);
 	}
 	
 	if ($profileID === 0)
 	{
-		array_push($errors, $errorCodes["G001"]);
+		array_push($errors, $errorCodes["G002"]);
 	}
 
 
@@ -836,7 +841,6 @@ function SayActivity($profileID, $action)
 	
 	if (count($errors) == 0)
 	{
-		$result["message"] = "$action Completed";
 		$result["status"] = $status;
 		$result["applauds"] = GetActivityCount($sayID, "Applaud");
 		$result["boos"] = GetActivityCount($sayID, "Boo");
@@ -848,7 +852,6 @@ function SayActivity($profileID, $action)
 	}
 	
 	return $result;
-	
 }
 
 
@@ -869,7 +872,8 @@ function GetActivityUsers($profileID, $action)
 	
 	$result = array();
 	$errors = array();
-	
+	$users = array();
+
 	//Pre Requirments
 	if ($db->ping() !== TRUE) 
 	{
@@ -882,21 +886,14 @@ function GetActivityUsers($profileID, $action)
 	}
 	else
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["S000"]);
 	}
-	
-	if ($profileID === 0)
-	{
-		array_push($errors, $errorCodes["G001"]);
-	}
-	
-	$users = array();
 	
 	if ($profileID === 0)
 	{
 		array_push($errors, $errorCodes["G002"]);
 	}
-	
+		
 	//Process
 	if (count($errors) == 0) //If theres no errors so far
 	{			
@@ -926,13 +923,10 @@ function GetActivityUsers($profileID, $action)
 			}				
  
 		}
-	}
-
-	if (count($errors) == 0)
-	{
 		$result["users"] = $users;
 	}
-	else
+
+	if (count($errors) != 0)
 	{
 		$result["errors"] = $errors;
 	}
@@ -1027,12 +1021,12 @@ function DeleteSay($profileID)
 	}
 	else
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["S000"]);
 	}
 	
 	if ($profileID === 0)
 	{
-		array_push($errors, $errorCodes["G001"]);
+		array_push($errors, $errorCodes["G002"]);
 	}
 
 	//Process
@@ -1054,11 +1048,7 @@ function DeleteSay($profileID)
 
 	}
 	
-	if (count($errors) == 0)
-	{
-		$result["message"] = "Say Deleted";
-	}
-	else
+	if (count($errors) != 0)
 	{
 		$result["errors"] = $errors;
 	}
@@ -1094,12 +1084,12 @@ function ReportSay($profileID)
 	}
 	else
 	{
-		array_push($errors, $errorCodes["G000"]);
+		array_push($errors, $errorCodes["S000"]);
 	}
 	
 	if ($profileID === 0)
 	{
-		array_push($errors, $errorCodes["G001"]);
+		array_push($errors, $errorCodes["G002"]);
 	}
 
 	//Process
@@ -1126,15 +1116,10 @@ function ReportSay($profileID)
 		$posterUserName = $say["userName"];
 		$reporterUserName = GetUserName($profileID);
 
-		
 		SlackBot_ReportSay($sayID, $sayMessage, $posterUserName, $reporterUserName);
 	}
 	
-	if (count($errors) == 0)
-	{
-		$result["message"] = "Say Reported";
-	}
-	else
+	if (count($errors) != 0)
 	{
 		$result["errors"] = $errors;
 	}
