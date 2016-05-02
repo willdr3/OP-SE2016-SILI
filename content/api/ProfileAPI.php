@@ -195,7 +195,7 @@ function GetUserProfile($profileID, $requestedProfileID, $filter= "")
 
 	if($filter == "")
 	{
-		$filter = array("profieID", "firstName", "lastName", "fullName", "fullNameUserName", "userName", "profileImage", "profileLink", "userBio", "email", "dob"," gender", "location", "joinDate", "listensTo", "audience", "listening");
+		$filter = array("profileID", "firstName", "lastName", "fullName", "fullNameUserName", "userName", "profileImage", "profileLink", "userBio", "email", "dob"," gender", "location", "joinDate", "listensTo", "audience", "listening");
 	}
 	else
 	{
@@ -273,7 +273,7 @@ function UserNameCheck($userName, $profileID = 0)
 {
 	global $db;
 	$result = false;
-	if($profileID == 0)
+	if($profileID === 0)
 	{
 		$queryResult = $db->rawQuery("SELECT userName FROM Profile WHERE userName = ?", Array($userName));
 	}

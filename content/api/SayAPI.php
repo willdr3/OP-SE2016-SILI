@@ -374,7 +374,7 @@ function SayIt($profileID) //Adds A Say
 			
 			$sayID = GenerateSayID();
 
-			if(CreateSay($sayID, $content, $profileID))
+			if(CreateSay($sayID, $sayContent, $profileID))
 			{
 				$say = GetSay($profileID, $sayID, false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus");
 			}			

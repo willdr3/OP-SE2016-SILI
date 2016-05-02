@@ -85,6 +85,8 @@ function addSay(){
 		data: data,
 		success: function(data) {	
 		$('.emojionearea-editor').text('');
+		$('#gifSearch').val('');
+		GIFTrending();
 			$(".sayFeed").loadTemplate("content/templates/say.html",
 				{
 					sayID: data.say["sayID"],
