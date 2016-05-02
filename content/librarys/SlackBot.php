@@ -113,7 +113,7 @@ function SlackBot_ReportSay($sayID, $sayMessage, $posterUserName, $reporterUserN
 
   $attachment1["fields"] = $attachment1Fields;
 
-  $attachment2["text"] = "To take action and flag it as inappropriate run :remove $sayID";
+  $attachment2["text"] = "To take action and flag it as inappropriate run `~remove $sayID`";
 
   array_push($attachments, $attachment1, $attachment2);
 

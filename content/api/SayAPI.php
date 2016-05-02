@@ -204,11 +204,124 @@ function CreateCommentLink($sayID, $commentID)
 {
 	global $db;
 	$data = Array(
-		"sayID" => $sayID, // THIS is posted with the form and dealt with higher up
+		"sayID" => $sayID,
 		"commentID" => $commentID
 	);
 
 	return $db->insert("Comments", $data);
+}
+
+/**
+ *
+ * Marks a say as removed from the DB, done via slack
+ *
+ * @param    string $sayID of the Say to tie the comment to
+ * @param    string $slackUserName the user who ran the command on slack
+ * @return 	 the result of the insert
+ *
+ */
+function SlackRemoveSay($sayID, $slackUserName)
+{
+	global $db;
+	$data = Array(
+		"sayID" => $sayID, 
+		"removedBySlackUser" => $slackUserName,
+		"removedDate" => date("Y-m-d H:i:s")
+	);
+
+	return $db->insert("SlackRemovedSays", $data);
+}
+
+/**
+ *
+ * Undos a say as removed from the DB, done via slack
+ *
+ * @param    string $sayID of the Say to tie the comment to
+ * @return 	 the result of the insert
+ *
+ */
+function SlackUndoRemoveSay($sayID)
+{
+	global $db;
+	
+	$db->where("sayID", $sayID);
+	$db->delete("SlackRemovedSays");
+}
+
+/**
+ *
+ * Checks if a Say has been Removed By a Slack User
+ *
+ * 
+ * @return   bool|string the user that removed the say
+ *
+ */
+function CheckSlackRemoved($sayID)
+{
+	global $db;
+	$result = false;
+
+	$queryResult = $db->rawQuery("SELECT sayID, removedBySlackUser FROM SlackRemovedSays WHERE sayID = ?", Array($sayID));
+	if (count($queryResult) == 1)
+	{
+		$result = $queryResult[0]["removedBySlackUser"];
+	}
+	
+return $result;
+}
+
+/**
+ *
+ * Checks if a Say has been Deleted by a user
+ *
+ * 
+ * @return   bool 
+ *
+ */
+function CheckDeleted($sayID)
+{
+	global $db;
+	$result = false;
+
+	$queryResult = $db->rawQuery("SELECT sayID FROM Says WHERE sayID = ? AND deleted = 1", Array($sayID));
+	if (count($queryResult) == 1)
+	{
+		$result = true;
+	}
+	
+return $result;
+}
+
+/**
+ *
+ * Checks if a Say has been Reported
+ *
+ * @param 	 string $profileID if given will check if that user has reported it 
+ * @return   bool|int the number of people tha have reported it 
+ *
+ */
+function CheckReported($sayID, $profileID = 0)
+{
+	global $db;
+	$result = false;
+	if($profileID == 0)
+	{
+		$queryResult = $db->rawQuery("SELECT sayID FROM ReportedSays WHERE sayID = ?", Array($sayID));
+		if (count($queryResult) >= 1)
+		{
+			$result = count($queryResult);
+		}
+	}
+	else
+	{
+		$queryResult = $db->rawQuery("SELECT sayID FROM ReportedSays WHERE sayID = ? AND reporterProfileID = ?", Array($sayID, $profileID));
+		if (count($queryResult) == 1)
+		{
+			$result = true;
+		}
+	}
+
+return $result;
 }
 
 /**
@@ -326,13 +439,16 @@ function FetchSays($profileID)
 	if ($profileID !== 0)
 	{
 		$offset *= 10;
-		$saysQuery = "SELECT sayID FROM Says WHERE deleted = 0 AND timePosted >= ? AND sayID NOT IN (SELECT sayID FROM ReportedSays WHERE reporterProfileID = ?) AND (profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) OR profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) AND activity = \"". RESAY ."\")) AND sayID NOT IN (SELECT commentID FROM Comments) ORDER BY timePosted DESC LIMIT ?,10";	
+		$saysQuery = "SELECT sayID FROM Says WHERE timePosted >= ? AND (profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) OR profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) AND activity = \"". RESAY ."\")) AND sayID NOT IN (SELECT commentID FROM Comments) ORDER BY timePosted DESC LIMIT ?,10";	
 		
-		$queryResult = $db->rawQuery($saysQuery, Array($timestamp, $profileID, $profileID, $profileID, $profileID, $offset));
+		$queryResult = $db->rawQuery($saysQuery, Array($timestamp, $profileID, $profileID, $profileID, $offset));
 		if (count($queryResult) >= 1)
 		{
 			foreach ($queryResult as $value) {
-				array_push($says, GetSay($profileID, $value["sayID"], false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus"));
+				if(!CheckSlackRemoved($value["sayID"]) && !CheckDeleted($value["sayID"]) && !CheckReported($value["sayID"], $profileID))
+				{
+					array_push($says, GetSay($profileID, $value["sayID"], false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus"));
+				}
 			}
 		}	
 
@@ -486,16 +602,18 @@ function FetchUserSays($profileID) //Get the says of a user
 	{
 		$offset *= 10;
 
-		$saysQuery = "SELECT sayID FROM Says WHERE deleted = 0 AND timePosted >= ? AND sayID NOT IN (SELECT sayID FROM ReportedSays WHERE reporterProfileID = ?) AND profileID = ? AND sayID NOT IN (SELECT commentID FROM Comments) OR sayID IN (SELECT sayID FROM Activity WHERE profileID = ? AND activity = \"Re-Say\")  ORDER BY timePosted DESC LIMIT ?,10";	
+		$saysQuery = "SELECT sayID FROM Says WHERE timePosted >= ? AND profileID = ? AND sayID NOT IN (SELECT commentID FROM Comments) OR sayID IN (SELECT sayID FROM Activity WHERE profileID = ? AND activity = \"Re-Say\")  ORDER BY timePosted DESC LIMIT ?,10";	
 		
-		$queryResult = $db->rawQuery($saysQuery , Array($timestamp, $profileID, $requestedProfileID, $requestedProfileID, $offset));
+		$queryResult = $db->rawQuery($saysQuery , Array($timestamp, $requestedProfileID, $requestedProfileID, $offset));
 
 		if (count($queryResult) >= 1)
 		{
 			foreach ($queryResult as $value) 
 			{
-				$sayID = $value["sayID"];
-				array_push($says, GetSay($profileID, $sayID, true, $requestedProfileID, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus"));
+				if(!CheckSlackRemoved($value["sayID"]) && !CheckDeleted($value["sayID"]) && !CheckReported($value["sayID"], $profileID))
+				{
+					array_push($says, GetSay($profileID,  $value["sayID"], true, $requestedProfileID, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus"));
+				}
 			}
 		}	
 
