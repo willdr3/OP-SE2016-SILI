@@ -15,6 +15,10 @@
   *
   */
 
+define("RESAY", "resay");
+define("APPLAUD", "applaud");
+define("BOO", "boo");
+
 //Check that only approved methods are trying to access this file (Internal Files/API Controller)
 if (!isset($internal) && !isset($controller))
 {
@@ -68,6 +72,149 @@ return $sayID;
  *
  * Create record for say
  *
+ * @param    string $sayID the generated SayID
+ * @param    string $sayContent the content of the say
+ * @param    int  $profileID of the user creating the say
+ * @return 	 the result of the insert
+ *
+ */
+function CreateSay($sayID, $sayContent, $profileID)
+{
+	global $db;
+	if(strlen($sayContent) == 0)
+	{
+		return null;
+	}
+
+	$data = Array(
+		"sayID" => $sayID,
+		"profileID" => $profileID,
+       	"message" => $sayContent,
+       	"timePosted" => date("Y-m-d H:i:s")
+	);
+	return $db->insert("Says", $data);
+}
+
+/**
+ *
+ * Returns a say
+ *
+ *
+ * @param    int  $profileID of the current logged in user
+ * @param    int  $sayID of the say to retreive
+ * @param    bool $justMe only return the activity by the requestedProfileID
+ * @param    string $requestedProfileID profileID of the users whos activity on the say 
+ * @param    array $filter comma seperated list of fields to include
+ * @return   array Containing the say
+ *
+ */
+function GetSay($profileID, $sayID, $justMe = false, $requestedProfileID = 0, $filter = "")
+{
+	global $db, $Emojione;
+
+	if($filter == "")
+	{
+		$filter = array("sayID", "messageFormatted", "message", "timePosted", "firstName", "lastName", "userName", "profileImage", "profileLink", "boos", "applauds", "resays", "booStatus", "applaudStatus", "resayStatus", "ownSay", "activityStatus");
+	}
+	else
+	{
+		$filter = explode(",", str_replace(" ", "", $filter));
+	}
+
+	if(count($filter) == 0)
+	{
+		return null;
+	}
+
+	$say = array();
+
+	$queryResult = $db->rawQuery("SELECT sayID, timePosted, message, profileID FROM Says WHERE sayID = ?", Array($sayID));
+		
+	if (count($queryResult) == 1)
+	{
+		//Get User Profile of the user who posted the say
+		$userProfile = GetUserProfile($profileID, $queryResult[0]["profileID"], "firstName, lastName, userName, profileImage, profileLink");
+		
+		//Additional Fields not returned in the query or need additonal formating
+		$fields = array();
+		$fields["timePosted"] = strtotime($queryResult[0]["timePosted"]) * 1000;
+		$fields["messageFormatted"] = $Emojione->toImage($queryResult[0]["message"]);
+		$fields["boos"] = GetActivityCount($queryResult[0]["sayID"], BOO);
+		$fields["applauds"] = GetActivityCount($queryResult[0]["sayID"], APPLAUD);
+		$fields["resays"] = GetActivityCount($queryResult[0]["sayID"], RESAY);
+		$fields["booStatus"] = GetActivityStatus($profileID, $queryResult[0]["sayID"], BOO);
+		$fields["applaudStatus"] = GetActivityStatus($profileID, $queryResult[0]["sayID"], APPLAUD);
+		$fields["resayStatus"] = GetActivityStatus($profileID, $queryResult[0]["sayID"], APPLAUD);
+		$fields["ownSay"] = GetOwnSayStatus($queryResult[0]["sayID"], $profileID);
+		$fields["activityStatus"] = GetActivity($profileID, $queryResult[0]["sayID"], RESAY, $justMe, $requestedProfileID);
+
+		foreach ($filter as $value) 
+		{
+			if(array_key_exists($value, $fields))
+			{
+				$say["$value"] = $fields["$value"];
+			}
+			elseif(array_key_exists($value, $userProfile))
+			{
+				$say["$value"] = $userProfile["$value"];
+			}
+			elseif (array_key_exists($value, $queryResult[0])) 
+			{
+				$say["$value"] = $queryResult[0]["$value"];
+			}
+			else
+			{
+				$say["$value"] = null;
+			}
+		}
+	}	
+	
+	return $say;
+}
+
+/**
+ *
+ * Mark a say as deleted
+ *
+ * @param    string $sayID of the say to marked as deleted
+ * @return 	 the result of the update
+ *
+ */
+function DeleteSay($sayID)
+{
+	global $db;
+	$data = Array(
+	    "deleted" => true,
+		"deletedDate" => date("Y-m-d H:i:s")
+	);
+	$db->where("sayID", $sayID);
+	return $db->update("Says", $data);
+}
+
+/**
+ *
+ * Create record to link Say to comment
+ *
+ * @param    string $sayID of the Say to tie the comment to
+ * @param    string $commentID of the comment to be tied to the given say
+ * @return 	 the result of the insert
+ *
+ */
+function CreateCommentLink($sayID, $commentID)
+{
+	global $db;
+	$data = Array(
+		"sayID" => $sayID, // THIS is posted with the form and dealt with higher up
+		"commentID" => $commentID
+	);
+
+	return $db->insert("Comments", $data);
+}
+
+/**
+ *
+ * Process adding a Say from the Frontend form
+ *
  * @param    int  $profileID of the current logged in user
  * @return   array Containing the say or any errors that have occurred
  *
@@ -114,15 +261,10 @@ function SayIt($profileID) //Adds A Say
 			
 			$sayID = GenerateSayID();
 
-			$data = Array(
-				"sayID" => $sayID,
-				"profileID" => $profileID,
-               	"message" => $sayContent,
-               	"timePosted" => date("Y-m-d H:i:s")
-			);
-			$db->insert("Says", $data);
-
-			$say = FetchSay($sayID);
+			if(CreateSay($sayID, $content, $profileID))
+			{
+				$say = GetSay($profileID, $sayID, false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus");
+			}			
 		}
 	}
 	
@@ -151,7 +293,7 @@ function SayIt($profileID) //Adds A Say
  * @return   array Containing the says or any errors that have occurred
  *
  */
-function GetSays($profileID) //Returns all the says based of the people listened to by the logged in user
+function FetchSays($profileID)
 {	
 	global $db, $errorCodes, $request;
 	
@@ -184,20 +326,20 @@ function GetSays($profileID) //Returns all the says based of the people listened
 	if ($profileID !== 0)
 	{
 		$offset *= 10;
-		$saysQuery = "SELECT sayID FROM Says WHERE deleted = 0 AND timePosted >= ? AND sayID NOT IN (SELECT sayID FROM ReportedSays WHERE reporterProfileID = ?) AND (profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) OR profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) AND activity = \"Re-Say\")) AND sayID NOT IN (SELECT commentID FROM Comments) ORDER BY timePosted DESC LIMIT ?,10";	
+		$saysQuery = "SELECT sayID FROM Says WHERE deleted = 0 AND timePosted >= ? AND sayID NOT IN (SELECT sayID FROM ReportedSays WHERE reporterProfileID = ?) AND (profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) OR profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) AND activity = \"". RESAY ."\")) AND sayID NOT IN (SELECT commentID FROM Comments) ORDER BY timePosted DESC LIMIT ?,10";	
 		
 		$queryResult = $db->rawQuery($saysQuery, Array($timestamp, $profileID, $profileID, $profileID, $profileID, $offset));
 		if (count($queryResult) >= 1)
 		{
 			foreach ($queryResult as $value) {
-				array_push($says, FetchSay($value["sayID"]));
+				array_push($says, GetSay($profileID, $value["sayID"], false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus"));
 			}
 		}	
 
 		//$currentPage = $offset / 10;
 		$result["says"] = $says;
 		//$result["currentPage"] = $currentPage;
-		$result["totalPages"] = CalcuateSaysPages($profileID, $timestamp, "says");
+		$result["totalPages"] = CalculatePages($profileID, $timestamp, "says");
 	}
 	
 	if (count($errors) != 0)
@@ -220,7 +362,7 @@ function GetSays($profileID) //Returns all the says based of the people listened
  * @return   int the number of pages there will be
  *
  */
-function CalcuateSaysPages($profileID, $timestamp, $view)
+function CalculatePages($profileID, $timestamp, $view)
 {
 	global $db;
 	$totalSays = 0;
@@ -238,6 +380,11 @@ function CalcuateSaysPages($profileID, $timestamp, $view)
 	elseif ($view == "comments") 
 	{
 		$countQuery = "";
+	}
+	elseif ($view == BOO || $view == APPLAUD || $view == RESAY)
+	{
+		$countQuery = "SELECT count(*) AS totalUsers FROM Activity WHERE sayID = ? AND timeOfAction >= ? AND activity = ?";
+		$queryResult = $db->rawQuery($countQuery, Array($sayID, $timestamp, $view));
 	}
 	else
 	{
@@ -263,59 +410,13 @@ function CalcuateSaysPages($profileID, $timestamp, $view)
 
 /**
  *
- * Returns a say
- *
- *
- * @param    int  $profileID of the current logged in user
- * @param    bool $justMe only return the activity by the requestedProfileID
- * @param    string $requestedProfileID profileID of the users whos activity on the say 
- * @return   array Containing the say
- *
- */
-function FetchSay($sayID, $justMe = false, $requestedProfileID = 0) //Fetches the Say
-{
-	global $db, $profileImagePath, $defaultProfileImg, $profileID, $Emojione;
-	$say = array();
-
-	$queryResult = $db->rawQuery("SELECT sayID, timePosted, message, profileID FROM Says WHERE sayID = ?", Array($sayID));
-		
-	if (count($queryResult) == 1)
-	{
-		$userProfile = GetUserProfile($profileID, $queryResult[0]["profileID"], "firstName, lastName, userName, profileImage, profileLink");
-
-		$say = [
-		"sayID" => $queryResult[0]["sayID"],
-		"timePosted" => strtotime($queryResult[0]["timePosted"]) * 1000,
-		"message" => CheckForGiphy($Emojione->toImage($queryResult[0]["message"])),
-		"messageClean" => $queryResult[0]["message"],
-		"firstName" => $userProfile["firstName"],
-		"lastName" => $userProfile["lastName"],
-		"userName" => $userProfile["userName"],
-		"profileImage" => $userProfile["profileImage"],
-		"profileLink" => $userProfile["profileLink"],
-		"boos" => GetActivityCount($queryResult[0]["sayID"], "Boo"),
-		"applauds" => GetActivityCount($queryResult[0]["sayID"], "Applaud"),
-		"resays" => GetActivityCount($queryResult[0]["sayID"], "Re-Say"),
-		"booStatus" => GetActivityStatus($profileID, $queryResult[0]["sayID"], "Boo"),
-		"applaudStatus" => GetActivityStatus($profileID, $queryResult[0]["sayID"], "Applaud"),
-		"resayStatus" => GetActivityStatus($profileID, $queryResult[0]["sayID"], "Re-Say"),
-		"ownSay" => GetOwnSayStatus($queryResult[0]["sayID"], $profileID),
-		"activityStatus" => GetActivity($profileID, $queryResult[0]["sayID"], "Re-Say", $justMe, $requestedProfileID),
-		];
-	}	
-	
-	return $say;
-}
-
-/**
- *
  * Returns the says/resays for current user
  *
  * @param    int  $profileID of the current logged in user
  * @return   array Containing the says or any errors that have occurred
  *
  */
-function GetUserSays($profileID) //Get the says of a user
+function FetchUserSays($profileID) //Get the says of a user
 {
 	global $db, $errorCodes, $request;
 	// Arrays for jsons
@@ -385,7 +486,7 @@ function GetUserSays($profileID) //Get the says of a user
 	{
 		$offset *= 10;
 
-		$saysQuery = "SELECT sayID FROM Says WHERE deleted = 0 AND timePosted >= ? AND sayID NOT IN (SELECT sayID FROM ReportedSays WHERE reporterProfileID = ?) AND profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID = ? AND activity = \"Re-Say\") ORDER BY timePosted DESC LIMIT ?,10";	
+		$saysQuery = "SELECT sayID FROM Says WHERE deleted = 0 AND timePosted >= ? AND sayID NOT IN (SELECT sayID FROM ReportedSays WHERE reporterProfileID = ?) AND profileID = ? AND sayID NOT IN (SELECT commentID FROM Comments) OR sayID IN (SELECT sayID FROM Activity WHERE profileID = ? AND activity = \"Re-Say\")  ORDER BY timePosted DESC LIMIT ?,10";	
 		
 		$queryResult = $db->rawQuery($saysQuery , Array($timestamp, $profileID, $requestedProfileID, $requestedProfileID, $offset));
 
@@ -394,12 +495,12 @@ function GetUserSays($profileID) //Get the says of a user
 			foreach ($queryResult as $value) 
 			{
 				$sayID = $value["sayID"];
-				array_push($says, FetchSay($sayID, true, $requestedProfileID));
+				array_push($says, GetSay($profileID, $sayID, true, $requestedProfileID, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus"));
 			}
 		}	
 
 		$result["says"] = $says;
-		$result["totalPages"] = CalcuateSaysPages($requestedProfileID, $timestamp, "profile");
+		$result["totalPages"] = CalculatePages($requestedProfileID, $timestamp, "profile");
 	}
 
 	if (count($errors) != 0)
@@ -478,13 +579,11 @@ function GetActivityStatus($profileID, $sayID, $action)
 	$queryResult = $db->rawQuery("SELECT COUNT(*) as count FROM Activity WHERE activity = ? AND sayID = ? AND profileID = ?" , Array($action, $sayID, $profileID));
 	if (count($queryResult) == 1)
 	{
-		$count = $queryResult[0]["count"];
-	
+		$count = $queryResult[0]["count"];	
 		if ($count == 1)
 		{
 			$status = true;
 		}
-		
 	}
 	
 	return $status;
@@ -524,8 +623,7 @@ function GetActivity($profileID, $sayID, $action, $justMe = false, $requestedPro
 	{
 		$activity = GetUserProfile($profileID, $queryResult[0]["profileID"], "firstName, lastName, userName, profileImage, profileLink");
 	}
-	
-	
+		
 	return $activity;
 }
 
@@ -537,7 +635,7 @@ function GetActivity($profileID, $sayID, $action, $justMe = false, $requestedPro
  * @return   array Containing the comment or any errors that have occurred
  *
  */
-function CommentSayIt($profileID)
+function CommentIt($profileID)
 {
 	global $db, $errorCodes, $request;
 	// Arrays for jsons
@@ -573,25 +671,13 @@ function CommentSayIt($profileID)
 			$sayContent = htmlspecialchars($_POST['commentBox']);
 			$commentID = GenerateSayID();
 
-			//Add the comment
-			$data = Array(
-							"sayID" => $commentID, //This Say is a comment so therefore this is the comment ID
-							"profileID" => $profileID,
-			               	"message" => $sayContent,
-			               	"timePosted" => date("Y-m-d H:i:s")
-						);
-
-			$db->insert("Says", $data);
-
-			//Create a link to the orginal say and the comment that was just added
-			$data = Array(
-							"sayID" => $sayID, // THIS is posted with the form and dealt with higher up
-							"commentID" => $commentID
-						);
-
-			$db->insert("Comments", $data);
-
-			$say = FetchSay($commentID);
+			if(CreateSay($commentID, $sayContent, $profileID))
+			{
+				if(CreateCommentLink($sayID, $commentID))
+				{
+					$say = GetSay($profileID, $commentID, false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus");
+				}
+			}
 		}
 	}
 	
@@ -619,7 +705,7 @@ function CommentSayIt($profileID)
  * @return   array say details or any errors that occour
  *
  */
-function GetSay($profileID)
+function FetchSay($profileID)
 {
 	global $db, $errorCodes, $request;
 	
@@ -646,15 +732,14 @@ function GetSay($profileID)
 		array_push($errors, $errorCodes["G002"]);
 	}
 	else 
-	{
-		
+	{		
 		$saysQuery = "SELECT sayID FROM Says WHERE sayID = ?";	
 		
 		$queryResult = $db->rawQuery($saysQuery , Array($sayID));
 		if (count($queryResult) == 1)
 		{	
 			$sayID = $queryResult[0]["sayID"];
-			$say = FetchSay($sayID);
+			$say = GetSay($profileID, $sayID, false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus");
 		}	
 		$result["say"] = $say;
 	}
@@ -676,7 +761,7 @@ function GetSay($profileID)
  * @return   array comment details or any errors that occour
  *
  */
-function GetComments($profileID)
+function FetchComments($profileID)
 {
 	global $db, $errorCodes, $request;
 	// Arrays for jsons
@@ -708,7 +793,7 @@ function GetComments($profileID)
 		{
 			foreach ($queryResult as $value) {
 				$commentID = $value["sayID"];
-				array_push($comments, FetchSay($commentID));
+				array_push($comments, GetSay($profileID, $commentID, false, 0, "sayID, messageFormatted, timePosted, firstName, lastName, userName, profileImage, profileLink, boos, applauds, resays, booStatus, applaudStatus, resayStatus, ownSay, activityStatus"));
 			}
 		}	
 		$result["comments"] = $comments;
@@ -768,19 +853,19 @@ function SayActivity($profileID, $action)
 	$status = "";
 	$reverseAction = "";
 	
-	if ($action == "Boo") 
+	if ($action == BOO) 
 	{
-		$reverseAction = "Applaud";
+		$reverseAction = APPLAUD;
 	}
-	elseif ($action == "Applaud")
-	 {
-		$reverseAction = "Boo";
-	 }
+	elseif ($action == APPLAUD)
+	{
+		$reverseAction = BOO;
+	}
 
 	//Process
 	if (count($errors) == 0) //If theres no errors so far
 	{	
-		if ($action == "Re-Say" || !GetActivityStatus($profileID, $sayID, $reverseAction)) 
+		if ($action == RESAY || !GetActivityStatus($profileID, $sayID, $reverseAction)) 
 		{
 			if (!GetActivityStatus($profileID, $sayID, $action))
 			{
@@ -796,7 +881,6 @@ function SayActivity($profileID, $action)
 			}
 			else
 			{
-
 				$db->where("profileID", $profileID);
 				$db->where("sayID", $sayID);
 				$db->where("activity", $action);
@@ -814,9 +898,9 @@ function SayActivity($profileID, $action)
 	if (count($errors) == 0)
 	{
 		$result["status"] = $status;
-		$result["applauds"] = GetActivityCount($sayID, "Applaud");
-		$result["boos"] = GetActivityCount($sayID, "Boo");
-		$result["resays"] = GetActivityCount($sayID, "Re-Say");
+		$result["applauds"] = GetActivityCount($sayID, APPLAUD);
+		$result["boos"] = GetActivityCount($sayID, BOO);
+		$result["resays"] = GetActivityCount($sayID, RESAY);
 	}
 	else
 	{
@@ -825,7 +909,6 @@ function SayActivity($profileID, $action)
 	
 	return $result;
 }
-
 
 /**
  *
@@ -899,11 +982,10 @@ function GetActivityUsers($profileID, $action)
 			{
 				$user = GetUserProfile($profileID, $queryResult[0]["profileID"], "firstName, lastName, userName, profileImage, profileLink");
 				array_push($users, $user);
-			}				
- 
+			} 
 		}
 		
-		$result["totalPages"] = CalculateActivityPages($sayID, $timestamp, $action);
+		$result["totalPages"] = CalculatePages($sayID, $timestamp, $action);
 		$result["users"] = $users;
 	}
 
@@ -917,41 +999,6 @@ function GetActivityUsers($profileID, $action)
 
 /**
  *
- * Returns the total number of users that performed the given activity
- *
- *
- * @param    int  $sayID
- * @param    int  $timestamp the time we are calcuating users from
- * @param    string $view the type of view (Applaud|Re-Say|Boo)
- * @return   int the number of pages there will be
- *
- */
-function CalculateActivityPages($sayID, $timestamp, $view)
-{
-	global $db;
-	$totalSays = 0;
-	
-	$countQuery = "SELECT count(*) AS totalUsers FROM Activity WHERE sayID = ? AND timeOfAction >= ? AND activity = ?";
-	$queryResult = $db->rawQuery($countQuery, Array($sayID, $timestamp, $view));
-
-	if (count($queryResult) >= 1)
-	{
-		$totalSays = $queryResult[0]["totalUsers"];
-	}
-
-	$nbrPages = floor($totalSays / 10);
-
-	if ($totalSays % 10 > 0)
-	{
-		$nbrPages += 1;
-	}
-
-
-	return $nbrPages;
-}
-
-/**
- *
  * Preform Boo Action
  *
  * @param    int $profileID of the current logged in user
@@ -959,7 +1006,7 @@ function CalculateActivityPages($sayID, $timestamp, $view)
  */
 function Boo($profileID)
 {
-	return SayActivity($profileID, "Boo");	
+	return SayActivity($profileID, BOO);	
 }
 
 /**
@@ -971,7 +1018,7 @@ function Boo($profileID)
  */
 function Applaud($profileID)
 {
-	return SayActivity($profileID, "Applaud");	
+	return SayActivity($profileID, APPLAUD);	
 }
 
 /**
@@ -983,7 +1030,7 @@ function Applaud($profileID)
  */
 function ReSay($profileID)
 {
-	return SayActivity($profileID, "Re-Say");	
+	return SayActivity($profileID, RESAY);	
 }
 
 /**
@@ -995,7 +1042,7 @@ function ReSay($profileID)
  */
 function ApplaudUsers($profileID)
 {
-	return GetActivityUsers($profileID, "Applaud");	
+	return GetActivityUsers($profileID, APPLAUD);	
 }
 
 /**
@@ -1007,7 +1054,7 @@ function ApplaudUsers($profileID)
  */
 function BooUsers($profileID)
 {
-	return GetActivityUsers($profileID, "Boo");	
+	return GetActivityUsers($profileID, BOO);	
 }
 
 /**
@@ -1019,18 +1066,18 @@ function BooUsers($profileID)
  */
 function ResayUsers($profileID)
 {
-	return GetActivityUsers($profileID, "Re-Say");	
+	return GetActivityUsers($profileID, RESAY);	
 }
 
 /**
  *
- * Deletes a Say
+ * Takes the requested say and marks it as deleted
  *
  * @param    string $profileID of the current logged in user
  * @return   array Result of the action
  *
  */
-function DeleteSay($profileID)
+function RemoveSay($profileID)
 {
 	global $db, $errorCodes, $request;
 	
@@ -1062,18 +1109,12 @@ function DeleteSay($profileID)
 	{	
 		if (GetOwnSayStatus($sayID, $profileID))
 		{
-			$data = Array(
-			    "deleted" => true,
-				"deletedDate" => date("Y-m-d H:i:s")
-			);
-			$db->where("sayID", $sayID);
-			$db->update("Says", $data);
+			DeleteSay($sayID);
 		}
 		else
 		{
 			array_push($errors, $errorCodes["G000"]);
 		}
-
 	}
 	
 	if (count($errors) != 0)
@@ -1138,9 +1179,9 @@ function ReportSay($profileID)
 		}
 
 		//Get the Details of the say
-		$say = FetchSay($sayID);
+		$say = GetSay($profileID, $sayID, false, 0, "sayID, message, userName");
 
-		$sayMessage = $say["messageClean"];
+		$sayMessage = $say["message"];
 		$posterUserName = $say["userName"];
 		$reporterUserName = GetUserName($profileID);
 
@@ -1153,6 +1194,5 @@ function ReportSay($profileID)
 	}
 	
 	return $result;
-	
 }
 ?>

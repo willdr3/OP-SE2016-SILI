@@ -7,14 +7,14 @@
 	];
 	
 	$reqArray["say"] = [
-		0 => ["GET" => "GetSays", "POST" => "SayIt"],
-		"comment" => ["POST" => "CommentSayIt", "GET" => "GetComments"],
+		0 => ["GET" => "FetchSays", "POST" => "SayIt"],
+		"comment" => ["POST" => "CommentIt", "GET" => "FetchComments"],
 		"boo" => ["GET" => "Boo"],
 		"applaud" => ["GET" => "Applaud"],
 		"resay" => ["GET" => "Resay"],
-		"user" => ["GET" => "GetUserSays"],
-		"say" => ["GET" => "GetSay"],
-		"delete" =>	["GET" => "DeleteSay"],
+		"user" => ["GET" => "FetchUserSays"],
+		"say" => ["GET" => "FetchSay"],
+		"delete" =>	["GET" => "RemoveSay"],
 		"applaudusers" =>	["GET" => "ApplaudUsers"],
 		"boousers" =>	["GET" => "BooUsers"],
 		"resayusers" =>	["GET" => "ResayUsers"],
