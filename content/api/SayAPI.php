@@ -138,7 +138,7 @@ function GetSay($profileID, $sayID, $justMe = false, $requestedProfileID = 0, $f
 		//Additional Fields not returned in the query or need additonal formating
 		$fields = array();
 		$fields["timePosted"] = strtotime($queryResult[0]["timePosted"]) * 1000;
-		$fields["messageFormatted"] = $Emojione->toImage($queryResult[0]["message"]);
+		$fields["messageFormatted"] = CheckForGiphy($Emojione->toImage($queryResult[0]["message"]));
 		$fields["boos"] = GetActivityCount($queryResult[0]["sayID"], BOO);
 		$fields["applauds"] = GetActivityCount($queryResult[0]["sayID"], APPLAUD);
 		$fields["resays"] = GetActivityCount($queryResult[0]["sayID"], RESAY);
