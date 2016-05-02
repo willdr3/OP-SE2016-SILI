@@ -736,7 +736,10 @@ function GetActionUser(sayID, action) {
 				
 			});
 			
-			
+			if (totalActionPages == 1 || totalActionPages == 0)
+			{
+				$("#loadMoreActionUsers").remove();
+			}
 		}
 	});
 	

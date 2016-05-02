@@ -144,7 +144,7 @@ function GetSay($profileID, $sayID, $justMe = false, $requestedProfileID = 0, $f
 		$fields["resays"] = GetActivityCount($queryResult[0]["sayID"], RESAY);
 		$fields["booStatus"] = GetActivityStatus($profileID, $queryResult[0]["sayID"], BOO);
 		$fields["applaudStatus"] = GetActivityStatus($profileID, $queryResult[0]["sayID"], APPLAUD);
-		$fields["resayStatus"] = GetActivityStatus($profileID, $queryResult[0]["sayID"], APPLAUD);
+		$fields["resayStatus"] = GetActivityStatus($profileID, $queryResult[0]["sayID"], RESAY);
 		$fields["ownSay"] = GetOwnSayStatus($queryResult[0]["sayID"], $profileID);
 		$fields["activityStatus"] = GetActivity($profileID, $queryResult[0]["sayID"], RESAY, $justMe, $requestedProfileID);
 
@@ -472,26 +472,26 @@ function FetchSays($profileID)
  * Returns the total number of says for the given user
  *
  *
- * @param    int  $profileID 
+ * @param    int  $ID 
  * @param    int  $timestamp the time we are calcuating says from
  * @param    string $view the type of view (says|profile|comments)
  * @return   int the number of pages there will be
  *
  */
-function CalculatePages($profileID, $timestamp, $view)
+function CalculatePages($ID, $timestamp, $view)
 {
 	global $db;
 	$totalSays = 0;
 
 	if ($view == "says")
 	{
-		$countQuery = "SELECT count(sayID) as totalSays FROM Says WHERE deleted = 0 AND timePosted >= ? AND (profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) OR profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) AND activity = \"Re-Say\")) AND sayID NOT IN (SELECT commentID FROM Comments)";
-		$queryResult = $db->rawQuery($countQuery, Array($timestamp, $profileID, $profileID, $profileID));
+		$countQuery = "SELECT count(sayID) as total FROM Says WHERE deleted = 0 AND timePosted >= ? AND (profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) OR profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID IN (SELECT listenerProfileID FROM Listeners WHERE profileID = ?) AND activity = \"Re-Say\")) AND sayID NOT IN (SELECT commentID FROM Comments)";
+		$queryResult = $db->rawQuery($countQuery, Array($timestamp, $ID, $ID, $ID));
 	} 
 	elseif ($view == "profile")
 	{
-		$countQuery = "SELECT count(sayID) as totalSays FROM Says WHERE deleted = 0 AND timePosted >= ? AND profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID = ? AND activity = \"Re-Say\")";
-		$queryResult = $db->rawQuery($countQuery, Array($timestamp, $profileID, $profileID));
+		$countQuery = "SELECT count(sayID) as total FROM Says WHERE deleted = 0 AND timePosted >= ? AND profileID = ? OR sayID IN (SELECT sayID FROM Activity WHERE profileID = ? AND activity = \"Re-Say\")";
+		$queryResult = $db->rawQuery($countQuery, Array($timestamp, $ID, $ID));
 	}
 	elseif ($view == "comments") 
 	{
@@ -499,8 +499,8 @@ function CalculatePages($profileID, $timestamp, $view)
 	}
 	elseif ($view == BOO || $view == APPLAUD || $view == RESAY)
 	{
-		$countQuery = "SELECT count(*) AS totalUsers FROM Activity WHERE sayID = ? AND timeOfAction >= ? AND activity = ?";
-		$queryResult = $db->rawQuery($countQuery, Array($sayID, $timestamp, $view));
+		$countQuery = "SELECT count(*) AS total FROM Activity WHERE sayID = ? AND timeOfAction >= ? AND activity = ?";
+		$queryResult = $db->rawQuery($countQuery, Array($ID, $timestamp, $view));
 	}
 	else
 	{
@@ -510,12 +510,12 @@ function CalculatePages($profileID, $timestamp, $view)
 
 	if (count($queryResult) >= 1)
 	{
-		$totalSays = $queryResult[0]["totalSays"];
+		$total = $queryResult[0]["total"];
 	}
 
-	$nbrPages = floor($totalSays / 10);
+	$nbrPages = floor($total / 10);
 
-	if ($totalSays % 10 > 0)
+	if ($total % 10 > 0)
 	{
 		$nbrPages += 1;
 	}
@@ -1098,7 +1098,7 @@ function GetActivityUsers($profileID, $action)
 		{
 			foreach ($queryResult as $user) 
 			{
-				$user = GetUserProfile($profileID, $queryResult[0]["profileID"], "firstName, lastName, userName, profileImage, profileLink");
+				$user = GetUserProfile($profileID, $user["profileID"], "firstName, lastName, userName, profileImage, profileLink");
 				array_push($users, $user);
 			} 
 		}
