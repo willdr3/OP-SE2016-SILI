@@ -394,7 +394,7 @@ function addMessage(data, userName){
 		dataType: "json",
 		url: "API/message/user/" + userName,
 		data: "data",
-		success function(data) {
+		success: function(data) {
 			$(".messageBox").val("");
 			$(".messageModal").loadTemplate("content/templates/singleMessage.html",
 			{
@@ -1037,6 +1037,7 @@ $("document").ready(function() {
 		$(this).parent().find("span").html(count);			
 		setActionStatus($(this).parent().find("i"), status);	
 	});
+
 	$(document).on('click', '.applaudModal', function(){		
 		var $el = $(this).parent().parent().parent().parent().parent();
 		var sayID = $el.attr('id');
@@ -1176,8 +1177,7 @@ $("document").ready(function() {
 		var listeningStatus = $(this).data("listening");
 		listenButton(userID, reqUserName, listeningStatus);	
 		$(this).blur();
-	});	
-
+	});
 
 	$(document).on('submit','.comment-form', function(e){
 		console.log(this);
