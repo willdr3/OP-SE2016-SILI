@@ -22,8 +22,9 @@
  */
 function CreateImage($giphyID)
 {
-	$giphyArray = getByID($giphyID);
-	$gifURL = $giphyArray["data"]["images"]["fixed_width_still"]["url"];
+	//$giphyArray = getByID($giphyID);
+	//$gifURL = $giphyArray["data"]["images"]["fixed_width_still"]["url"];$
+	$gifURL = "http://media0.giphy.com/media/$giphyID/200w.gif";
 
 	$htmlReturn = "<img src=\"$gifURL\" alt=\"\">";
 
@@ -181,14 +182,14 @@ function request($endpoint, $params = array())
 	$params["api_key"] = "dc6zaTOxFJmzC";
 	$query = http_build_query($params);
 	$url = "http://api.giphy.com" . $endpoint . ($query ? "?$query": "");
-	//$result = file_get_contents($url);
-	$ch = curl_init($url);
+	$result = file_get_contents($url);
+	/*$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_USERAGENT, "MozillaXYZ/1.0");
 	curl_setopt($ch, CURLOPT_HEADER, 0);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
   	$result = curl_exec($ch);
-  	curl_close($ch);
+  	curl_close($ch);*/
 	return $result ? json_decode($result, true) : false;
 }
 ?>
