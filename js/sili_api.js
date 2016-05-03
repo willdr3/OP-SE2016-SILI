@@ -370,10 +370,10 @@ function fetchMessages(data, userName){
 		success: function(data) {
 			$(".messageModal").loadTemplate("content/templates/message.html",
 			{
-				firstName: data.say["firstName"],
-			    lastName: data.say["lastName"],
-			    userName: data.say["userName"],
-				profilePicture: data.say["profileImage"],
+				firstName: data.message["firstName"],
+			    lastName: data.message["lastName"],
+			    userName: data.message["userName"],
+				profilePicture: data.message["profileImage"],
 			}, { async: false });
 			$.each(data.messages, function(index, element){
 				$(".messageFeed").loadTemplate("content/templates/singleMessage.html",
@@ -389,7 +389,20 @@ function fetchMessages(data, userName){
 }
 
 function addMessage(data, userName){
-
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: "API/message/user/" + userName,
+		data: "data",
+		success function(data) {
+			$(".messageBox").val("");
+			$(".messageModal").loadTemplate("content/templates/singleMessage.html",
+			{
+				message: data.message["message"],
+			}, { prepend: true });
+		}
+	});
+	return false;
 }
 
 function getUserDetials() {
