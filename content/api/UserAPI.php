@@ -143,14 +143,14 @@ function ChangePassword($userID, $hashedPassword)
 		return null;
 	}
 
+	//Delete all the saved sessions
+	deleteAllRememberMeCookies($userID);
+
 	$data = Array(
 	    "userPassword" => $hashedPassword,
 	);
 	$db->where("userID", $userID);
-	$db->update("UserLogin", $data);
-
-	//Delete all the saved sessions
-	deleteAllRememberMeCookies($userID);
+	return $db->update("UserLogin", $data);
 }
 
 /**
@@ -180,7 +180,7 @@ function ChangeEmail($userID, $emailAddress)
 	    "userEmail" => $emailAddress,
 	);
 	$db->where("userID", $userID);
-	$db->update("UserLogin", $data);
+	return $db->update("UserLogin", $data);
 }
 
 /**

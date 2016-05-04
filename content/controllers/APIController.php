@@ -18,6 +18,10 @@ require_once("../api/SayAPI.php");
 require_once("../api/ProfileAPI.php");
 require_once("../api/MessageAPI.php");
 require_once("../librarys/SlackBot.php");
+require_once("../librarys/Emojione.php");
+require_once("../librarys/Giphy.php");
+
+
 
 //Check if the request is coming from one of the scripts
 if (is_ajax())

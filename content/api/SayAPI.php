@@ -27,16 +27,6 @@ if (!isset($internal) && !isset($controller))
 	exit;
 }
 
-include_once("../librarys/Giphy.php");
-
-//EmojiOne Code
-require('../librarys/emojione/autoload.php');
-$Emojione = new Emojione\Client(new Emojione\Ruleset());
-//Set the image type to use
-$Emojione->imageType = 'svg'; // or png (default)
-$Emojione->ascii = true; // Convert ascii to emojis
-//EmojiOne Code End
-
 /**
  *
  * Generate a random sayID
@@ -81,11 +71,21 @@ return $sayID;
 function CreateSay($sayID, $sayContent, $profileID)
 {
 	global $db;
+	if($sayID === 0)
+	{
+		return null;
+	}
+
 	if(strlen($sayContent) == 0)
 	{
 		return null;
 	}
 
+	if($profileID === 0)
+	{
+		return null;
+	}
+	
 	$data = Array(
 		"sayID" => $sayID,
 		"profileID" => $profileID,
