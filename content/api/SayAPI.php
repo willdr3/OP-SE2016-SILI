@@ -85,7 +85,7 @@ function CreateSay($sayID, $sayContent, $profileID)
 	{
 		return null;
 	}
-	
+
 	$data = Array(
 		"sayID" => $sayID,
 		"profileID" => $profileID,
@@ -183,6 +183,12 @@ function GetSay($profileID, $sayID, $justMe = false, $requestedProfileID = 0, $f
 function DeleteSay($sayID)
 {
 	global $db;
+
+	if($sayID === 0)
+	{
+		return null;
+	}
+	
 	$data = Array(
 	    "deleted" => true,
 		"deletedDate" => date("Y-m-d H:i:s")
