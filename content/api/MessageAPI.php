@@ -127,7 +127,7 @@ function GetConversationIDs($participant1)
 		$conversationIDs = array();
 		$queryResult = $db->rawQuery("SELECT conversationID FROM Conversations WHERE participant1 = ? OR participant2 = ?", Array($participant1, $participant1));
 		foreach ($queryResult as $value) {
-			array_push($conversationIDs, $value["conversationID"]);
+			array_push($conversationIDs, addslashes($value["conversationID"]));
 		}
 	}
 
@@ -295,7 +295,7 @@ function GetMessages($profileID)
 		$conversationID = GetConversationID($profileID, $recipientProfileID);
 		$recipientProfile = GetUserProfile($profileID, $recipientProfileID, "firstName, lastName, userName, profileImage");
 
-		$messagesQuery = "SELECT messageID FROM Messages WHERE conversationID = ? ORDER BY timeSent DESC";
+		$messagesQuery = "SELECT messageID FROM Messages WHERE conversationID = ? ORDER BY timeSent ASC";
 
 		$queryResult = $db->rawQuery($messagesQuery, Array($conversationID));
 		if (count($queryResult) >= 1)
@@ -343,9 +343,10 @@ function GetConversation($profileID)
 	else
 	{
 
- 		$conversationIDs =implode(", ",GetConversationIDs($profileID));
-		$queryResult = $db->rawQuery("SELECT messageID, conversationID FROM Messages WHERE conversationID IN (?) GROUP BY conversationID ORDER BY timeSent ASC", array($conversationIDs));
-		if (count($queryResult) >= 1)
+ 		$conversationIDs = GetConversationIDs($profileID);
+ 		$comma_list = "'" .implode("', '", $conversationIDs) . "'";
+
+		$queryResult = $db->rawQuery("SELECT * FROM (SELECT messageID, conversationID, timeSent FROM Messages WHERE conversationID IN ($comma_list) ORDER BY timeSent DESC) AS MessageConvo GROUP BY conversationID ORDER BY timeSent DESC");
 		{
 
 			foreach ($queryResult as $value) {
