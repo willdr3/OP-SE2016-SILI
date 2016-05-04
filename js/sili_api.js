@@ -348,15 +348,15 @@ function fetchConversations(){
 		dataType: "json",
 		url: "API/message/",
 		success: function(data){
-			$.each(data.messages, function(index, element){
+			$.each(data.conversations, function(index, element){
 				$(".conversationFeed").loadTemplate("content/templates/conversation.html",
 				{
-					firstName: element["firstName"],
-				    lastName: element["lastName"],
-				    userName: element["userName"],
-					message: element["message"],
-					profilePicture: element["profileImage"],
-					timePosted: moment(element["timePosted"]).format('lll'),
+					firstName: element["otherUser"]["firstName"],
+				    lastName: element["otherUser"]["lastName"],
+				    userName: element["otherUser"]["userName"],
+					message: element["message"]["message"],
+					profilePicture: element["otherUser"]["profileImage"],
+					timeSent: moment(element["message"]["timeSent"]).format('lll'),
 				}, { append: true })
 			})
 		}
@@ -369,12 +369,12 @@ function fetchMessages(reqUserName){
 		url: "API/message/user/" + reqUserName,
 		success: function(data) {
 			$(".messageModal").loadTemplate("content/templates/message.html",
-			{
-				firstName: data.message["firstName"],
-			    lastName: data.message["lastName"],
-			    userName: data.message["userName"],
-				profilePicture: data.message["profileImage"],
-			}, { async: false });
+            {
+                firstName: data.recipientProfile["firstName"],
+                lastName: data.recipientProfile["lastName"],
+                userName: data.recipientProfile["userName"],
+                profilePicture: data.recipientProfile["profileImage"],
+            }, { async: false });
 			$.each(data.messages, function(index, element){
 				$(".messageFeed").loadTemplate("content/templates/singleMessage.html",
 				{

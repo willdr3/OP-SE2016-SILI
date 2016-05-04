@@ -43,7 +43,7 @@ function GenerateMessageID()
 	  	$bytes = openssl_random_pseudo_bytes(20, $cstrong);
 	   	$hex = bin2hex($bytes);
 	   	
-		$queryResult = $db->rawQuery("SELECT messageID FROM Message WHERE messageID = ?", Array($hex));
+		$queryResult = $db->rawQuery("SELECT messageID FROM Messages WHERE messageID = ?", Array($hex));
 	   	//Check the generated id doesnt already exist
 		if (count($queryResult) == 0)
 		{
@@ -52,6 +52,131 @@ function GenerateMessageID()
 	} while ($messageID == "");
 	
 return $messageID;
+}
+
+/**
+ *
+ * Generate a random conversationID
+ *
+ * Generates a random conversationID checking that it does not 
+ * already exist in the database
+ * 
+ * @return   string The  conversationID for the Message
+ *
+ */
+function GenerateConversationID()
+{
+	global $db;
+	$conversationID = "";
+
+	//Generate MessageID
+	do {
+	  	$bytes = openssl_random_pseudo_bytes(20, $cstrong);
+	   	$hex = bin2hex($bytes);
+	   	
+		$queryResult = $db->rawQuery("SELECT  conversationID FROM Conversations WHERE conversationID = ?", Array($hex));
+	   	//Check the generated id doesnt already exist
+		if (count($queryResult) == 0)
+		{
+			$conversationID = $hex;
+		}
+	} while ($conversationID == "");
+	
+return $conversationID;
+}
+
+/**
+ *
+ * Retuns an
+ *
+ * @param    sring $participant1 
+ * @param    sring $participant2
+ * @return   string The  conversationID for the Message
+ *
+ */
+function GetConversationID($participant1, $participant2)
+{
+	global $db;
+	$conversationID = 0;
+	if(strlen($participant1) !== 0 && strlen($participant2) !== 0)
+	{
+		$queryResult = $db->rawQuery("SELECT conversationID FROM Conversations WHERE (participant1 = ? AND participant2 = ?) OR (participant1 = ? AND participant2 = ?)", Array($participant1,$participant2,$participant2,$participant1));
+		if(count($queryResult) == 1)
+		{
+			$conversationID = $queryResult[0]["conversationID"];
+		}
+	}
+
+	return $conversationID;
+}
+
+/**
+ *
+ * Retuns an
+ *
+ * @param    sring $participant1 
+ * @return   array 
+ *
+ */
+function GetConversationIDs($participant1)
+{
+	global $db;
+	$conversationIDs = 0;
+	if(strlen($participant1) !== 0)
+	{
+		$conversationIDs = array();
+		$queryResult = $db->rawQuery("SELECT conversationID FROM Conversations WHERE participant1 = ? OR participant2 = ?", Array($participant1, $participant1));
+		foreach ($queryResult as $value) {
+			array_push($conversationIDs, $value["conversationID"]);
+		}
+	}
+
+	return $conversationIDs;
+}
+
+function GetConversationOtherUser($profileID, $conversationID)
+{
+	global $db;
+	$userProfile = null;
+	if(strlen($profileID) !== 0 && strlen($conversationID) !== 0)
+	{
+		$queryResult = $db->rawQuery("SELECT participant1, participant2 FROM Conversations WHERE conversationID = ?", Array($conversationID));
+		if(count($queryResult) == 1)
+		{
+			if($queryResult[0]["participant1"] === $profileID)
+			{
+				$userProfile = GetUserProfile($profileID, $queryResult[0]["participant2"], "firstName, lastName, userName, profileImage");
+			}
+			else
+			{
+				$userProfile = GetUserProfile($profileID, $queryResult[0]["participant1"], "firstName, lastName, userName, profileImage");
+			}
+		}
+	}
+
+	return $userProfile;
+}
+
+/**
+ *
+ * Creates an convo
+ *
+ * @param    sring $participant1 
+ * @param    sring $participant2
+ *
+ */
+function CreateConversation($participant1, $participant2)
+{
+	global $db;
+	if(strlen($participant1) !== 0 && strlen($participant2) !== 0)
+	{
+		$conversationID = GenerateConversationID();
+		$data = Array(
+			"participant1" => $participant1,
+            "participant2D" => $participant2            
+		);
+		$queryResult = $db->insert("Conversations", $data);
+	}
 }
 
 /**
@@ -167,32 +292,12 @@ function GetMessages($profileID)
 	}
 	else
 	{
-		$queryResult = $db->rawQuery("SELECT firstName, lastName, userName, profileImage FROM Profile WHERE profileID = ?", Array($recipientProfileID));
+		$conversationID = GetConversationID($profileID, $recipientProfileID);
+		$recipientProfile = GetUserProfile($profileID, $recipientProfileID, "firstName, lastName, userName, profileImage");
 
-		if (count($queryResult) == 1)
-		{
-			$firstName = $queryResult[0]["firstName"];
-			$lastName = $queryResult[0]["lastName"];
-			$userName = $queryResult[0]["userName"];
-			$profileImage = $queryResult[0]["profileImage"];
-				
-							
-			if ($profileImage == "")
-			{
-				$profileImage = $defaultProfileImg;
-			}
-			
-			$messageProfile = [
-			"firstName" => $firstName,
-			"lastName" => $lastName,
-			"userName" => $userName,
-			"profileImage" => $profileImagePath . $profileImage,
-			];
-		}
+		$messagesQuery = "SELECT messageID FROM Messages WHERE conversationID = ? ORDER BY timeSent DESC";
 
-		$messagesQuery = "SELECT messageID FROM Message WHERE profileID = ? AND recipientProfileID = ? ORDER BY timeSent DESC";
-
-		$queryResult = $db->rawQuery($messagesQuery, Array($profileID, $recipientProfileID));
+		$queryResult = $db->rawQuery($messagesQuery, Array($conversationID));
 		if (count($queryResult) >= 1)
 		{
 			foreach ($queryResult as $value) {
@@ -201,9 +306,10 @@ function GetMessages($profileID)
 			}
 		}	
 
-		$result["recipientProfile"] = $messageProfile;
+		$result["recipientProfile"] = $recipientProfile;
 		$result["messages"] = $messages;
 	}
+
 	return $result;
 }
 
@@ -222,7 +328,8 @@ function GetConversation($profileID)
 	global $db, $errorCodes;
 	// Arrays for jsons
 	$result = array();
-	$messages = array();
+	$errors = array();
+	$conversations = array();
 
 	if ($db->ping() !== TRUE) 
 	{
@@ -235,20 +342,24 @@ function GetConversation($profileID)
 	}
 	else
 	{
-		$messagesQuery = "SELECT messageID FROM Message WHERE Message.profileID = ? GROUP BY recipientProfileID ORDER BY timeSent ASC ";
 
-		$queryResult = $db->rawQuery($messagesQuery, Array($profileID));
+ 		$conversationIDs =implode(", ",GetConversationIDs($profileID));
+		$queryResult = $db->rawQuery("SELECT messageID, conversationID FROM Messages WHERE conversationID IN (?) GROUP BY conversationID ORDER BY timeSent ASC", array($conversationIDs));
 		if (count($queryResult) >= 1)
 		{
+
 			foreach ($queryResult as $value) {
-				$messageID = $value["messageID"];
-				array_push($messages, FetchMessage($messageID, $profileID));
+				$tempConvo = array();
+				$tempConvo["otherUser"] = GetConversationOtherUser($profileID, $value["conversationID"]);
+				$tempConvo["message"] = FetchMessage($value["messageID"], $profileID);
+				array_push($conversations, $tempConvo);
 			}
 			
 		}	
 
-		$result["messages"] = $messages;
+		$result["conversations"] = $conversations;
 	}
+
 	return $result;
 }
 
@@ -282,11 +393,9 @@ function FetchMessage($messageID, $profileID)
 	}
 	else
 	{
-		$messagesQuery = "SELECT profileID, message, timeSent FROM Message WHERE messageID = ? ORDER BY timeSent ASC ";
+		$queryResult = $db->rawQuery("SELECT senderProfileID, message, timeSent FROM Messages WHERE messageID = ?", Array($messageID));
 
-		$queryResult = $db->rawQuery($messagesQuery, Array($messageID));
-
-		$senderProfileID = $queryResult[0]["profileID"];
+		$senderProfileID = $queryResult[0]["senderProfileID"];
 		$message = $queryResult[0]["message"];
 		$timeSent = $queryResult[0]["timeSent"];
 		

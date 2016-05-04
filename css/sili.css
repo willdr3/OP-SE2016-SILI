@@ -71,16 +71,38 @@ input, textarea
 
 }
 
-.form-horizontal .form-group
+.form-horizontal, .form-group
 {
 	margin-left: 0;
 	margin-right: 0;
 }
 
+ .messageContainer
+ {
+ 	padding-left: 10px;
+ 	padding-right: 10px;
+ }
+
+ .messageBox
+ {
+ 	height: 75px;
+ }
+
+ .convTitle
+ {
+ 	text-align: center;
+ }
+
 .registerButton, .loginButton, .sayButton, .comButton, .listenButton, .messageButton
 {
 	background-color:#79B791;
 	color: #FFFFFF;
+}
+
+.messageIconContainer
+{
+	padding-top: 25px;
+	padding-left: 50px;
 }
 
 .form-control, .registerButton, .loginButton 
@@ -137,7 +159,7 @@ input, textarea
 	margin-bottom: 5px;
 }
 
-.comFeed
+.comFeed, .convContainer
 {
 	background-color: #DCE0D9;
 	border: 1px solid #91AEC1;
@@ -145,6 +167,11 @@ input, textarea
 	margin: 0px;
 	padding-left: 10px;
 	padding-top: 3px;
+}
+
+.convContainer
+{
+	padding-bottom: 3px;
 }
 
 textarea
