@@ -141,7 +141,7 @@ function MessageIt($profileID)
  */
 function GetMessages($profileID)
 {
-	global $db, $errorCodes;
+	global $db, $errorCodes, $request;
 	// Arrays for jsons
 	$result = array();
 	$messages = array();
@@ -211,7 +211,7 @@ function GetMessages($profileID)
  *
  * Return most recent message from each conversation between 2 users
  *
- * For display on Messages page
+ * For display on messagePage.html
  *
  * @param    int  $profileID of the current logged in user
  * @return   array Containing the conversations or any errors that have occurred
@@ -244,6 +244,7 @@ function GetConversation($profileID)
 				$messageID = $value["messageID"];
 				array_push($messages, FetchMessage($messageID, $profileID));
 			}
+			
 		}	
 
 		$result["messages"] = $messages;

@@ -363,10 +363,10 @@ function fetchConversations(){
 	})
 }
 
-function fetchMessages(data, userName){
+function fetchMessages(reqUserName){
 		return $.ajax({
 		dataType: "json",
-		url: "API/message/user/",
+		url: "API/message/user/" + reqUserName,
 		success: function(data) {
 			$(".messageModal").loadTemplate("content/templates/message.html",
 			{
@@ -1233,6 +1233,15 @@ $("document").ready(function() {
 	  		if (currentPage + 1 == totalPages) {
 	  			$this.remove();
 	  		} });
+	});
+
+	$(document).on('click', '.message', function() {
+		var $this = $(this);
+		var convUser = $(this).attr('data-username');
+		convUser = window.btoa(convUser).replace("=","");
+		fetchMessages(convUser).done( function() {
+			$('#messageModal').modal('show');
+		});
 	});
 
 	$("body").tooltip({

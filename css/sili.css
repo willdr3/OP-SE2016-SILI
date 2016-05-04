@@ -175,7 +175,7 @@ textarea
 	padding-right: 2.5px;
 }
 
-.sayProfileImg
+.sayProfileImg, .messageProfileImage
 {
 	max-height: 50px;
 }
@@ -330,6 +330,11 @@ input[type=file].profileImageUpload
 {
 	text-decoration: none;
 	color: #000000;
+}
+
+.messageIcon
+{
+	text-decoration: none;
 }
 
 .resayHeader , .resayHeader *
