@@ -1,0 +1,3 @@
+php phpunit.phar --debug /home/sili/public_html/content/phpTests/testProfile.php
+php phpunit.phar --debug /home/sili/public_html/content/phpTests/testUserAPI.php
+php phpunit.phar --debug /home/sili/public_html/content/phpTests/testSays.php
