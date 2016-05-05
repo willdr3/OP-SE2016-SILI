@@ -477,7 +477,7 @@ function UserSearch($profileID)
 			
 			foreach ($queryResult as $user) 
 			{
-				$userResult = GetUserProfile($profileID, $user["profileID"], "fullNameUserName, profileImage, profileLink");
+				$userResult = GetUserProfile($profileID, $user["profileID"], "fullNameUserName, userName, profileImage, profileLink");
 				$userResult["name"] = $userResult["fullNameUserName"];
 				unset($userResult["fullNameUserName"]);
 				array_push($searchResults, $userResult);

@@ -97,7 +97,7 @@ return $conversationID;
 function GetConversationID($participant1, $participant2)
 {
 	global $db;
-	$conversationID = 0;
+	$conversationID = "";
 	if(strlen($participant1) !== 0 && strlen($participant2) !== 0)
 	{
 		$queryResult = $db->rawQuery("SELECT conversationID FROM Conversations WHERE (participant1 = ? AND participant2 = ?) OR (participant1 = ? AND participant2 = ?)", Array($participant1,$participant2,$participant2,$participant1));
@@ -174,6 +174,7 @@ function CreateConversation($participant1, $participant2)
 	{
 		$conversationID = GenerateConversationID();
 		$data = Array(
+			"conversationID" => $conversationID,
 			"participant1" => $participant1,
             "participant2" => $participant2            
 		);
@@ -229,7 +230,7 @@ function MessageIt($profileID)
 			$messageID = GenerateMessageID();
 			$conversationID = GetConversationID($profileID, $recipientProfileID);
 
-			if ($conversationID === 0) 
+			if ($conversationID === "") 
 			{
 				$conversationID = CreateConversation($profileID, $recipientProfileID);
 			}
@@ -277,6 +278,7 @@ function GetMessages($profileID)
 {
 	global $db, $errorCodes, $request;
 	// Arrays for jsons
+	$errors = array();
 	$result = array();
 	$messages = array();
 	

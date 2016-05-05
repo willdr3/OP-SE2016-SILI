@@ -407,7 +407,16 @@ function addMessage(data, userName){
 			{
 				singleMessage: data.message["message"],
 				timeStamp: data.message["timeSent"],
-			}, { append: true });
+			}, { append: true, afterInsert: function(elem) {
+					// MAKE FUNCTION HERE FOR PUSH MESSAGE LEFT OR RIGHT
+					if (data.message["ownMessage"]) {
+						$(elem).find('.singleMessage').find('span').addClass('ownMsg');
+					}
+					else {
+						$(elem).find('.singleMessage').find('span').addClass('recMsg');
+					}
+				}
+			});
 			$("#" + data.message['conversationID'] + " .conversations").find("span").html(data.message["message"]);
 			$("#" + data.message['conversationID'] + " .timeStamp").html(moment(data.message["timeSent"]).format('lll'));
 		}

@@ -25,7 +25,12 @@
 				</div>
 			</div>
 			<div class="col-md-2">
-				<input id="msgSearch" type="text" name="msgSearch" class="form-control input-lg msgSearch" />
+				<div class="row content">
+					<h2>Whisper someone</h2>
+				</div>
+				<div class="row content">
+					<input id="msgSearch" type="text" name="msgSearch" class="form-control input-lg msgSearch" />
+				</div>
 			</div>
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 			<div class="messageModal"></div>
@@ -71,7 +76,11 @@ $("document").ready(function(){
 				},
 				onChooseEvent: function() {
 					var index = $("#msgSearch").getSelectedItemIndex();
-					window.location = $("#msgSearch").getItemData(index).profileLink;
+					var reqUserName = $("#msgSearch").getItemData(index).userName;
+					reqUserName = window.btoa(reqUserName).replace("=","");
+					fetchMessages(reqUserName).done( function() {
+						$('#messageModal').modal('show');
+					});
 					}
   				}
 	};
