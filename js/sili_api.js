@@ -351,6 +351,7 @@ function fetchConversations(){
 			$.each(data.conversations, function(index, element){
 				$(".conversationFeed").loadTemplate("content/templates/conversation.html",
 				{
+					conversationID: element["conversationID"],
 					firstName: element["otherUser"]["firstName"],
 				    lastName: element["otherUser"]["lastName"],
 				    userName: element["otherUser"]["userName"],
@@ -393,13 +394,16 @@ function addMessage(data, userName){
 		type: "POST",
 		dataType: "json",
 		url: "API/message/user/" + userName,
-		data: "data",
+		data: data,
 		success: function(data) {
 			$(".messageBox").val("");
-			$(".messageModal").loadTemplate("content/templates/singleMessage.html",
+			$(".messageFeed").loadTemplate("content/templates/singleMessage.html",
 			{
-				message: data.message["message"],
-			}, { prepend: true });
+				singleMessage: data.message["message"],
+				timeStamp: data.message["timeSent"],
+			}, { append: true });
+			$("#" + data.message['conversationID'] + " .conversations").find("span").html(data.message["message"]);
+			$("#" + data.message['conversationID'] + " .timeStamp").html(moment(data.message["timeSent"]).format('lll'));
 		}
 	});
 	return false;
@@ -1177,6 +1181,16 @@ $("document").ready(function() {
 		var listeningStatus = $(this).data("listening");
 		listenButton(userID, reqUserName, listeningStatus);	
 		$(this).blur();
+	});
+
+	$(document).on('submit', '.message-form', function(e) {
+		e.preventDefault();
+		var data = $(this).serialize();
+		console.log(data);
+		var $el = $(this).parent().parent().parent().parent();
+		var msgUserName = $el.attr('data-username');
+		msgUserName = window.btoa(msgUserName).replace("=","");
+		addMessage(data, msgUserName);
 	});
 
 	$(document).on('submit','.comment-form', function(e){

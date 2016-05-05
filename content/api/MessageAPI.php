@@ -168,15 +168,18 @@ function GetConversationOtherUser($profileID, $conversationID)
 function CreateConversation($participant1, $participant2)
 {
 	global $db;
+	$conversationID = 0;
+
 	if(strlen($participant1) !== 0 && strlen($participant2) !== 0)
 	{
 		$conversationID = GenerateConversationID();
 		$data = Array(
 			"participant1" => $participant1,
-            "participant2D" => $participant2            
+            "participant2" => $participant2            
 		);
 		$queryResult = $db->insert("Conversations", $data);
 	}
+	return $conversationID;
 }
 
 /**
@@ -224,15 +227,21 @@ function MessageIt($profileID)
 		{
 			$messageContent = htmlspecialchars($_POST['messageBox']);
 			$messageID = GenerateMessageID();
+			$conversationID = GetConversationID($profileID, $recipientProfileID);
+
+			if ($conversationID === 0) 
+			{
+				$conversationID = CreateConversation($profileID, $recipientProfileID);
+			}
 
 			$data = Array(
 				"messageID" => $messageID,
-				"profileID" => $profileID,
-				"recipientProfileID" => $recipientProfileID,
+				"conversationID" => $conversationID,
+				"senderProfileID" => $profileID,
                	"message" => $messageContent,
                	"timeSent" => date("Y-m-d H:i:s")
 			);
-			$db->insert("Message", $data);
+			$db->insert("Messages", $data);
 
 			$message = FetchMessage($messageID, $profileID);			
 		}
@@ -353,6 +362,7 @@ function GetConversation($profileID)
 				$tempConvo = array();
 				$tempConvo["otherUser"] = GetConversationOtherUser($profileID, $value["conversationID"]);
 				$tempConvo["message"] = FetchMessage($value["messageID"], $profileID);
+				$tempConvo["conversationID"] = $value["conversationID"];
 				array_push($conversations, $tempConvo);
 			}
 			
@@ -394,8 +404,9 @@ function FetchMessage($messageID, $profileID)
 	}
 	else
 	{
-		$queryResult = $db->rawQuery("SELECT senderProfileID, message, timeSent FROM Messages WHERE messageID = ?", Array($messageID));
+		$queryResult = $db->rawQuery("SELECT conversationID, senderProfileID, message, timeSent FROM Messages WHERE messageID = ?", Array($messageID));
 
+		$conversationID = $queryResult[0]["conversationID"];
 		$senderProfileID = $queryResult[0]["senderProfileID"];
 		$message = $queryResult[0]["message"];
 		$timeSent = $queryResult[0]["timeSent"];
@@ -406,6 +417,7 @@ function FetchMessage($messageID, $profileID)
 		}
 
 		$message = [
+		"conversationID" => $conversationID,
 		"ownMessage" => $ownMessage,
 		"messageID" => $messageID,
 		"message" => $message,

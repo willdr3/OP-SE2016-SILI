@@ -359,9 +359,10 @@ input[type=file].profileImageUpload
 	color: #000000;
 }
 
-.messageIcon
+.messageIconContainer a:link, .messageIconContainer a:visited, .messageIconContainer a:hover, .messageIconContainer a:active
 {
 	text-decoration: none;
+	color: transparent;
 }
 
 .resayHeader , .resayHeader *
