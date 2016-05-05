@@ -383,6 +383,12 @@ function fetchMessages(reqUserName){
 					timeStamp: element["timeSent"],
 				}, { append: true, afterInsert: function(elem) {
 					// MAKE FUNCTION HERE FOR PUSH MESSAGE LEFT OR RIGHT
+					if (element["ownMessage"]) {
+						$(elem).find('.singleMessage').find('span').addClass('ownMsg');
+					}
+					else {
+						$(elem).find('.singleMessage').find('span').addClass('recMsg');
+					}
 				}});
 			});
 		}
@@ -1032,6 +1038,7 @@ $("document").ready(function() {
 	},60000);
 	
 	$("#userSearch").easyAutocomplete(options);
+	
 	$(document).on('click', '.applaud', function(){		
 		var $el = $(this).parent().parent().parent().parent();
 		var sayID = $el.attr('id');

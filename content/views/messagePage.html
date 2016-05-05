@@ -24,7 +24,9 @@
 
 				</div>
 			</div>
-			<div class="col-md-2"></div>
+			<div class="col-md-2">
+				<input id="msgSearch" type="text" name="msgSearch" class="form-control input-lg msgSearch" />
+			</div>
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 			<div class="messageModal"></div>
 		</div>
@@ -33,6 +35,48 @@
 <script type="text/javascript">
 $("document").ready(function(){
 	fetchConversations();
+
+	var options = {
+  		url: function(phrase) {
+			return "API/profile/search/" + phrase;
+		},
+  
+  		placeholder: "Search SILI for friends!",
+  
+ 		getValue: "name",
+  
+		cssClasses: "userSearch",
+  
+		adjustWidth: false,
+  
+		requestDelay: 500,
+
+		  template: {
+		  	type: "iconRight",
+				fields: {
+					iconSrc: "profileImage"
+				}
+		  },
+
+		  list: {
+				maxNumberOfElements: 10,
+				match: {
+						enabled: true
+				},
+				showAnimation: {
+				  type: "slide"
+				},
+				hideAnimation: {
+				  type: "slide"
+				},
+				onChooseEvent: function() {
+					var index = $("#msgSearch").getSelectedItemIndex();
+					window.location = $("#msgSearch").getItemData(index).profileLink;
+					}
+  				}
+	};
+
+	$("#msgSearch").easyAutocomplete(options);
 });
 </script>
 </html>
