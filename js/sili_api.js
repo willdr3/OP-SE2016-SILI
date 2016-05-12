@@ -464,6 +464,7 @@ function requestUserProfile(reqUserName) {
 			$(".profile").data("userid", data.userProfile["profileID"]);
 			$(".profile").data("username", data.userProfile["userName"]);
 			$(".listenButton").data("listening", data.userProfile["listening"]);
+			$(".messageLink").attr("href", "conversations/" + data.userProfile["userName"]);
 			if(data.userProfile["listening"] === true) //listens to user
 			{
 				$(".listenButton").html("<i class=\"icons flaticon-nolisten\"></i>Stop Listening To " + data.userProfile["firstName"]);
