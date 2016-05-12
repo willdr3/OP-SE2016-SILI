@@ -11,7 +11,11 @@
 					<div class="col-md-3"></div>
 				</div>
 			</div>
-			<div class="col-md-2"></div>
+			<div class="col-md-2">
+				<div class="row content">
+					<h2 class="whisperTitle">Whisper someone</h2>
+				</div>
+			</div>
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 		</div>
 
@@ -25,12 +29,7 @@
 				</div>
 			</div>
 			<div class="col-md-2">
-				<div class="row content">
-					<h2>Whisper someone</h2>
-				</div>
-				<div class="row content">
-					<input id="msgSearch" type="text" name="msgSearch" class="form-control input-lg msgSearch" />
-				</div>
+				<input id="msgSearch" type="text" name="msgSearch" class="form-control input-lg msgSearch" />
 			</div>
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 			<div class="messageModal"></div>
@@ -50,7 +49,7 @@ $("document").ready(function(){
   
  		getValue: "name",
   
-		cssClasses: "userSearch",
+		cssClasses: "whisperSearch",
   
 		adjustWidth: false,
   
@@ -84,6 +83,17 @@ $("document").ready(function(){
 					}
   				}
 	};
+
+	var pathArray = window.location.pathname.split( '/' );
+	var requestedUserName = '';
+	if(typeof pathArray[3] !== 'undefined')
+	{
+		requestedUserName = pathArray[3];
+		requestedUserName = window.btoa(requestedUserName).replace("=","");
+		fetchMessages(requestedUserName).done( function() {
+			$('#messageModal').modal('show');
+		});
+	}
 
 	$("#msgSearch").easyAutocomplete(options);
 });

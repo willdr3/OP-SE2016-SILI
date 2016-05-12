@@ -98,6 +98,11 @@ input, textarea
  	text-align: center;
  }
 
+ .whisperTitle
+ {
+ 	margin-top: 0px;
+ }
+
 .registerButton, .loginButton, .sayButton, .comButton, .listenButton, .messageButton
 {
 	background-color:#79B791;
@@ -288,6 +293,11 @@ textarea
 {
 	padding-top: 25px;
 	margin-bottom: 0;
+}
+
+.whisperSearch
+{
+	padding-top: 0px;
 }
 
 .easy-autocomplete.userSearch input:focus 
