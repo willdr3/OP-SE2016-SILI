@@ -945,8 +945,8 @@ function UpdateProfile($profileID)
 		$lastName = filter_var($_POST['lastName'], FILTER_SANITIZE_STRING);
 		$userName =  strtoupper(filter_var($_POST['userName'], FILTER_SANITIZE_STRING));
 		$dob = filter_var($_POST['dob'], FILTER_SANITIZE_STRING);
-		$dob = str_replace('/', '-', $dob);
-		$dob = date("Y-m-d", strtotime($dob));
+		$dob = DateTime::createFromFormat('d/m/Y',$dob);
+		$dob =  $dob->format('Y-m-d');
 		$gender = substr($_POST['gender'], 0, 1);
 		$location =  filter_var($_POST['location'], FILTER_SANITIZE_STRING);
 		
