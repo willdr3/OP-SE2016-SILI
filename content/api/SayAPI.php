@@ -958,7 +958,7 @@ function SayActivity($profileID, $action)
 	if (count($request) >= 3)
 	{
 		$sayID = filter_var($request[2], FILTER_SANITIZE_STRING);
-		if ($action == "Re-Say" && GetOwnSayStatus($sayID, $profileID))
+		if ($action == RESAY && GetOwnSayStatus($sayID, $profileID))
 		{
 			array_push($errors, $errorCodes["S003"]);	
 		}
