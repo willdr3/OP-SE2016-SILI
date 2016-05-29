@@ -23,17 +23,30 @@
 								<span data-content="message"></span>
 							</div>
 						</div>
+
 						<div class="row"> 
 							<div class="col-md-2">
-							   <i class="icons applaud flaticon-applaud" data-toggle="tooltip" data-placement="top" title="Applaud"></i><span class="applaud" data-content="applauds"></span>
-							</div> 
+								<i class="icons applaudModal flaticon-applaud" data-toggle="tooltip" data-placement="top" title="Applaud"></i><span class="applaudModalCount" data-content="applauds"></span>
+							</div>												
 							<div class="col-md-2">
-								<i class="icons reSay flaticon-resay" data-toggle="tooltip" data-placement="top" title="Re-Say"></i><span class="reSay" data-content="resays"></span>
-							</div> 
+								<i class="icons reSayModal flaticon-resay" data-toggle="tooltip" data-placement="top" title="Re-Say"></i><span class="reSayModalCount" data-content="resays"></span>
+							</div> 							
 							<div class="col-md-2">
-								<i class="icons boo flaticon-boo" data-toggle="tooltip" data-placement="top" title="Boo"></i><span class="boo" data-content="boos"></span>
+								<i class="icons booModal flaticon-boo" data-toggle="tooltip" data-placement="top" title="Boo"></i><span class="booModalCount" data-content="boos"></span>
+							</div> 							
+							<div class="col-md-4"></div> 
+							<div class="col-md-2">
+								<i class="icons deleteModal flaticon-delete" data-toggle="tooltip" data-placement="top" title="Delete"></i><span class="deleteModal" data-content="delete"></span>
+								<i class="icons reportModal flaticon-report" data-toggle="tooltip" data-placement="top" title="Report Say"></i><span class="reportModal" data-content="report"></span>
 							</div> 
-							<div class="col-md-6"></div> 
+						</div> 
+						<div class="row usersDisplay"> 
+							<div class="col-md-4 usersDisplay1">								
+							</div>												
+							<div class="col-md-4 usersDisplay2">								
+							</div> 							
+							<div class="col-md-4 usersDisplay3">								
+							</div>						
 						</div> 
 					</div>
 				</div>
@@ -58,4 +71,54 @@
 			</div><!-- /.modal-body -->
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->	  
+</div><!-- /.modal -->	
+
+<div class="modal" id="confirmDelete" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+	<div class="modal-body">
+     <span>Are you sure you want to delete your Say?</span> <br>
+	 <div class="row" data-template-bind='[
+     {"attribute": "data-sayID", "value": "sayID"}]'>
+	 	<div class="col-md-2"></div> 
+		<div class="col-md-2">
+			<button type="button" class="btn confirmDelete" data-dismiss="modal">Yes</button>
+		</div>
+		<div class="col-md-2"></div> 
+		<div class="col-md-2">
+			<button type="button" class="btn noDelete" data-dismiss="modal">No</button>	
+		</div> 
+	</div> 
+	</div>
+	 
+    </div>
+  </div>
+</div>  
+
+<div class="modal" id="confirmReport" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body">
+         <span>Do you find this say offensive/inappropriate?</span> <br>
+       <div class="row" data-template-bind='[
+         {"attribute": "data-sayID", "value": "sayID"}]'>
+        <div class="col-md-2"></div> 
+        <div class="col-md-2">
+          <button type="button" class="btn confirmReport" data-dismiss="modal">Yes</button>
+        </div>
+        <div class="col-md-2"></div> 
+        <div class="col-md-2">
+          <button type="button" class="btn noReport" data-dismiss="modal">No</button> 
+        </div> 
+      </div> 
+      </div>
+   
+    </div>
+   
+    </div>
+  </div>
+</div>  
+
+<div class="activityModal">
+
+</div>

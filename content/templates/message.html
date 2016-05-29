@@ -1,0 +1,29 @@
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel" data-template-bind='[{"attribute": "data-username", "value": "userName"}]'>
+	<div class="modal-dialog" role="document">
+		<div class="modal-content messageContainer">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				
+				<!-- SINGLE MESSAGES GO IN HERE -->
+				<div class="messageFeed">
+					
+				</div>				
+				<form class="form-horizontal message-form" accept-charset="utf-8">
+					<div class="form-group newMessage">
+						<label for="newMessage" class="sr-only">Enter Your Message</label>
+						<textarea placeholder="What have you got to say?" name="messageBox" id="newMessage" rows="4" class="messageBox"></textarea>
+					</div>
+					<div class = "row">
+						<div class="col-md-4"></div>
+							<div class="col-md-4">
+								<button class="btn btn-default messageButton" type="submit">Shh, whisper it.</button>
+							</div>
+						<div class="col-md-4"></div>
+					</div>
+				</form>
+			</div><!-- /.modal-body -->
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->	  

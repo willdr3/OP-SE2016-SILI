@@ -8,9 +8,11 @@ $pageRequests["profile"] = [
 		];	
 $pageRequests["accountSettings"] = [
 		"file" => "accountSettings.html",
-		];	
+		];
+$pageRequests["conversations"] = [
+		"file" => "messagePage.html",
+		];
 $pageRequests["logout"] = [
 		"file" => "logout.php",
-		];
-		
+		];		
 ?>

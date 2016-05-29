@@ -26,16 +26,16 @@
 					<div class="col-md-1">
 						
 					</div>
-					<div class="col-md-3">	
+					<div class="col-md-3 listeningUsers" data-action="listeners">	
 						<h3><i class="icons flaticon-listening listening"></i>Listens To: <span class="profile-listens"></span></h3>
 					</div>
-					<div class="col-md-3">
+					<div class="col-md-3 userAudience" data-action="audience">
 						<h3><i class="icons flaticon-audience audience"></i>Audience: <span class="profile-audience"></span></h3>
 					</div>		
 				</div>
 				<div class="row">
 					<div class="col-md-5">
-						<button type="button" class="btn btn-default btn-lg btn-block messageButton"><i class="icons flaticon-message message"></i>Send this person a message!<span class="profile-message"></span></button>
+						<a href="" class="messageLink"><button type="button" class="btn btn-default btn-lg btn-block messageButton"><i class="icons flaticon-message message"></i>Whisper me!<span class="profile-message"></span></button></a>
 					</div>
 					<div class="col-md-7"></div>
 				</div>
@@ -51,11 +51,19 @@
 				<div class="sayFeed">
 
 				</div>
+				<div class="loadMoreSays">
+					<button type="button" class="btn btn-default sayButton btn-lg center-block" id="loadSaysProfile" data-loading-text="<i class='fa fa-refresh fa-spin'></i> Loading Says">Load More Says</button>
+				</div>
 			</div>
 			<div class="col-md-2"></div>
 			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
 		</div>
 	</div>
+	<div class="sayDetailsModal">
+	</div>
+	<div class="profileModal">
+	</div>		
+
 	<script type="text/javascript">
 		$("document").ready(function(){
 			var pathArray = window.location.pathname.split( '/' );

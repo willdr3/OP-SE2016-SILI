@@ -8,13 +8,19 @@ if($status == PHP_SESSION_NONE){
 $controller = true;
 
 //Include all the API file
-include("../config/dbconnect.inc.php");
-include("../config/errorHandling.php");
-include("../config/APIrequestsNew.php");
-include("../config/config.inc.php");
-include("UserAPI.php");
-include("SayAPI.php");
-include("ProfileAPI.php");
+require_once ("../librarys/MysqliDb.php");
+require_once("../config/dbconnect.inc.php");
+require_once("../config/config.inc.php");
+require_once("../config/errorHandling.php");
+require_once("../config/APIrequests.php");
+require_once("../api/UserAPI.php");
+require_once("../api/SayAPI.php");
+require_once("../api/ProfileAPI.php");
+require_once("../api/MessageAPI.php");
+require_once("../librarys/SlackBot.php");
+require_once("../librarys/Emojione.php");
+require_once("../librarys/Giphy.php");
+
 
 
 //Check if the request is coming from one of the scripts
@@ -23,29 +29,36 @@ if (is_ajax())
 
 	//Get UserID from session
 	$userID = 0;
+	$profileID = 0;
 	if(isset($_SESSION['userID']))
 	{
 		$userID = $_SESSION['userID'];
+		$profileID = GetUserProfileID($userID);
 	}
 
 	//Check if a request for an API was actually made
 	if(isset($_GET['request']))
 	{	
 		$request = explode("/", filter_var($_GET['request'], FILTER_SANITIZE_STRING));
-		
+
 		//Check if the request is a vaild request
 		if (array_key_exists($request[0], $reqArray) && count($request) > 1) {
-			if($request[1] == "")
+			$requestedAPI = $request[0];
+			$requestedFunction = $request[1];
+			if($requestedFunction == "" || is_numeric($requestedFunction))
 			{
-				$request[1] = 0;
+				$requestedFunction = 0;
 			}
-			if (array_key_exists($request[1], $reqArray[$request[0]])) 
+			if (array_key_exists($requestedFunction, $reqArray[$requestedAPI])) 
 			{
-				if (array_key_exists($_SERVER['REQUEST_METHOD'], $reqArray[$request[0]][$request[1]])) 
+				if (array_key_exists($_SERVER['REQUEST_METHOD'], $reqArray[$requestedAPI][$requestedFunction])) 
 				{
-					$result = $reqArray[$request[0]][$request[1]][$_SERVER['REQUEST_METHOD']]($userID);
+					$result = $reqArray[$requestedAPI][$requestedFunction][$_SERVER['REQUEST_METHOD']]($profileID);
 					
 					//Output Request json result
+					header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+					header("Cache-Control: post-check=0, pre-check=0", false);
+					header("Pragma: no-cache");
 					header('Content-Type: application/json');
 					if(array_key_exists('errors', $result))
 					{
@@ -79,7 +92,4 @@ function is_ajax()
 {
 	return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
-
-$mysqli->close();	
-
 ?>

@@ -3,6 +3,18 @@ var firstName = "";
 var lastName = "";
 var profileImage = "";
 var loggedIn = false;
+var timeNow = moment().valueOf();
+var currentPage = 0;
+var totalPages = 0;
+var currentUserPage = 0;
+var totalUserPages = 0;
+var currentAction = "";
+var currentViewedProfileID = "";
+var currentViewedSayID = "";
+var currentActionPage = "";
+var totalActionPages = "";
+
+window.emojioneVersion = "2.1.1";
 
 function userLogin(){
 	var data = $(this).serialize();
@@ -19,17 +31,8 @@ function userLogin(){
 			$(".loginPassword .help-block").text("");
 			data = $.parseJSON(jqXHR.responseText);
 			$.each(data.errors, function(index, element) {
-				if(element.code == "L001" || element.code == "L007")
-				{
-					$(".container-fluid").append("<div class=\"modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\"><div class=\"modal-dialog\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-header\"><button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button><h4 class=\"modal-title\" id=\"myModalLabel\">Error</h4></div><div class=\"modal-body\">An error occurred while trying to Login, Please try again.</div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button></div></div></div> </div>");
-					$('#myModal').modal('show');
-					return false;
-				}
-				else 
-				{
-					$("." + errors[element.code].field).addClass("has-error");
-					$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
-				}
+				$(".login" + errors[element.code].field).addClass("has-error");
+				$(".login" + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
 			});
 		},				
 	  success: function(data) {	
@@ -62,17 +65,8 @@ function userRegister(){
 			$(".registerConfirmPassword .help-block").text("");
 			data = $.parseJSON(jqXHR.responseText);
 			$.each(data.errors, function(index, element) {
-				if(element.code == "R001" || element.code == "R007")
-				{
-					$(".container-fluid").append("<div class=\"modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\"><div class=\"modal-dialog\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-header\"><button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button><h4 class=\"modal-title\" id=\"myModalLabel\">Error</h4></div><div class=\"modal-body\">An error occurred while trying to Register, Please try again.</div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button></div></div></div> </div>");
-					$('#myModal').modal('show');
-					return false;
-				}
-				else 
-				{
-					$("." + errors[element.code].field).addClass("has-error");
-					$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
-				}
+				$(".register" + errors[element.code].field).addClass("has-error");
+				$(".register" + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
 			});
 		},
 		success: function(data) {	
@@ -90,14 +84,16 @@ function addSay(){
 		url: "API/say/",
 		data: data,
 		success: function(data) {	
-			$(".sayBox").val("");
+		$('.emojionearea-editor').text('');
+		$('#gifSearch').val('');
+		GIFTrending();
 			$(".sayFeed").loadTemplate("content/templates/say.html",
 				{
 					sayID: data.say["sayID"],
 					firstName: data.say["firstName"],
 					lastName: data.say["lastName"],
 					userName: data.say["userName"],
-					message: data.say["message"],
+					message: data.say["messageFormatted"],
 					profilePicture: data.say["profileImage"],
 					timeStamp: data.say["timePosted"],
 					timePosted: moment(data.say["timePosted"]).fromNow(),
@@ -113,20 +109,30 @@ function addSay(){
 }
 
 function fetchSays(){
-	$.ajax({
+	return $.ajax({
 		dataType: "json",
-		url: "API/say/",
-		success: function(data) {			
+		url: "API/say/" + currentPage + "/" + timeNow,
+		success: function(data) {	
+			totalPages = totalPages == 0 ? data["totalPages"] : totalPages; 
+			if (totalPages == 1 || totalPages == 0)
+			{
+				$("#loadSays").remove();
+			}
 			$.each(data.says, function(index, element) {					
-				loadSay(".sayFeed",element);
+				loadSay(".sayFeed",element, false);
 			});
 		}
 	});
 }
 
-function loadSay(location, element)
+function fetchMoreSays(){
+	currentPage = currentPage + 1;
+	return fetchSays();
+}
+
+function loadSay(location, element, profileView)
 {
-	if(element["activityStatus"] === false || element["ownSay"] === true) 
+	if(element["activityStatus"] === false || element["ownSay"] === true && profileView === false) 
 	{
 		$(location).loadTemplate("content/templates/say.html",
 		{
@@ -134,7 +140,7 @@ function loadSay(location, element)
 			firstName: element["firstName"],
 		    lastName: element["lastName"],
 		    userName: element["userName"],
-			message: element["message"],
+			message: element["messageFormatted"],
 			profilePicture: element["profileImage"],
 			timeStamp: element["timePosted"],
 			timePosted: moment(element["timePosted"]).fromNow(),
@@ -154,7 +160,7 @@ function loadSay(location, element)
 			firstName: element["firstName"],
 		    lastName: element["lastName"],
 		    userName: element["userName"],
-			message: element["message"],
+			message: element["messageFormatted"],
 			profilePicture: element["profileImage"],
 			timeStamp: element["timePosted"],
 			timePosted: moment(element["timePosted"]).fromNow(),
@@ -172,16 +178,27 @@ function loadSay(location, element)
 	}
 }
 
-function fetchUserSays(userName){
-	$.ajax({
+function fetchUserSays(reqUserName){
+	return $.ajax({
 		dataType: "json",
-		url: "API/say/user/" + userName,
-		success: function(data) {			
+		url: "API/say/user/" + reqUserName + "/" + currentPage + "/" + timeNow,
+		success: function(data) {	
+			totalPages = totalPages == 0 ? data["totalPages"] : totalPages; 
+			if (totalPages == 1)
+			{
+				$("#loadSaysProfile").remove();
+			}
+
 			$.each(data.says, function(index, element) {				
-				loadSay(".sayFeed", element);		
+				loadSay(".sayFeed", element, true);		
 			});
 		}
 	});
+}
+
+function fetchMoreUserSays(reqUserName){
+	currentPage = currentPage + 1;
+	return fetchUserSays(reqUserName);
 }
 
 function assignActionStatus(elem, data) {
@@ -189,12 +206,63 @@ function assignActionStatus(elem, data) {
 	setActionStatus(sayElement.find("i.applaud"), data["applaudStatus"]);
 	setActionStatus(sayElement.find("i.reSay"), data["resayStatus"]);
 	setActionStatus(sayElement.find("i.boo"), data["booStatus"]);
+	setActionStatus(sayElement.find("i.applaudModal"), data["applaudStatus"]);
+	setActionStatus(sayElement.find("i.reSayModal"), data["resayStatus"]);
+	setActionStatus(sayElement.find("i.booModal"), data["booStatus"]);
 	if(data["ownSay"] === true)
 	{
 		
 		sayElement.find("i.reSay").addClass("reSayOwn");
 		sayElement.find("i.reSay").removeClass("reSay");
+		sayElement.find("i.reSayModal").addClass("reSayOwn");
+		sayElement.find("i.reSayModal").removeClass("reSay");
+		sayElement.find("i.reportModal").remove();
+		$(document).find("#confirmReport").remove();
 	}
+	else
+	{
+		sayElement.find("i.deleteModal").remove();
+		$(document).find("#confirmDelete").remove();
+	}
+}
+
+function assignActionUsers(elem, data) {
+	var sayElement = elem;
+	var text = "";
+	var col = 1;
+	sayElement.find(".usersDisplay1").empty();
+	sayElement.find(".usersDisplay2").empty();
+	sayElement.find(".usersDisplay3").empty();
+	if(data["applauds"] > 0)
+	{
+		text = "Applaud";
+		if(data["applauds"] > 1)
+		{
+			text = "Applauds";
+		}
+		sayElement.find(".usersDisplay" + col).html("<span class=\"applaudUsers\" data-action=\"applaud\">" + data["applauds"] + " " + text + "</span>");
+		col = col + 1;	
+	}	
+	if(data["resays"] > 0)
+	{
+		text = "Re-Say";
+		if(data["resays"] > 1)
+		{
+			text = "Re-Says";
+		}
+		sayElement.find(".usersDisplay" + col).html("<span class=\"reSayUsers\" data-action=\"resay\">" + data["resays"] + " " + text + "</span>");
+		col = col + 1;	
+	}	
+	if(data["boos"] > 0)
+	{
+		text = "Boo";
+		if(data["boos"] > 1)
+		{
+			text = "Boos";
+		}
+		sayElement.find(".usersDisplay" + col).html("<span class=\"booUsers\" data-action=\"boo\">" + data["boos"] + " " + text + "</span>");
+		col = col + 1;	
+	}	
 }
 
 function fetchSayDetails(sayID){
@@ -208,7 +276,7 @@ function fetchSayDetails(sayID){
 				firstName: data.say["firstName"],
 			    lastName: data.say["lastName"],
 			    userName: data.say["userName"],
-				message: data.say["message"],
+				message: data.say["messageFormatted"],
 				profilePicture: data.say["profileImage"],
 				timePosted: moment(data.say["timePosted"]).format('lll'),
 				boos: data.say["boos"],
@@ -217,7 +285,9 @@ function fetchSayDetails(sayID){
 				profileLink: data.say["profileLink"],
 			}, { afterInsert: function (elem) {
 						assignActionStatus(elem, data.say);
+						assignActionUsers(elem, data.say);
 			}});
+			
 		}
 	});
 }
@@ -234,7 +304,7 @@ function fetchComments(sayID){
 					firstName: element["firstName"],
 				    lastName: element["lastName"],
 				    userName: element["userName"],
-					message: element["message"],
+					message: element["messageFormatted"],
 					profilePicture: element["profileImage"],
 					timeStamp: element["timePosted"],
 					timePosted: moment(element["timePosted"]).fromNow(),
@@ -251,8 +321,6 @@ function fetchComments(sayID){
 }
 
 function addComment(data, sayID){
-	console.log(sayID);
-	console.log(data);
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -265,7 +333,7 @@ function addComment(data, sayID){
 					firstName: data.comment["firstName"],
 				    lastName: data.comment["lastName"],
 				    userName: data.comment["userName"],
-					message: data.comment["message"],
+					message: data.comment["messageFormatted"],
 					profilePicture: data.comment["profileImage"],
 					timePosted: moment(data.comment["timePosted"]).fromNow(),
 					profileLink: data.comment["profileLink"]
@@ -275,15 +343,96 @@ function addComment(data, sayID){
 	return false;
 }
 
+function fetchConversations(){
+	return $.ajax({
+		dataType: "json",
+		url: "API/message/",
+		success: function(data){
+			$.each(data.conversations, function(index, element){
+				$(".conversationFeed").loadTemplate("content/templates/conversation.html",
+				{
+					conversationID: element["conversationID"],
+					firstName: element["otherUser"]["firstName"],
+				    lastName: element["otherUser"]["lastName"],
+				    userName: element["otherUser"]["userName"],
+					message: element["message"]["message"],
+					profilePicture: element["otherUser"]["profileImage"],
+					timeSent: moment(element["message"]["timeSent"]).format('lll'),
+				}, { append: true })
+			})
+		}
+	})
+}
+
+function fetchMessages(reqUserName){
+		return $.ajax({
+		dataType: "json",
+		url: "API/message/user/" + reqUserName,
+		success: function(data) {
+			$(".messageModal").loadTemplate("content/templates/message.html",
+            {
+                firstName: data.recipientProfile["firstName"],
+                lastName: data.recipientProfile["lastName"],
+                userName: data.recipientProfile["userName"],
+                profilePicture: data.recipientProfile["profileImage"],
+            }, { async: false });
+			$.each(data.messages, function(index, element){
+				$(".messageFeed").loadTemplate("content/templates/singleMessage.html",
+				{
+					singleMessage: element["message"],
+					timeStamp: element["timeSent"],
+				}, { append: true, afterInsert: function(elem) {
+					// MAKE FUNCTION HERE FOR PUSH MESSAGE LEFT OR RIGHT
+					if (element["ownMessage"]) {
+						$(elem).find('.singleMessage').find('span').addClass('ownMsg');
+					}
+					else {
+						$(elem).find('.singleMessage').find('span').addClass('recMsg');
+					}
+				}});
+			});
+		}
+	});
+}
+
+function addMessage(data, userName){
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: "API/message/user/" + userName,
+		data: data,
+		success: function(data) {
+			$(".messageBox").val("");
+			$(".messageFeed").loadTemplate("content/templates/singleMessage.html",
+			{
+				singleMessage: data.message["message"],
+				timeStamp: data.message["timeSent"],
+			}, { append: true, afterInsert: function(elem) {
+					// MAKE FUNCTION HERE FOR PUSH MESSAGE LEFT OR RIGHT
+					if (data.message["ownMessage"]) {
+						$(elem).find('.singleMessage').find('span').addClass('ownMsg');
+					}
+					else {
+						$(elem).find('.singleMessage').find('span').addClass('recMsg');
+					}
+				}
+			});
+			$("#" + data.message['conversationID'] + " .conversations").find("span").html(data.message["message"]);
+			$("#" + data.message['conversationID'] + " .timeStamp").html(moment(data.message["timeSent"]).format('lll'));
+		}
+	});
+	return false;
+}
+
 function getUserDetials() {
 	return $.ajax({
 		dataType: "json",
-		url: "API/user/",
+		url: "API/profile/",
 		success: function(data) {
-			userName = data.userData["userName"];
-			firstName = data.userData["firstName"];
-			lastName = data.userData["lastName"];
-			profileImage = data.userData["profileImage"];
+			userName = data.userProfile["userName"];
+			firstName = data.userProfile["firstName"];
+			lastName = data.userProfile["lastName"];
+			profileImage = data.userProfile["profileImage"];
 			loggedIn = true;
 		},
 		error: function(jqXHR, textStatus, errorThrown) { loggedIn = false; }
@@ -312,9 +461,10 @@ function requestUserProfile(reqUserName) {
 			$(".profile-userbio").text(data.userProfile["userBio"]);
 			$(".profile-listens").text(numeral(data.userProfile["listensTo"]).format('0 a'));
 			$(".profile-audience").text(numeral(data.userProfile["audience"]).format('0 a')); 
-			$(".profile").data("userid", data.userProfile["userID"]);
+			$(".profile").data("userid", data.userProfile["profileID"]);
 			$(".profile").data("username", data.userProfile["userName"]);
 			$(".listenButton").data("listening", data.userProfile["listening"]);
+			$(".messageLink").attr("href", "conversations/" + data.userProfile["userName"]);
 			if(data.userProfile["listening"] === true) //listens to user
 			{
 				$(".listenButton").html("<i class=\"icons flaticon-nolisten\"></i>Stop Listening To " + data.userProfile["firstName"]);
@@ -356,6 +506,7 @@ function requestUserSettings() {
 			$(".acc-profileImage").attr("src", data.userProfile["profileImage"]);
 			$(".acc-userbio").text(data.userProfile["userBio"]);
 			$(".acc-gender").text(data.userProfile["gender"]);
+			$(".acc-dob").text(data.userProfile["dob"]);
 			$(".acc-location").text(data.userProfile["location"]);
 			$(".acc-joined").text(moment(data.userProfile["joinDate"]).format('Do MMMM YYYY'));
 
@@ -371,13 +522,18 @@ function requestUserSettings() {
 			    lastName: data.userProfile["lastName"],
 			    userName: data.userProfile["userName"],
 				dob: data.userProfile["dob"],
-				gender: data.userProfile["gender"]
+				gender: data.userProfile["gender"],
+				location: data.userProfile["location"]
 			}, { append: true, async: false });
 				
 			$("#profileModals").loadTemplate("content/templates/userBio.html",
 				{
 				        bio: data.userProfile["userBio"]
 				}, { append: true });
+				
+			$( "#personal-form").on('shown.bs.modal', function(){
+				$("#personalLocation").easyAutocomplete(userLocationOptions);
+			});
 			
 			
 		}
@@ -399,20 +555,38 @@ function listenButton(reqUserID, reqUserName, status) {
 	});
 }
 
+function deleteSay(sayID) {
+	$.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/say/delete/" + sayID,
+		
+	});
+	return false;
+}
+
+function ReportSay(sayID) {
+	$.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/say/report/" + sayID,
+		
+	});
+	return false;
+}
 
 function SayAction(sayID, action) {
-	var count, status;
+	var dataResult;
 	$.ajax({
 		dataType: "json",
 		async: false,
 		url: "API/say/" + action + "/" + sayID,
 		success: function(data) {
-			count = data["count"];			
-			status = data["status"];
+			dataResult = data;
 		}
 	});
 	
-	return [count, status];
+	return dataResult;
 }
 
 function ProfileEdit(data)
@@ -423,13 +597,25 @@ function ProfileEdit(data)
 	  url: "API/profile/",
 	  data: data,
 	  error: function(jqXHR, textStatus, errorThrown) {
-			
+			//reset all the form fields
+			$(".personalFirstName").removeClass("has-error");
+			$(".personalFirstName .help-block").text("");
+			$(".personalLastName").removeClass("has-error");
+			$(".personalLastName .help-block").text("");
+			$(".personalUserName").removeClass("has-error");
+			$(".personalUserName .help-block").text("");
+			$(".personalDob").removeClass("has-error");
+			$(".personalDob .help-block").text("");
+			$(".personalGender").removeClass("has-error");
+			$(".personalGender .help-block").text("");
+			data = $.parseJSON(jqXHR.responseText);
+			$.each(data.errors, function(index, element) {
+			$("." + errors[element.code].field).addClass("has-error");
+			$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
+			});
 		},				
 	  success: function(data) {	
-			$('#personal-form').modal('hide');
-			$('body').removeClass('modal-open');
-			$('.modal-backdrop').remove();
-			getUserSettings();
+			AccountSettingsUpdate('#personal-form');
 		}
 	});
 	return false;
@@ -443,13 +629,21 @@ function ProfilePasswordChange(data)
 	  url: "API/profile/password",
 	  data: data,
 	  error: function(jqXHR, textStatus, errorThrown) {
-			
+			//reset all the form fields
+			$(".currentPassword").removeClass("has-error");
+			$(".currentPassword .help-block").text("");
+			$(".newPassword").removeClass("has-error");
+			$(".newPassword .help-block").text("");
+			$(".confirmNewPassword").removeClass("has-error");
+			$(".confirmNewPassword .help-block").text("");
+			data = $.parseJSON(jqXHR.responseText);
+			$.each(data.errors, function(index, element) {
+			$("." + errors[element.code].field).addClass("has-error");
+			$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
+			});
 		},				
 	  success: function(data) {	
-			$('#changePassword-form').modal('toggle');
-			$('body').removeClass('modal-open');
-			$('.modal-backdrop').remove();
-			getUserSettings();
+			AccountSettingsUpdate('#changePassword-form');
 		}
 	});
 	return false;
@@ -463,13 +657,21 @@ function ProfileEmailChange(data)
 	  url: "API/profile/email",
 	  data: data,
 	  error: function(jqXHR, textStatus, errorThrown) {
-			
+			//reset all the form fields
+			$(".currentPassword").removeClass("has-error");
+			$(".currentPassword .help-block").text("");
+			$(".newEmail").removeClass("has-error");
+			$(".newEmail .help-block").text("");
+			$(".confirmNewEmail").removeClass("has-error");
+			$(".confirmNewEmail .help-block").text("");
+			data = $.parseJSON(jqXHR.responseText);
+			$.each(data.errors, function(index, element) {
+			$("." + errors[element.code].field).addClass("has-error");
+			$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
+			});
 		},				
 	  success: function(data) {	
-			$('#changeEmail-form').modal('toggle');
-			$('body').removeClass('modal-open');
-			$('.modal-backdrop').remove();
-			getUserSettings();
+			AccountSettingsUpdate('#changeEmail-form');
 		}
 	});
 	return false;
@@ -483,13 +685,34 @@ function ProfileBioEdit(data)
 	  url: "API/profile/bio",
 	  data: data,
 	  error: function(jqXHR, textStatus, errorThrown) {
+			//reset all the form fields
+			$(".userBio").removeClass("has-error");
+			$(".userBio .help-block").text("");
+			data = $.parseJSON(jqXHR.responseText);
+			$.each(data.errors, function(index, element) {
+			$("." + errors[element.code].field).addClass("has-error");
+			$("." + errors[element.code].field +" .help-block").text(errors[element.code].errorMessage);	
+			});
+		},				
+	  success: function(data) {	
+			AccountSettingsUpdate('#userBio-form');
+		}
+	});
+	return false;
+}
+
+function ProfileImageEdit(data)
+{
+	$.ajax({
+	  type: "POST",
+	  dataType: "json",
+	  url: "API/profile/image",
+	  data: data,
+	  error: function(jqXHR, textStatus, errorThrown) {
 			
 		},				
 	  success: function(data) {	
-			$('#userBio-form').modal('toggle');
-			$('body').removeClass('modal-open');
-			$('.modal-backdrop').remove();
-			getUserSettings();
+			AccountSettingsUpdate('#profileImage-form');
 		}
 	});
 	return false;
@@ -505,6 +728,206 @@ function setActionStatus(element, status)
 	{
 		element.removeClass("active");
 	}
+}
+
+function GetActionUser(sayID, action) {
+	$.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/say/" + action + "users/" + sayID,
+		success: function(data) {
+			currentActionPage = 0;
+			totalActionPages = data["totalPages"];
+			currentViewedSayID = sayID;
+			currentAction = action;
+			var actionHeader = action;
+			if (action == "resay")
+			{
+				actionHeader = "Resaid"
+			} 
+			else if(action == "applaud")
+			{
+				actionHeader = "Applauded"
+			}
+			else
+			{
+				actionHeader = "Booed"
+			}
+			$(".activityModal").loadTemplate("content/templates/activity.html",
+				{
+					activityHeader:"Users that " + actionHeader,
+				}, {async: false});
+
+
+			$.each(data.users, function(index, element) {	
+				$(".activityFeed").loadTemplate("content/templates/activityDisplay.html",
+					{
+						profileLink:element["profileLink"],
+						profilePicture:element["profileImage"],
+						firstName:element["firstName"],
+						lastName:element["lastName"],
+						userName:element["userName"],
+					},{append: true});				
+				
+			});
+			
+			if (totalActionPages == 1 || totalActionPages == 0)
+			{
+				$("#loadMoreActionUsers").remove();
+			}
+		}
+	});
+	
+	
+}
+
+function GetProfileListeners(action, name, userProfileID) {
+	$.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/profile/" + action + "/" + userProfileID + "/" + currentUserPage + "/" + timeNow,
+		success: function(data) {
+			currentUserPage = 0;
+			totalUserPages = data["totalPages"];
+			currentViewedProfileID = userProfileID;
+			currentAction = action;
+			var actionHeader = action;
+			if (action == "listeners")
+			{
+				actionHeader = "Users that listen to " + name;
+			} 
+			else
+			{
+				actionHeader = name + "'s Audience";
+			}
+			$(".profileModal").loadTemplate("content/templates/profileModal.html",
+				{
+					profileHeader:actionHeader,
+				}, {async: false});
+
+			if (totalUserPages == 1)
+			{
+				$("#loadMoreUsers").remove();
+			}
+			$.each(data.users, function(index, element) {	
+				$(".profileFeed").loadTemplate("content/templates/activityDisplay.html",
+					{
+						profileLink:element["profileLink"],
+						profilePicture:element["profileImage"],
+						firstName:element["firstName"],
+						lastName:element["lastName"],
+						userName:element["userName"],
+					},{append: true});				
+				
+			});
+			
+			
+		}
+	});
+	
+	
+}
+
+function fetchMoreUsers()
+{
+	currentUserPage = currentUserPage + 1;
+	return $.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/profile/" + currentAction + "/" + currentViewedProfileID + "/" + currentUserPage + "/" + timeNow,
+		success: function(data) {		
+			$.each(data.users, function(index, element) {	
+				$(".profileFeed").loadTemplate("content/templates/activityDisplay.html",
+					{
+						profileLink:element["profileLink"],
+						profilePicture:element["profileImage"],
+						firstName:element["firstName"],
+						lastName:element["lastName"],
+						userName:element["userName"],
+					},{append: true});				
+				
+			});
+			
+			
+		}
+	});
+}
+
+function fetchMoreActionUsers()
+{
+	currentActionPage = currentActionPage + 1;
+	return $.ajax({
+		dataType: "json",
+		async: false,
+		url: "API/say/" + currentAction + "users/" + currentViewedSayID + "/" + currentActionPage + "/" + timeNow,
+		success: function(data) {		
+			$.each(data.users, function(index, element) {	
+				$(".activityFeed").loadTemplate("content/templates/activityDisplay.html",
+					{
+						profileLink:element["profileLink"],
+						profilePicture:element["profileImage"],
+						firstName:element["firstName"],
+						lastName:element["lastName"],
+						userName:element["userName"],
+					},{append: true});				
+				
+			});
+			
+			
+		}
+	});
+}
+
+function AccountSettingsUpdate(modal)
+{
+	getUserDetials().done(function() {
+	if(loggedIn) {
+		$("#profileImage").attr("src", profileImage);
+		$("#userName").text(firstName);
+	}
+	});
+	$(modal).modal('toggle');
+	$('body').removeClass('modal-open');
+	$('.modal-backdrop').remove();
+	getUserSettings();
+}
+
+function GIFSearch(searchPhrase)
+{
+	$.ajax({
+		dataType: "json",
+		url: "http://api.giphy.com/v1/gifs/search?q=" + encodeURIComponent(searchPhrase) + "&rating=g&api_key=dc6zaTOxFJmzC ",
+		success: function(data) {	
+			$(".gifs").empty();
+			$(".gifs").append("<option value=\"\"></option>");
+			$.each(data.data, function(index, element) {	
+				var image = element.images.fixed_height_small["url"];
+				var id = element["id"];
+				$(".gifs").append("<option data-img-src=\"" + image + "\" value=\"" + id +"\">" + id +"</option>");				
+			});
+			$(".gifs").imagepicker();
+		}
+	});
+	 
+}
+
+function GIFTrending()
+{
+	$.ajax({
+		dataType: "json",
+		url: "http://api.giphy.com/v1/gifs/trending?rating=g&api_key=dc6zaTOxFJmzC",
+		success: function(data) {	
+			$(".gifs").empty();
+			$(".gifs").append("<option value=\"\"></option>");
+			$.each(data.data, function(index, element) {	
+				var image = element.images.fixed_height_small["url"];
+				var id = element["id"];
+				$(".gifs").append("<option data-img-src=\"" + image + "\" value=\"" + id +"\">" + id +"</option>");				
+			});
+			$(".gifs").imagepicker();
+		}
+	});
+	 
 }
 
 getUserDetials().done(function() {
@@ -555,6 +978,42 @@ var options = {
 
 };
 
+var userLocationOptions = {
+  url: function(phrase) {
+		return "//maps.googleapis.com/maps/api/geocode/json?address=" + phrase;
+	},
+  
+  placeholder: "Type to search location",
+  
+  getValue: "formatted_address",
+  
+  cssClasses: "userLocation",
+  
+  adjustWidth: false,
+  
+  requestDelay: 500,
+  
+  listLocation: "results",
+
+  list: {
+		maxNumberOfElements: 10,
+		match: {
+				enabled: true
+		},
+		showAnimation: {
+		  type: "slide"
+		},
+		hideAnimation: {
+		  type: "slide"
+		},
+		onChooseEvent: function() {
+			var index = $("#personalLocation").getSelectedItemIndex();
+			//window.location = $("#personalLocation").getItemData(index).profileLink;
+		}
+  }
+
+};
+
 angular.module('app', ['ngImgCrop'])
   .controller('Ctrl', function($scope) {
     $scope.myImage = '';
@@ -570,10 +1029,8 @@ angular.module('app', ['ngImgCrop'])
       };
 
     $scope.onLoadError=function() {
-      console.log('onLoadError fired');
     };
     $scope.onLoadDone=function() {
-      console.log('onLoadDone fired');
       $('#profileImage-form').modal('show');
     };
       reader.readAsDataURL(file);
@@ -583,42 +1040,145 @@ angular.module('app', ['ngImgCrop'])
 
 $("document").ready(function() {
 	setInterval(function()
-		{
-			$(".say").each(function() {
-				var timeCode = $(this).data("timestamp");
-				$(this).find(".timeStamp").text(moment(timeCode).fromNow());
-			});
-		},60000);
+	{
+		$(".say").each(function() {
+			var timeCode = $(this).data("timestamp");
+			$(this).find(".timeStamp").text(moment(timeCode).fromNow());
+		});
+	},60000);
+	
 	$("#userSearch").easyAutocomplete(options);
+	
 	$(document).on('click', '.applaud', function(){		
 		var $el = $(this).parent().parent().parent().parent();
 		var sayID = $el.attr('id');
 		var action = SayAction(sayID, "applaud")
-		var count = action[0];
-		var status = action[1];
+		var count = action["applauds"];
+		var status = action["status"];
 		$(this).parent().find("span").html(count);			
 		setActionStatus($(this).parent().find("i"), status);	
 	});
-	
+
+	$(document).on('click', '.applaudModal', function(){		
+		var $el = $(this).parent().parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var action = SayAction(sayID, "applaud")
+		var count = action["applauds"];
+		var status = action["status"];
+		$(this).parent().parent().find("span.applaudModalCount").html(count);			
+		setActionStatus($(this).parent().find("i"), status);	
+		$("#" + sayID).find("span.applaud").html(count);	
+		setActionStatus($("#" + sayID).find("i.applaud"), status);
+		assignActionUsers($el, action);
+	});
+		
 	$(document).on('click', '.reSay', function(){
 		var $el = $(this).parent().parent().parent().parent();
 		var sayID = $el.attr('id');
 		var action = SayAction(sayID, "resay");
-		var count = action[0];
-		var status = action[1];
+		var count = action["resays"];
+		var status = action["status"];
 		$(this).parent().find("span").html(count);			
 		setActionStatus($(this).parent().find("i"), status);
+	});
+	
+	$(document).on('click', '.reSayModal', function(){		
+		var $el = $(this).parent().parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var action = SayAction(sayID, "resay")
+		var count = action["resays"];
+		var status = action["status"];
+		$(this).parent().parent().find("span.reSayModalCount").html(count);			
+		setActionStatus($(this).parent().find("i"), status);	
+		$("#" + sayID).find("span.reSay").html(count);	
+		setActionStatus($("#" + sayID).find("i.reSay"), status);
+		assignActionUsers($el, action);
 	});
 	
 	$(document).on('click', '.boo', function(){
 		var $el = $(this).parent().parent().parent().parent();
 		var sayID = $el.attr('id');
 		var action = SayAction(sayID, "boo");
-		var count = action[0];
-		var status = action[1];
+		var count = action["boos"];
+		var status = action["status"];
 		$(this).parent().find("span").html(count);			
 		setActionStatus($(this).parent().find("i"), status);
 		});
+		
+	$(document).on('click', '.booModal', function(){		
+		var $el = $(this).parent().parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var action = SayAction(sayID, "boo");
+		var count = action["boos"];
+		var status = action["status"];
+		$(this).parent().parent().find("span.booModalCount").html(count);			
+		setActionStatus($(this).parent().find("i"), status);	
+		$("#" + sayID).find("span.boo").html(count);	
+		setActionStatus($("#" + sayID).find("i.boo"), status);
+		assignActionUsers($el, action);
+	});	
+		
+	$(document).on('click', '.more', function(){
+		var $el = $(this).parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		fetchSayDetails(sayID).done(function() {
+			fetchComments(sayID).done(function()
+			{
+				$('#sayDetailsModal').modal('show');
+			});
+		});
+	});
+
+	$(document).on('click', '.deleteModal', function(){
+		$('#confirmDelete').modal('show');
+	});
+
+	$(document).on('click', '.reportModal', function(){
+		$('#confirmReport').modal('show');
+	});
+
+	$(document).on('click', '.applaudUsers, .booUsers, .reSayUsers', function(){
+		var $el = $(this).parent().parent().parent().parent().parent();
+		var sayID = $el.attr('id');
+		var action = $(this).data('action');
+
+		GetActionUser(sayID, action);
+
+		$('#activityModal').modal('show');
+	});
+
+	$(document).on('click', '.listeningUsers, .userAudience', function(){
+		var $el = $(this).parent().parent();		
+		var action = $(this).data('action');
+		var name = $(document).find(".profile-name").text();
+		var userProfileID = $el.data('userid');		
+		GetProfileListeners(action, name, userProfileID);
+		$('#profileModal').modal('show');
+	});
+
+	$(document).on('click', '.confirmDelete', function(){
+		var $el = $(this).parent().parent();
+		var sayID = $el.attr('data-sayID');
+		$('#confirmDelete').modal('hide');
+		$('#sayDetailsModal').modal('hide');
+		$('#' + sayID).remove();
+		$('.sayDetailsModal').empty();
+		$('body').removeClass('modal-open');
+		$('.modal-backdrop').remove();
+		deleteSay(sayID);
+	});
+
+	$(document).on('click', '.confirmReport', function(){
+		var $el = $(this).parent().parent();
+		var sayID = $el.attr('data-sayID');
+		$('#confirmReport').modal('hide');
+		$('#sayDetailsModal').modal('hide');
+		$('#' + sayID).remove();
+		$('.sayDetailsModal').empty();
+		$('body').removeClass('modal-open');
+		$('.modal-backdrop').remove();
+		ReportSay(sayID);
+	});
 
 	$(document).on('click', '.commentPen', function(){
 		var $el = $(this).parent().parent().parent().parent();
@@ -634,12 +1194,21 @@ $("document").ready(function() {
 	$(document).on('click', '.listenButton', function(){
 		var $el = $(this).parent().parent().parent();
 		var userID = $el.data('userid');
-		var userName = $el.data('username');
+		var reqUserName = $el.data('username');
 		var listeningStatus = $(this).data("listening");
-		listenButton(userID, userName, listeningStatus);	
+		listenButton(userID, reqUserName, listeningStatus);	
 		$(this).blur();
-	});	
+	});
 
+	$(document).on('submit', '.message-form', function(e) {
+		e.preventDefault();
+		var data = $(this).serialize();
+		console.log(data);
+		var $el = $(this).parent().parent().parent().parent();
+		var msgUserName = $el.attr('data-username');
+		msgUserName = window.btoa(msgUserName).replace("=","");
+		addMessage(data, msgUserName);
+	});
 
 	$(document).on('submit','.comment-form', function(e){
 		console.log(this);
@@ -650,6 +1219,62 @@ $("document").ready(function() {
 		$(this).blur();
 	});
 	
+	$('#loadSays').on('click', function() {
+	    var $this = $(this);
+	  	$this.button('loading');
+	  	fetchMoreSays().done( function() { 
+	  		$this.button('reset');
+	  		if (currentPage + 1 == totalPages) {
+	  			$this.remove();
+	  		} });
+	});
+	
+	$(document).on('click' , '#loadMoreUsers', function() {
+	    var $this = $(this);
+	  	$this.button('loading');
+	  	fetchMoreUsers().done( function() { 
+	  		$this.button('reset');
+	  		if (currentUserPage + 1 == totalUserPages) {
+	  			$this.remove();
+	  		} });
+	});
+	
+	$(document).on('click' , '#loadMoreActionUsers', function() {
+	    var $this = $(this);
+	  	$this.button('loading');
+	  	fetchMoreActionUsers().done( function() { 
+	  		$this.button('reset');
+	  		if (currentActionPage + 1 == totalActionPages) {
+	  			$this.remove();
+	  		} });
+	});
+
+	$('#loadSaysProfile').on('click', function() {
+	    var $this = $(this);
+	  	$this.button('loading');
+	  	var pathArray = window.location.pathname.split( '/' );
+		var reqUserName = '';
+		if(typeof pathArray[3] !== 'undefined')
+		{
+			reqUserName = pathArray[3];
+			reqUserName = window.btoa(reqUserName).replace("=","");
+		}
+	  	fetchMoreUserSays(reqUserName).done( function() { 
+	  		$this.button('reset');
+	  		if (currentPage + 1 == totalPages) {
+	  			$this.remove();
+	  		} });
+	});
+
+	$(document).on('click', '.message', function() {
+		var $this = $(this);
+		var convUser = $(this).attr('data-username');
+		convUser = window.btoa(convUser).replace("=","");
+		fetchMessages(convUser).done( function() {
+			$('#messageModal').modal('show');
+		});
+	});
+
 	$("body").tooltip({
 		selector: '[data-toggle="tooltip"]'
 	});

@@ -26,7 +26,7 @@ p, *
 	cursor: default;
 }
 
-a, .icons, .banner .user *, .pointer, .profileLink *
+a, .icons, .banner .user *, .pointer, .profileLink *, .reSayProfileLink *, .applaudUsers, .booUsers, .reSayUsers, .listeningUsers *, .userAudience *
 {
     cursor: pointer;
 }
@@ -35,6 +35,11 @@ a, .icons, .banner .user *, .pointer, .profileLink *
 input, textarea
 {
 	cursor: text;
+}
+
+.container-fluid
+{
+	padding: 0px;
 }
 
 .login-banner
@@ -71,16 +76,43 @@ input, textarea
 
 }
 
-.form-horizontal .form-group
+.form-horizontal .form-group, .row
 {
 	margin-left: 0;
 	margin-right: 0;
 }
 
+ .messageContainer
+ {
+ 	padding-left: 10px;
+ 	padding-right: 10px;
+ }
+
+ .messageBox
+ {
+ 	height: 75px;
+ }
+
+ .convTitle
+ {
+ 	text-align: center;
+ }
+
+ .whisperTitle
+ {
+ 	margin-top: 0px;
+ }
+
 .registerButton, .loginButton, .sayButton, .comButton, .listenButton, .messageButton
 {
 	background-color:#79B791;
 	color: #FFFFFF;
+}
+
+.messageIconContainer
+{
+	padding-top: 25px;
+	padding-left: 50px;
 }
 
 .form-control, .registerButton, .loginButton 
@@ -137,7 +169,7 @@ input, textarea
 	margin-bottom: 5px;
 }
 
-.comFeed
+.comFeed, .convContainer
 {
 	background-color: #DCE0D9;
 	border: 1px solid #91AEC1;
@@ -145,6 +177,11 @@ input, textarea
 	margin: 0px;
 	padding-left: 10px;
 	padding-top: 3px;
+}
+
+.convContainer
+{
+	padding-bottom: 3px;
 }
 
 textarea
@@ -175,7 +212,7 @@ textarea
 	padding-right: 2.5px;
 }
 
-.sayProfileImg
+.sayProfileImg, .messageProfileImage
 {
 	max-height: 50px;
 }
@@ -200,9 +237,20 @@ textarea
 	font-size: 30px;
 }
 
-.icons.applaud, .icons.reSay, .icons.boo, .icons.reSayOwn
+.icons.applaud, .icons.reSay, .icons.boo, .icons.reSayOwn, .icons.applaudModal, .icons.booModal, .icons.reSayModal, .icons.messageIcon
 {
 	color: #E8E8E8;
+}
+
+.usersDisplay
+{
+	border-top: 1px  solid #E8E8E8;
+	margin-top: 10px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid #E8E8E8;
+	margin-bottom: 10px;
+	padding-top: 5px;
+
 }
 
 .icons.reSayOwn
@@ -245,6 +293,11 @@ textarea
 {
 	padding-top: 25px;
 	margin-bottom: 0;
+}
+
+.whisperSearch
+{
+	padding-top: 0px;
 }
 
 .easy-autocomplete.userSearch input:focus 
@@ -320,11 +373,84 @@ input[type=file].profileImageUpload
 	text-decoration: none;
 	color: #000000;
 }
+
+.messageIconContainer a:link, .messageIconContainer a:visited, .messageIconContainer a:hover, .messageIconContainer a:active
+{
+	text-decoration: none;
+	color: transparent;
+}
+
 .resayHeader , .resayHeader *
 {
-	color:#91AEC1;
+	color: #91AEC1;
 }
+
 .resayHeader
 {
-	margin-left:15px;
+	margin-left: 15px;
+}
+
+.reSayProfileLink:link, .reSayProfileLink:visited, .reSayProfileLink:hover, .reSayProfileLink:active
+{
+	text-decoration: none;
+	color: #91AEC1;
+}
+
+.activityfeed, .activity, .profileFeed
+{
+	margin: 0px;
+}
+
+.activity
+{
+	border-bottom: 1px solid #E8E8E8;
+	margin-bottom: 5px;
+	margin-top: 5px;
+	padding-bottom: 5px;
+}
+
+.displayUserDetails
+{
+	margin-top: 12px;
+}
+
+.emojione
+{
+	height: 10ex;
+	width: 10ex;
+}
+
+.gifResults
+{
+	max-height: 190px;
+	overflow-y: auto;
+}
+
+.nav-tabs
+{
+	margin-left: 15px;
+}
+
+.ownMsg
+{
+	float: right;
+	background-color: #91AEC1;
+	border:1px solid #91AEC1;
+	border-radius: 5px;
+}
+
+.recMsg
+{
+	float:left;
+	background-color: #DCE0D9;
+	border:1px solid #DCE0D9;
+	border-radius: 5px;
+}
+
+.indMsg
+{
+	padding-left: 5px;
+	padding-right: 5px;
+	margin-top: 2px;
+	margin-bottom: 2px;
 }

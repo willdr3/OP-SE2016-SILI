@@ -1,0 +1,21 @@
+<div class="row message convContainer" data-id="conversationID" data-template-bind='[
+     {"attribute": "data-timeStamp", "value": "timeStamp", "attribute": "data-username", "value": "userName"}]'>
+	<div class="col-md-1 messageProfilePic">
+		<img class="messageProfileImage img-circle pull-right" data-src="profilePicture" />
+	</div> 
+	<div class="col-md-11 conversationDetails">
+		<div class="row">
+			<div class="col-md-8">
+				<span data-content="firstName"></span> <span data-content="lastName"></span> (<span data-content="userName"></span>)
+			</div>
+			<div class="col-md-4 text-right">
+				<span class="timeStamp" data-content="timeSent"></span> 
+			</div>
+		</div> 
+		<div class="row"> 
+			<div class="col-md-12 conversations">
+				<span data-content="message"></span> 
+			</div>
+		</div> 
+	</div>
+</div>

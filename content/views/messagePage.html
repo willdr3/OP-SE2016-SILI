@@ -1,0 +1,101 @@
+
+		<div class="row content">
+			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+			<div class="col-md-2"></div>
+			<div class="col-md-8 col-lg-6">
+				<div class="row">
+					<div class="col-md-3"></div>
+					<div class="col-md-6">
+						<h2 class="convTitle">WHISPERS</h2>
+					</div>
+					<div class="col-md-3"></div>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="row content">
+					<h2 class="whisperTitle">Whisper someone</h2>
+				</div>
+			</div>
+			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+
+		<div class="row content">
+			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+			<div class="col-md-2"></div>
+			<div class="col-md-8 col-lg-6">
+				<!-- CONVERSATIONS GO IN HERE -->
+				<div class="conversationFeed">
+
+				</div>
+			</div>
+			<div class="col-md-2">
+				<input id="msgSearch" type="text" name="msgSearch" class="form-control input-lg msgSearch" />
+			</div>
+			<div class="col-lg-1 hidden-xs hidden-sm hidden-md"></div>
+			<div class="messageModal"></div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+$("document").ready(function(){
+	fetchConversations();
+
+	var options = {
+  		url: function(phrase) {
+			return "API/profile/search/" + phrase;
+		},
+  
+  		placeholder: "Search SILI for friends!",
+  
+ 		getValue: "name",
+  
+		cssClasses: "whisperSearch",
+  
+		adjustWidth: false,
+  
+		requestDelay: 500,
+
+		  template: {
+		  	type: "iconRight",
+				fields: {
+					iconSrc: "profileImage"
+				}
+		  },
+
+		  list: {
+				maxNumberOfElements: 10,
+				match: {
+						enabled: true
+				},
+				showAnimation: {
+				  type: "slide"
+				},
+				hideAnimation: {
+				  type: "slide"
+				},
+				onChooseEvent: function() {
+					var index = $("#msgSearch").getSelectedItemIndex();
+					var reqUserName = $("#msgSearch").getItemData(index).userName;
+					reqUserName = window.btoa(reqUserName).replace("=","");
+					fetchMessages(reqUserName).done( function() {
+						$('#messageModal').modal('show');
+					});
+					}
+  				}
+	};
+
+	var pathArray = window.location.pathname.split( '/' );
+	var requestedUserName = '';
+	if(typeof pathArray[3] !== 'undefined')
+	{
+		requestedUserName = pathArray[3];
+		requestedUserName = window.btoa(requestedUserName).replace("=","");
+		fetchMessages(requestedUserName).done( function() {
+			$('#messageModal').modal('show');
+		});
+	}
+
+	$("#msgSearch").easyAutocomplete(options);
+});
+</script>
+</html>

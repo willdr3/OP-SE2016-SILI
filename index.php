@@ -9,19 +9,20 @@ if(isset($_GET['request']))
 
 //Check if the user is actually logged in	
 $internal = true; //Used to tell the API that is being used internally
-include("content/config/dbconnect.inc.php");
-include("content/config/errorHandling.php");
-include("content/config/config.inc.php");
-include("content/api/UserAPI.php");
-include("content/config/errorHandling.php");
-include("content/config/pageRequests.php");
-$loginDetails = CheckLogin($mysqli, $errorCodes); //Check if the use is logged in
+require_once("content/librarys/MysqliDb.php");
+require_once("content/config/dbconnect.inc.php");
+require_once("content/config/errorHandling.php");
+require_once("content/config/config.inc.php");
+require_once("content/api/UserAPI.php");
+require_once("content/config/errorHandling.php");
+require_once("content/config/pageRequests.php");
+require_once("content/librarys/SlackBot.php");
 
 $page = "";
 $login = false;
 $error = false;
 
-if(array_key_exists("userData", $loginDetails)) //If the userData is returned then the user is logged in
+if(CheckLogin()) //Check if a user is logged in
 {
 	
 	$userID = $_SESSION['userID'];
@@ -56,7 +57,5 @@ if(!$login && !$error)
 	include("content/views/banner.inc.html");
 }
 
-include($page);
-
-$mysqli->close();	
+include($page);	
 ?>
